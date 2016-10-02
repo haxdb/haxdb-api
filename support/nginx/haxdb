@@ -1,0 +1,28 @@
+server {
+    listen 80;
+
+    root /home/haxdb/client;
+    index index.php;
+
+    server_name haxdb.knoxmakers.org;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+    rewrite ^/page/(.*)/(\d+)$ /index.php?page=$1&rowid=$2 last;
+    rewrite ^/page/(.*)$ /index.php?page=$1 last;
+    rewrite ^/auth/token/(.*)$ /token.php?token=$1 last;
+    rewrite ^/auth(.*)$ /auth.php last;
+    rewrite ^/noapi$ /noapi.php last;
+}
+

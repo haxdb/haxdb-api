@@ -1,0 +1,14 @@
+[Unit]
+Description=haxdb api service
+After=network.target
+
+[Service]
+User=haxdb
+Group=www-data
+WorkingDirectory=/home/haxdb/api
+Environment="PATH=/home/haxdb/api/env/bin"
+ExecStart=/home/haxdb/api/env/bin/gunicorn --workers 5 --bind unix:haxdb.sock -m 007 app:app
+
+[Install]
+WantedBy=multi-user.target
+

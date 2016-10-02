@@ -1,0 +1,136 @@
+/auth
+
+    /email/login/<email>
+        * <email>
+
+    /email/register/<email>
+        * <email>
+
+    /email/token/<token>
+        * <token>
+
+    /session
+
+
+/API_KEYS
+
+    /list
+        * [query]
+
+    /new
+        * [api_dba]
+
+    /save/<rowid>/<col>/<val>
+        * <rowid>
+        * <col>
+        * <val>
+
+    /delete/<rowid>
+        * <rowid>
+
+/LISTS
+
+    /list
+        * [query]
+        * [name]
+        * [rowid]
+
+    /new/<name>
+        * <name>
+
+    /delete/<rowid>
+        * <rowid>
+
+    /save/<rowid>/<col>/<val>
+        * <rowid>
+        * <col>
+        * <val>
+
+/LIST_ITEMS
+
+    /list/<rowid>
+        * [rowid]
+        * [name]
+        * [query]
+        * [disabled]
+
+    /new/<rowid>/<name>
+        * <rowid>
+        * <name>
+
+    /delete/<rowid>
+        * <rowid>
+    
+    /save/<rowid>/<col>/<val>
+        * <rowid>
+        * <col>
+        * <val>
+
+/PEOPLE
+
+    /list/[category]
+        * [category]
+        * [query]
+
+    /save/<rowid>/<column>/<value>
+        * <rowid>
+        * <col>
+        * <val>
+
+    /new/<email>
+        * <email>
+
+    /delete/<rowid>
+        * <rowid>
+    
+
+/PEOPLE_COLUMNS
+
+    /list
+        * [query]
+
+    /categories
+        
+    /save/<rowid>/<col>/<val>
+        * <rowid>
+        * <col>
+        * <val>
+
+    /new/<name>
+        * <name>
+
+    /delete/<rowid>
+        * <rowid>
+    
+
+/ASSETS
+
+    /list 
+        * [query]
+        * [location]
+
+    /new
+        * <name>
+        * [qty]
+
+    /delete
+        * <rowid>
+
+    /save
+        * <rowid>
+        * <col>
+        * <val>
+
+
+/LOGS
+
+    /list
+        * [query]
+        
+    /new
+        * [assetid] or [asset]
+        * [actionid] or [action]
+        * [peopleid]
+        * [nodeid]
+        * [node]
+        * [description]
