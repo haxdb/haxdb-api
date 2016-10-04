@@ -1,6 +1,6 @@
 from flask import request, send_from_directory
 from werkzeug.utils import secure_filename
-import os
+import os, shlex
 
 api = None
 db = None
@@ -19,8 +19,8 @@ def init(app_api, app_db, app_config, app_tools):
 def run():
     @api.app.route("/PEOPLE/list", methods=["POST","GET"])
     @api.app.route("/PEOPLE/list/<int:category>", methods=["POST","GET"])
-    @api.require_dba
     @api.require_auth
+    @api.require_dba
     def mod_people_list(category=None):
         people_id = None
         category = category or api.data.get("category")
@@ -95,51 +95,69 @@ def run():
             data["lists"][row["LISTS_ID"]].append({ "value": row["LIST_ITEMS_VALUE"], "description": row["LIST_ITEMS_DESCRIPTION"] })
             row = db.next()
         
+        sql = """
+        SELECT * FROM PEOPLE
+        JOIN PEOPLE_COLUMNS
+        LEFT OUTER JOIN PEOPLE_COLUMN_VALUES ON PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = PEOPLE_COLUMNS_ID and PEOPLE_COLUMN_VALUES_PEOPLE_ID = PEOPLE_ID
+        WHERE
+        1=1
+        """
+        params = ()
+        
         if category:
-            if not query:
-                sql = """
-                SELECT * FROM PEOPLE
-                JOIN PEOPLE_COLUMNS
-                LEFT OUTER JOIN PEOPLE_COLUMN_VALUES ON PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = PEOPLE_COLUMNS_ID and PEOPLE_COLUMN_VALUES_PEOPLE_ID = PEOPLE_ID
-                WHERE (PEOPLE_COLUMNS_CATEGORY=? OR PEOPLE_COLUMNS_KEY=1)
-                """
-                db.query(sql,(category,))
-            else:
-                sql = """
-                SELECT * FROM PEOPLE
-                JOIN PEOPLE_COLUMNS
-                LEFT OUTER JOIN PEOPLE_COLUMN_VALUES ON PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = PEOPLE_COLUMNS_ID and PEOPLE_COLUMN_VALUES_PEOPLE_ID = PEOPLE_ID
-                WHERE (PEOPLE_COLUMNS_CATEGORY=? OR PEOPLE_COLUMNS_KEY=1)
-                and 
-                (
-                PEOPLE_ID IN (SELECT PEOPLE_COLUMN_VALUES_PEOPLE_ID FROM PEOPLE_COLUMN_VALUES WHERE PEOPLE_COLUMN_VALUES_VALUE LIKE ?)
-                or
-                PEOPLE_EMAIL LIKE ?
-                )
-                """
-                query = "%" + query + "%"
-                db.query(sql,(category,query,query))
-                
+            sql += " and (PEOPLE_COLUMNS_CATEGORY=? OR PEOPLE_COLUMNS_KEY=1)"
+            params += (category,)
         else:
-            if not query:
-                sql = """
-                    SELECT * FROM PEOPLE
-                    JOIN PEOPLE_COLUMNS
-                    LEFT OUTER JOIN PEOPLE_COLUMN_VALUES ON PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = PEOPLE_COLUMNS_ID and PEOPLE_COLUMN_VALUES_PEOPLE_ID = PEOPLE_ID
-                    WHERE PEOPLE_COLUMNS_KEY=1
+            sql += " and PEOPLE_COLUMNS_KEY=1"
+
+
+        if query:
+            queries = shlex.split(query)
+            for query in queries:
+                tmp = query.split(":")
+                if len(tmp) > 1:
+                    col = tmp[0]
+                    vals = tmp[1].split("|")
+                    sql += " AND ("
+                    
+                    valcount = 0
+                    for val in vals:
+
+                        if valcount > 0:
+                            sql += " OR "
+                            
+                        if col == "EMAIL":
+                            sql += """
+                            PEOPLE_EMAIL = ?
+                            """
+                            params += (val,)
+                        else:
+                            sql += """
+                            PEOPLE_ID IN (SELECT PEOPLE_COLUMN_VALUES_PEOPLE_ID FROM PEOPLE_COLUMNS JOIN PEOPLE_COLUMN_VALUES ON PEOPLE_COLUMNS_ID=PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID 
+                            WHERE PEOPLE_COLUMNS_NAME=? AND PEOPLE_COLUMN_VALUES_VALUE=?)
+                            """
+                            params += (col,val,)
+
+                        valcount += 1
+                        
+                    sql += ")"
+                else:
+                    query = "%" + query + "%"
+                    sql += """
+                    AND (
+                    PEOPLE_ID IN (SELECT PEOPLE_COLUMN_VALUES_PEOPLE_ID FROM PEOPLE_COLUMN_VALUES WHERE PEOPLE_COLUMN_VALUES_VALUE LIKE ?)
+                    OR
+                    PEOPLE_EMAIL LIKE ?
+                    )
                     """
-                db.query(sql)
-            else:
-                sql = """
-                    SELECT * FROM PEOPLE
-                    JOIN PEOPLE_COLUMNS
-                    LEFT OUTER JOIN PEOPLE_COLUMN_VALUES ON PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = PEOPLE_COLUMNS_ID and PEOPLE_COLUMN_VALUES_PEOPLE_ID = PEOPLE_ID
-                    WHERE PEOPLE_COLUMNS_KEY=1
-                    and PEOPLE_ID IN (SELECT PEOPLE_COLUMN_VALUES_PEOPLE_ID FROM PEOPLE_COLUMN_VALUES WHERE PEOPLE_COLUMN_VALUES_VALUE LIKE ?)
-                    """
-                query = "%" + query + "%"
-                db.query(sql, (query,))
+                    params += (query,query,)
+
+
+        db.query(sql, params)
             
+        if db.error:
+            return api.output(success=0, data=data, info=db.error)
+        
         row = db.next()
         rows = {}
         while row:
@@ -164,9 +182,9 @@ def run():
     @api.app.route("/PEOPLE/save/<int:rowid>", methods=["GET","POST"])
     @api.app.route("/PEOPLE/save/<int:rowid>/<col>", methods=["GET","POST"])
     @api.app.route("/PEOPLE/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
+    @api.require_auth
     @api.require_dba
     @api.no_readonly
-    @api.require_auth
     def mod_people_save(rowid=None,col=None,val=None):
         rowid = rowid or api.data.get("rowid")
         column = col or api.data.get("col")
@@ -233,9 +251,9 @@ def run():
     @api.app.route("/PEOPLE/download", methods=["GET","POST"])
     @api.app.route("/PEOPLE/download/<int:rowid>", methods=["GET","POST"])
     @api.app.route("/PEOPLE/download/<int:rowid>/<col>", methods=["GET","POST"])
+    @api.require_auth
     @api.require_dba
     @api.no_readonly
-    @api.require_auth
     def mod_people_download(rowid=None,col=None):
         rowid = rowid or api.data.get("rowid")
         column = col or api.data.get("col")
@@ -257,9 +275,9 @@ def run():
     
     @api.app.route("/PEOPLE/new", methods=["GET","POST"])
     @api.app.route("/PEOPLE/new/<email>", methods=["GET","POST"])
+    @api.require_auth
     @api.require_dba
     @api.no_readonly
-    @api.require_auth
     def mod_people_new(email=None):
         email = email or api.data.get("email")
 
@@ -287,9 +305,9 @@ def run():
     
     @api.app.route("/PEOPLE/delete/", methods=["GET","POST"])
     @api.app.route("/PEOPLE/delete/<int:rowid>", methods=["GET","POST"])
+    @api.require_auth
     @api.require_dba
     @api.no_readonly
-    @api.require_auth
     def mod_people_delete(rowid=None):
         rowid = rowid or api.data.get("rowid")
         
@@ -316,8 +334,8 @@ def run():
     
     
     @api.app.route("/PEOPLE_COLUMNS/list", methods=["POST","GET"])
-    @api.require_dba
     @api.require_auth
+    @api.require_dba
     def mod_people_columns_list():
         query = api.data.get("query")
  
@@ -343,8 +361,8 @@ def run():
         return api.output(success=1, rows=rows, data=data)
 
     @api.app.route("/PEOPLE_COLUMNS/categories", methods=["POST","GET"])
-    @api.require_dba
     @api.require_auth
+    @api.require_dba
     def mod_people_list_categories():
         data = {}
         data["input"] = {}
@@ -365,9 +383,9 @@ def run():
     @api.app.route("/PEOPLE_COLUMNS/save/<int:rowid>", methods=["GET","POST"])
     @api.app.route("/PEOPLE_COLUMNS/save/<int:rowid>/<col>", methods=["GET","POST"])
     @api.app.route("/PEOPLE_COLUMNS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
+    @api.require_auth
     @api.require_dba
     @api.no_readonly
-    @api.require_auth
     def mod_PEOPLE_COLUMNS_save(rowid=None,col=None,val=None):
         rowid = rowid or api.data.get("rowid")
         column = col or api.data.get("col")
@@ -407,7 +425,9 @@ def run():
             "PEOPLE_COLUMNS_CATEGORY",
         )
         
-        
+        if column == "PEOPLE_COLUMNS_NAME":
+            val = val.replace(" ","_")
+            
         if column not in valid_columns:
             return api.output(success=0, info="INVALID VALUE: col", data=data)
         
@@ -440,9 +460,9 @@ def run():
         
     @api.app.route("/PEOPLE_COLUMNS/new", methods=["GET","POST"])
     @api.app.route("/PEOPLE_COLUMNS/new/<name>", methods=["GET","POST"])
+    @api.require_auth
     @api.require_dba
     @api.no_readonly
-    @api.require_auth
     def mod_people_columns_new(name=None):
         sname = name or api.data.get("name")
         senabled = api.data.get("enabled") or 0
@@ -464,6 +484,7 @@ def run():
         data["input"]["skey"] = skey
         data["input"]["category"] = scategory
         
+        sname = sname.replace(" ","_")
         try:
             int(sorder)
         except ValueError:
@@ -496,9 +517,9 @@ def run():
     
     @api.app.route("/PEOPLE_COLUMNS/delete", methods=["GET","POST"])
     @api.app.route("/PEOPLE_COLUMNS/delete/<rowid>", methods=["GET","POST"])
+    @api.require_auth
     @api.require_dba
     @api.no_readonly
-    @api.require_auth
     def mod_people_columns_delete(rowid=None):
         rowid = rowid or api.data.get("rowid")
 

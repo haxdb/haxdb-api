@@ -16,7 +16,6 @@ def init(app_api, app_db, app_config, app_tools):
 
 def run():
     @api.app.route("/ASSETS/list", methods=["POST","GET"])
-    @api.require_auth
     def mod_assets_list():
         query = api.data.get("query")
         location = api.data.get("location")
@@ -29,7 +28,7 @@ def run():
         data["input"]["location"] = location
         
         sql = """
-        SELECT * FROM ASSETS
+        SELECT ASSETS.*, LIST_ITEMS_NAME AS ASSETS_LOCATION_NAME FROM ASSETS
         LEFT OUTER JOIN LIST_ITEMS ON LIST_ITEMS_ID=ASSETS_LOCATION_LIST_ITEMS_ID
         """
         if location:
@@ -123,7 +122,7 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_assets_save (rowid=None, col=None, val=None):
-        valid_cols = ["ASSETS_NAME","ASSETS_TYPE","ASSETS_MANUFACTURER","ASSETS_PRODUCT_ID","ASSETS_SERIAL_NUMBER","ASSETS_QUANTITY","ASSETS_LOCATION_LIST_ITEMS_ID","ASSETS_AREA_LISTS_ID","ASSETS_DESCRIPTION"]
+        valid_cols = ["ASSETS_NAME","ASSETS_TYPE","ASSETS_REQUIRE_AUTH","ASSETS_AUTO_LOG","ASSETS_MANUFACTURER","ASSETS_PRODUCT_ID","ASSETS_SERIAL_NUMBER","ASSETS_QUANTITY","ASSETS_LOCATION_LIST_ITEMS_ID","ASSETS_AREA_LISTS_ID","ASSETS_DESCRIPTION"]
         
         rowid = rowid or api.data.get("rowid")
         col = col or api.data.get("col")
@@ -156,7 +155,6 @@ def run():
 
     @api.app.route("/ASSET_LINKS/list", methods=["POST","GET"])
     @api.app.route("/ASSET_LINKS/list/<int:rowid>", methods=["POST","GET"])
-    @api.require_auth
     def mod_asset_links_asset(rowid=None):
         rowid = rowid or api.data.get("rowid")
         query = api.data.get("query")
@@ -168,14 +166,10 @@ def run():
         data["input"]["query"] = query
         data["input"]["rowid"] = rowid
 
-        sql = """SELECT * FROM ASSET
-        JOIN ASSET_LINKS ON ASSET_LINKS_ASSET_ID=ASSET_ID
-        WHERE ASSET_ID=? 
-        ORDER BY ASSET_LINKS_ORDER"
-        """
+        sql = "SELECT * FROM ASSETS WHERE ASSETS_ID=?"
         db.query(sql,(rowid,))
         row = db.next()
-        data["name"] = row["ASSET_NAME"]
+        data["name"] = row["ASSETS_NAME"]
         
         if query:
             query = "%" + query + "%"
@@ -250,9 +244,6 @@ def run():
         
         if col not in valid_cols:
             return api.output(success=0, data=data, info="INVALID VALUE: col")
-        
-        if col == "ASSET_LINKS_ENABLED" and val not in ('0','1'):
-            return api.output(success=0, data=data, info="INVALID VALUE: val")
         
         if col == "ASSET_LINKS_ORDER" and not tools.is_float(val):
             return api.output(success=0, data=data, info="INVALID VALUE: val")
