@@ -10,3 +10,10 @@ def init(app_config, app_db, app_api):
     db = app_db
     config = app_config
 
+def is_float(val):
+    try:
+        float(val)
+        return True
+    except:
+        return False
+    

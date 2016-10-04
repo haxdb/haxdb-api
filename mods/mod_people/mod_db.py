@@ -37,9 +37,10 @@ def run():
     
     sql = "INSERT INTO PEOPLE_COLUMNS (PEOPLE_COLUMNS_NAME, PEOPLE_COLUMNS_ENABLED, PEOPLE_COLUMNS_ORDER, PEOPLE_COLUMNS_TYPE, PEOPLE_COLUMNS_KEY, PEOPLE_COLUMNS_CATEGORY, PEOPLE_COLUMNS_INTERNAL) VALUES (?,1,?,?,?,?,?)"
     
-    db.query(sql, ("FIRST NAME",1,"TEXT",1,"PRIMARY",1))
-    db.query(sql, ("LAST NAME",2,"TEXT",1,"PRIMARY",1))
+    db.query(sql, ("FIRST_NAME",1,"TEXT",1,"PRIMARY",1))
+    db.query(sql, ("LAST_NAME",2,"TEXT",1,"PRIMARY",1))
     db.query(sql, ("EMAIL",3,"TEXT",1,"PRIMARY",1))
+    db.query(sql, ("RFID",50,"TEXT",0,"ACCESS",1))
     db.commit()
     
     find_sql = "select LISTS_ID FROM LISTS WHERE LISTS_NAME=?"

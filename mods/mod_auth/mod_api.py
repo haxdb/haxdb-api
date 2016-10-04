@@ -32,6 +32,8 @@ def run():
                 api.session.set("api_key",row["API_KEYS_KEY"])
                 api.session.set("api_readonly",row["API_KEYS_READONLY"])
                 api.session.set("api_dba",row["API_KEYS_DBA"])
+            else:
+                api.session.set("api_authenticated", 0)
         
   
     @api.app.route("/API_KEYS/list", methods=["POST","GET"])

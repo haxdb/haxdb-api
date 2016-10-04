@@ -17,7 +17,7 @@ def output(success=0, info=None, data=None, rows=None, authenticated=True):
 
 class get_class:
     def get(self, key):
-        return request.args.get(key) or self.getlist(key)
+        return request.args.get(key) or self.getlist(key) or None
 
     def getlist(self, key):
         return request.args.getlist(key) or request.args.getlist(key+"[]")
@@ -27,7 +27,7 @@ class get_class:
     
 class post_class:
     def get(self, key):
-        return request.form.get(key) or self.getlist(key)
+        return request.form.get(key) or self.getlist(key) or None
 
     def getlist(self, key):
         return request.form.getlist(key) or request.form.getlist(key+"[]")

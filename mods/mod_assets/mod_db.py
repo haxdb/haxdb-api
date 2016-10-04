@@ -12,6 +12,8 @@ def init(app_db, app_config):
     t = db.tables.table("ASSETS")
     t.add("ASSETS_NAME", "CHAR", col_size=50, col_required=True)
     t.add("ASSETS_TYPE", "CHAR", col_size=50)
+    t.add("ASSETS_REQUIRE_AUTH", "INT", col_size=1)
+    t.add("ASSETS_AUTO_LOG", "INT", col_size=1)
     t.add("ASSETS_MANUFACTURER", "CHAR", col_size=50)
     t.add("ASSETS_PRODUCT_ID", "CHAR", col_size=50)
     t.add("ASSETS_SERIAL_NUMBER", "CHAR", col_size=50)
@@ -25,8 +27,30 @@ def init(app_db, app_config):
     t.add("ASSET_LINKS_ASSETS_ID", "INT", col_required=True)
     t.add("ASSET_LINKS_NAME", "CHAR", col_size=50, col_required=True)
     t.add("ASSET_LINKS_LINK", "CHAR", col_size=255)
-    t.add("ASSET_LINKS_ORDER", "INT", col_required=True)
+    t.add("ASSET_LINKS_ORDER", "INT")
     tables.append(t)
+
+    """
+    t = db.tables.table('ASSET_FILES')
+    t.add("ASSET_FILES_ASSETS_ID", "INT", col_required=True)
+    t.add("ASSET_FILES_NAME", "CHAR", col_size=50, col_required=True)
+    t.add("ASSET_FILES_DATA", "BLOB")
+    t.add("ASSET_FILES_ORDER", "INT")
+    tables.append(t)
+
+    t = db.tables.table('ASSET_IMAGES')
+    t.add("ASSET_FILES_ASSETS_ID", "INT", col_required=True)
+    t.add("ASSET_FILES_NAME", "CHAR", col_size=50, col_required=True)
+    t.add("ASSET_FILES_DATA", "BLOB")
+    t.add("ASSET_FILES_ORDER", "INT")
+    tables.append(t)
+    """
+
+    t = db.tables.table('ASSET_AUTHS')
+    t.add("ASSET_AUTHS_ASSETS_ID", "INT", col_required=True)
+    t.add("ASSET_AUTHS_PEOPLE_ID", "CHAR", col_size=50, col_required=True)
+    tables.append(t)
+    
     
     indexes = []
     indexes.append(db.tables.index("ASSETS", ["ASSETS_NAME"], unique=True))
