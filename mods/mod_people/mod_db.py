@@ -40,7 +40,6 @@ def run():
     db.query(sql, ("FIRST_NAME",1,"TEXT",1,"PRIMARY",1))
     db.query(sql, ("LAST_NAME",2,"TEXT",1,"PRIMARY",1))
     db.query(sql, ("EMAIL",3,"TEXT",1,"PRIMARY",1))
-    db.query(sql, ("RFID",50,"TEXT",0,"ACCESS",1))
     db.commit()
     
     find_sql = "select LISTS_ID FROM LISTS WHERE LISTS_NAME=?"
