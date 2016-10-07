@@ -179,13 +179,13 @@ def run():
 
 
     @api.app.route("/PEOPLE/save", methods=["GET","POST"])
-    @api.app.route("/PEOPLE/save/<int:rowid>", methods=["GET","POST"])
-    @api.app.route("/PEOPLE/save/<int:rowid>/<col>", methods=["GET","POST"])
     @api.app.route("/PEOPLE/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
     @api.require_auth
     @api.require_dba
     @api.no_readonly
     def mod_people_save(rowid=None,col=None,val=None):
+        table_cols = { "EMAIL": "PEOPLE_EMAIL", "DBA": "PEOPLE_DBA" }
+        
         rowid = rowid or api.data.get("rowid")
         column = col or api.data.get("col")
         value = val or api.data.get("val")
@@ -199,40 +199,41 @@ def run():
         data["input"]["val"] = value
         data["oid"] = "PEOPLE-%s-%s" % (rowid,column)
         
-        col = tools.get_col_definition(col_name=column)
-        if not col:
-            return api.output(success=0, info="INVALID VALUE: col", data=data)
-        
-        col_name = col["PEOPLE_COLUMNS_NAME"]
-        col_type = col["PEOPLE_COLUMNS_TYPE"]
-        defid = col["PEOPLE_COLUMNS_ID"]
-        
-        if col_type == "FILE":
-            #check file
-            pass
-        elif not tools.valid_col_value(col_name,col_type,value):
-            return api.output(success=0, info="INVALID VALUE: val", data=data)
-        
-
-        if col_type == "FILE":
-            if 'value' not in request.files:
-                return api.output(success=0, info="NO FILE UPLOADED")
-            
-            f = request.files["value"]
-            if f.filename == '':
-                return api.output(success=0, info="UPLOAD CANCELLED", data=data)
-            
-            #filename = secure_filename(file.filename)
-            fname, fext = os.path.splitext(f.filename)
-            keycols = tools.get_keycols(rowid)
-            filename = secure_filename("PEOPLE." + str(rowid) + "." + ".".join(keycols) + "." + column + fext)
-            f.save(os.path.join(config["API"]["UPLOADS"], filename))
-            value = filename
-
-        if col_name == "DBA":
-            sql = "UPDATE PEOPLE SET PEOPLE_DBA=? WHERE PEOPLE_ID=?"
+        if column in table_cols:
+            sql = "UPDATE PEOPLE SET %s=? WHERE PEOPLE_ID=?" % table_cols[column]
             db.query(sql,(value, rowid))
+
         else:
+            col = tools.get_col_definition(col_name=column)
+            if not col:
+                return api.output(success=0, info="INVALID VALUE: col", data=data)
+            
+            col_name = col["PEOPLE_COLUMNS_NAME"]
+            col_type = col["PEOPLE_COLUMNS_TYPE"]
+            defid = col["PEOPLE_COLUMNS_ID"]
+            
+            if col_type == "FILE":
+                #check file
+                pass
+            elif not tools.valid_col_value(col_name,col_type,value):
+                return api.output(success=0, info="INVALID VALUE: val", data=data)
+            
+    
+            if col_type == "FILE":
+                if 'value' not in request.files:
+                    return api.output(success=0, info="NO FILE UPLOADED")
+                
+                f = request.files["value"]
+                if f.filename == '':
+                    return api.output(success=0, info="UPLOAD CANCELLED", data=data)
+                
+                #filename = secure_filename(file.filename)
+                fname, fext = os.path.splitext(f.filename)
+                keycols = tools.get_keycols(rowid)
+                filename = secure_filename("PEOPLE." + str(rowid) + "." + ".".join(keycols) + "." + column + fext)
+                f.save(os.path.join(config["API"]["UPLOADS"], filename))
+                value = filename
+    
             sql = "DELETE FROM PEOPLE_COLUMN_VALUES WHERE PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID=? and PEOPLE_COLUMN_VALUES_PEOPLE_ID=?"
             db.query(sql,(defid, rowid))
             db.rowcount = 0
@@ -249,7 +250,6 @@ def run():
         return api.output(success=0, info="UNKNOWN ERROR", data=data)
 
     @api.app.route("/PEOPLE/download", methods=["GET","POST"])
-    @api.app.route("/PEOPLE/download/<int:rowid>", methods=["GET","POST"])
     @api.app.route("/PEOPLE/download/<int:rowid>/<col>", methods=["GET","POST"])
     @api.require_auth
     @api.require_dba
@@ -380,8 +380,6 @@ def run():
         return api.output(success=1, data=data)
     
     @api.app.route("/PEOPLE_COLUMNS/save", methods=["GET","POST"])
-    @api.app.route("/PEOPLE_COLUMNS/save/<int:rowid>", methods=["GET","POST"])
-    @api.app.route("/PEOPLE_COLUMNS/save/<int:rowid>/<col>", methods=["GET","POST"])
     @api.app.route("/PEOPLE_COLUMNS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
     @api.require_auth
     @api.require_dba
@@ -397,7 +395,7 @@ def run():
         data["input"]["action"] = "save"
         data["input"]["rowid"] = rowid
         data["input"]["col"] = column
-        data["input"]["val"] = val
+        data["input"]["val"] = value
         data["oid"] = "PEOPLE_COLUMNS-%s-%s" % (rowid,column,)
         
         if not rowid:
@@ -405,8 +403,6 @@ def run():
         
         if not column:
             return api.output(success=0, info="MISSING INPUT: col", data=data)
-            
-        
         
         valid_columns = (
             "PEOPLE_COLUMNS_NAME",
@@ -425,8 +421,8 @@ def run():
             "PEOPLE_COLUMNS_CATEGORY",
         )
         
-        if column == "PEOPLE_COLUMNS_NAME":
-            val = val.replace(" ","_")
+        if column == "PEOPLE_COLUMNS_NAME" and value:
+            value = value.replace(" ","_")
             
         if column not in valid_columns:
             return api.output(success=0, info="INVALID VALUE: col", data=data)
@@ -516,7 +512,7 @@ def run():
         return api.output(success=0, info="UNKNOWN ERROR", data=data)
     
     @api.app.route("/PEOPLE_COLUMNS/delete", methods=["GET","POST"])
-    @api.app.route("/PEOPLE_COLUMNS/delete/<rowid>", methods=["GET","POST"])
+    @api.app.route("/PEOPLE_COLUMNS/delete/<int:rowid>", methods=["GET","POST"])
     @api.require_auth
     @api.require_dba
     @api.no_readonly

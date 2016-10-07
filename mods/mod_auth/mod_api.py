@@ -114,8 +114,6 @@ def run():
         
     
     @api.app.route("/API_KEYS/save", methods=["GET","POST"])
-    @api.app.route("/API_KEYS/save/<int:rowid>", methods=["GET","POST"])
-    @api.app.route("/API_KEYS/save/<int:rowid>/<col>", methods=["GET","POST"])
     @api.app.route("/API_KEYS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
     @api.require_auth
     @api.no_readonly

@@ -105,8 +105,6 @@ def run():
         return api.output(success=0, info="UNKNOWN LIST ID OR LIST IS INTERNAL", data=data)
         
     @api.app.route("/LISTS/save", methods=["GET","POST"])
-    @api.app.route("/LISTS/save/<int:rowid>", methods=["GET","POST"])
-    @api.app.route("/LISTS/save/<int:rowid>/<col>", methods=["GET","POST"])
     @api.app.route("/LISTS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
     @api.require_auth
     @api.require_dba
@@ -144,42 +142,44 @@ def run():
     
 
     @api.app.route("/LIST_ITEMS/list", methods=["POST","GET"])
-    @api.app.route("/LIST_ITEMS/list/<int:rowid>", methods=["POST","GET"])
+    @api.app.route("/LIST_ITEMS/list/<int:lists_id>", methods=["POST","GET"])
+    @api.app.route("/LIST_ITEMS/list/<lists_name>", methods=["POST","GET"])
     @api.require_auth
-    def mod_list_items_list(rowid=None):
-        rowid = rowid or api.data.get("rowid")
+    def mod_list_items_list(lists_id=None, lists_name=None):
+        lists_id = lists_id or api.data.get("lists_id")
+        lists_name = lists_name or api.data.get("lists_name")
         query = api.data.get("query")
-        name = api.data.get("name")
-        disabled = api.data.get("disabled")
+        include_disabled = api.data.get("include_disabled")
         
         data = {}
         data["input"] = {}
         data["input"]["api"] = "LIST_ITEMS"
         data["input"]["action"] = "list"
         data["input"]["query"] = query
-        data["input"]["disabled"] = disabled
-        data["input"]["rowid"] = rowid
-        data["input"]["name"] = name
+        data["input"]["include_disabled"] = include_disabled
+        data["input"]["lists_id"] = lists_id
+        data["input"]["lists_name"] = lists_name
 
-        if not rowid and not name:
-            return api.output(success=0, data=data, info="MISSING VALUE: rowid or name")
+        if not lists_id and not lists_name:
+            return api.output(success=0, data=data, info="MISSING VALUE: lists_id or lists_name")
         
         params = ()
         sql = "SELECT * FROM LISTS WHERE"
-        if rowid:
+        if lists_id:
             sql += " LISTS_ID=?"
-            params += (rowid,)
-        elif name:
+            params += (lists_id,)
+        elif lists_name:
             sql += " LISTS_NAME=?"
-            params += (name,)
+            params += (lists_name,)
+            
         db.query(sql,params)
         row = db.next()
         if not row:
             return api.output(success=0, data=data, info="UNKNOWN LIST")
         data["name"] = row["LISTS_NAME"]
-        rowid = row["LISTS_ID"]
+        lists_id = row["LISTS_ID"]
         
-        params = (rowid,)
+        params = (lists_id,)
         sql = """
         SELECT * FROM LIST_ITEMS
         JOIN LISTS ON LIST_ITEMS_LISTS_ID = LISTS_ID
@@ -192,11 +192,15 @@ def run():
             sql += "and (LIST_ITEMS_VALUE LIKE ? OR LIST_ITEMS_DESCRIPTION LIKE ?)"
             params += (query,query,)
             
-        if not disabled:
+        if not include_disabled:
                 sql += " AND LIST_ITEMS_ENABLED='1'"
 
         sql += " ORDER BY LIST_ITEMS_ORDER"
         db.query(sql,params)
+        
+        if db.error:
+            return api.output(success=0, data=data, info=db.error)
+
         row = db.next()
         rows = []
         while row:
@@ -206,25 +210,25 @@ def run():
         return api.output(success=1, data=data, rows=rows)
 
     @api.app.route("/LIST_ITEMS/new", methods=["POST", "GET"])
-    @api.app.route("/LIST_ITEMS/new/<int:rowid>", methods=["POST", "GET"])
-    @api.app.route("/LIST_ITEMS/new/<int:rowid>/<name>", methods=["POST", "GET"])
+    @api.app.route("/LIST_ITEMS/new/<int:lists_id>", methods=["POST", "GET"])
+    @api.app.route("/LIST_ITEMS/new/<int:lists_id>/<name>", methods=["POST", "GET"])
     @api.require_auth
     @api.require_dba
     @api.no_readonly
-    def mod_list_items_new(rowid=None, name=None):
-        rowid = rowid or api.data.get("rowid")
+    def mod_list_items_new(lists_id=None, name=None):
+        lists_id = lists_id or api.data.get("lists_id")
         name = name or api.data.get("name")
         
         data = {}
         data["input"] = {}
         data["input"]["api"] = "LIST_ITEMS"
         data["input"]["action"] = "new"
-        data["input"]["rowid"] = rowid
+        data["input"]["lists_id"] = lists_id
         data["input"]["name"] = name
         
         sql = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER) "
         sql += "VALUES (?, ?, ?, 0, 999)"
-        db.query(sql, (rowid, name, name,))
+        db.query(sql, (lists_id, name, name,))
         if db.rowcount > 0:
             db.commit()
             data["rowid"] = db.lastrowid
@@ -236,8 +240,6 @@ def run():
         return api.output(success=0, info="UNKNOWN ERROR", data=data)
 
     @api.app.route("/LIST_ITEMS/save", methods=["GET","POST"])
-    @api.app.route("/LIST_ITEMS/save/<int:rowid>", methods=["GET","POST"])
-    @api.app.route("/LIST_ITEMS/save/<int:rowid>/<col>", methods=["GET","POST"])
     @api.app.route("/LIST_ITEMS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
     @api.require_auth
     @api.require_dba

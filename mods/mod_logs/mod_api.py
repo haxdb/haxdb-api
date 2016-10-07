@@ -62,13 +62,13 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_logs_new():
-        assetid = api.data.get("assetid")
-        asset = api.data.get("asset")
-        actionid = api.data.get("actionid")
-        action = api.data.get("action")
-        peopleid = api.data.get("peopleid")
-        nodeid = api.data.get("nodeid")
-        node = api.data.get("node")
+        assets_id = api.data.get("assets_id")
+        assets_name = api.data.get("assets_name")
+        actions_id = api.data.get("actions_id")
+        actions_name = api.data.get("actions_name")
+        people_id = api.data.get("people_id")
+        nodes_id = api.data.get("nodes_id")
+        nodes_name = api.data.get("nodes_name")
         description = api.data.get("description")
         
         log_people_id = api.session.get("api_people_id")
@@ -78,42 +78,42 @@ def run():
         data["input"] = {}
         data["input"]["api"] = "LOGS"
         data["input"]["action"] = "new"
-        data["input"]["assetid"] = assetid
-        data["input"]["asset"] = asset
-        data["input"]["actionid"] = actionid
-        data["input"]["action"] = action
-        data["input"]["peopleid"] = peopleid
-        data["input"]["nodeid"] = nodeid
-        data["input"]["node"] = node
+        data["input"]["assets_id"] = assets_id
+        data["input"]["assets_name"] = assets_name
+        data["input"]["actions_id"] = actions_id
+        data["input"]["actions_name"] = actions_name
+        data["input"]["people_id"] = people_id
+        data["input"]["nodes_id"] = nodes_id
+        data["input"]["nodes_name"] = nodes_name
         data["input"]["description"] = description
         
-        if asset and not assetid:
+        if assets_name and not assets_id:
             sql = "SELECT * FROM ASSETS WHERE ASSET_NAME = ?"
-            db.query(sql, (asset,))
+            db.query(sql, (assets_name,))
             row = db.next()
             if not row or not row["ASSETS_ID"]:
-                return api.output(success=0, data=data, info="INVALID VALUE: asset")
-            assetid = row["ASSETS_ID"]
+                return api.output(success=0, data=data, info="INVALID VALUE: assets_name")
+            assets_id = row["ASSETS_ID"]
             
-        if action and not actionid:
+        if actions_name and not actions_id:
             sql = "SELECT * FROM LISTS JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID=LISTS_ID WHERE LISTS_NAME='LOG ACTIONS' and LIST_ITEMS_VALUE=?"
-            db.query(sql, (action,))
+            db.query(sql, (actions_name,))
             row = db.next()
             if not row or not row["LIST_ITEMS_ID"]:
-                return api.output(success=0, data=data, info="INVALID VALUE: action")
+                return api.output(success=0, data=data, info="INVALID VALUE: actions_name")
             actionid = row["LIST_ITEMS_ID"]
 
-        if node and not nodeid:
+        if nodes_name and not nodes_id:
             sql = "SELECT * FROM LISTS JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID=LISTS_ID WHERE LISTS_NAME='LOG NODES' and LIST_ITEMS_VALUE=?"
-            db.query(sql, (node,))
+            db.query(sql, (nodes_name,))
             row = db.next()
             if not row or not row["LIST_ITEMS_ID"]:
-                return api.output(success=0, data=data, info="INVALID VALUE: node")
+                return api.output(success=0, data=data, info="INVALID VALUE: nodes_name")
             nodeid = row["LIST_ITEMS_ID"]
             
         sql = "INSERT INTO LOGS (LOGS_ASSETS_ID, LOGS_ACTION_ID, LOGS_ACTION_PEOPLE_ID, LOGS_NODE_ID, LOGS_DESCRIPTION, LOGS_LOG_PEOPLE_ID, LOGS_API_KEY_ID) "
         sql += "VALUES (?, ?, ?, ?, ?, ?, ?)"
-        db.query(sql, (assetid, actionid, peopleid, nodeid, description, log_people_id, log_api_key,))
+        db.query(sql, (assets_id, actions_id, people_id, nodes_id, description, log_people_id, log_api_key,))
         if db.rowcount > 0:
             db.commit()
             data["rowid"] = db.lastrowid

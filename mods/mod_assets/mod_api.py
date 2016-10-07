@@ -280,14 +280,14 @@ def run():
         return api.output(success=0, info="UNKNOWN ERROR", data=data)
 
     @api.app.route("/ASSET_LINKS/save", methods=["GET","POST"])
-    @api.app.route("/ASSET_LINKS/save/<int:assets_id>/<col>/<val>", methods=["GET","POST"])
+    @api.app.route("/ASSET_LINKS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
     @api.require_auth
     @api.require_dba
     @api.no_readonly
-    def mod_asset_links_save (assets_id=None, col=None, val=None):
+    def mod_asset_links_save (rowid=None, col=None, val=None):
         valid_cols = ["ASSET_LINKS_NAME","ASSET_LINKS_LINK","ASSET_LINKS_ORDER"]
         
-        assets_id = assets_id or api.data.get("assets_id")
+        rowid = rowid or api.data.get("rowid")
         col = col or api.data.get("col")
         val = val or api.data.get("val")
         
@@ -295,7 +295,7 @@ def run():
         data["input"] = {}
         data["input"]["api"] = "ASSET_LINKS"
         data["input"]["action"] = "save"
-        data["input"]["assets_id"] = assets_id
+        data["input"]["rowid"] = rowid
         data["input"]["col"] = col
         data["input"]["val"] = val
         data["oid"] = "ASSET_LINKS-%s-%s" % (rowid, col,)
@@ -307,7 +307,7 @@ def run():
             return api.output(success=0, data=data, info="INVALID VALUE: val")
         
         sql = "UPDATE ASSET_LINKS SET %s=? WHERE ASSET_LINKS_ID=?" % col
-        db.query(sql, (val,assets_id,))
+        db.query(sql, (val,rowid,))
         
         if db.rowcount > 0:
             db.commit()
@@ -316,7 +316,7 @@ def run():
         if db.error:
             return api.output(success=0, info=db.error, data=data)
         
-        return api.output(success=0, info="INVALID VALUE: assets_id", data=data)
+        return api.output(success=0, info="INVALID VALUE: rowid", data=data)
     
     @api.app.route("/ASSET_LINKS/delete", methods=["GET","POST"])
     @api.app.route("/ASSET_LINKS/delete/<int:rowid>", methods=["GET","POST"])
