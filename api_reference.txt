@@ -12,6 +12,8 @@
     /session
 
 
+
+
 /API_KEYS
 
     /list
@@ -27,6 +29,8 @@
 
     /delete/<rowid>
         * <rowid>
+
+
 
 /LISTS
 
@@ -46,16 +50,17 @@
         * <col>
         * <val>
 
+
+
 /LIST_ITEMS
 
-    /list/<rowid>
-        * [rowid]
-        * [name]
+    /list/<lists_id>
+        * [lists_id] or [lists_name]
         * [query]
-        * [disabled]
+        * [include_disabled]
 
-    /new/<rowid>/<name>
-        * <rowid>
+    /new/<lists_id>/<name>
+        * <lists_id>
         * <name>
 
     /delete/<rowid>
@@ -65,6 +70,8 @@
         * <rowid>
         * <col>
         * <val>
+
+
 
 /PEOPLE
 
@@ -83,6 +90,8 @@
     /delete/<rowid>
         * <rowid>
     
+
+
 
 /PEOPLE_COLUMNS
 
@@ -103,11 +112,16 @@
         * <rowid>
     
 
+
+
 /ASSETS
 
     /list 
         * [query]
-        * [location]
+        * [locations_id]
+
+    /view/<rowid>
+        * <rowid>
 
     /new
         * <name>
@@ -116,10 +130,51 @@
     /delete
         * <rowid>
 
-    /save
+    /save/<rowid>/<col>/<val>
         * <rowid>
         * <col>
         * <val>
+
+
+
+
+/ASSET_LINKS
+
+    /list/<assets_id>
+        * <assets_id>
+        * [query]
+        
+    /new/<assets_id>/<name>/<link>
+        * <assets_id>
+        * <name>
+        * [link]
+    
+    /save/<rowid>/<col>/<val>
+        * <rowid>
+        * <col>
+        * <val>
+    
+    /delete/<rowid>
+        * <rowid>
+
+
+
+
+/ASSET_AUTHS
+
+    /list/<assets_id>
+        * <assets_id>
+        * [query]
+
+    /new/<assets_id>/<people_id>
+        * <assets_id>
+        * <people_id>
+    
+    /delete/<rowid>
+    /delete/<assets_id>/<people_id>
+        * <rowid> or (<assets_id> and <people_id>)
+
+    
 
 
 /LOGS
@@ -128,9 +183,8 @@
         * [query]
         
     /new
-        * [assetid] or [asset]
-        * [actionid] or [action]
-        * [peopleid]
-        * [nodeid]
-        * [node]
+        * [assets_id] or [assets_name]
+        * [actions_id] or [actions_name]
+        * [nodes_id] or [nodes_name]
+        * [people_id]
         * [description]

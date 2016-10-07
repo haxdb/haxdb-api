@@ -18,7 +18,7 @@ def run():
     @api.app.route("/ASSETS/list", methods=["POST","GET"])
     def mod_assets_list():
         query = api.data.get("query")
-        location = api.data.get("location")
+        locations_id = api.data.get("locations_id")
         
         data = {}
         data["input"] = {}
@@ -52,7 +52,7 @@ def run():
                 query = "%" + query + "%"
                 sql += " WHERE ASSETS_LOCATION_ID = ? and (ASSETS_NAME LIKE ? or LIST_ITEMS_VALUE LIKE ?)"
                 sql += " ORDER BY LIST_ITEMS_VALUE, ASSETS_NAME"
-                db.query(sql, (location, query, query,))
+                db.query(sql, (locations_id, query, query,))
             else:
                 sql += " WHERE ASSETS_LOCATION_ID = ?"
                 sql += " ORDER BY LIST_ITEMS_VALUE, ASSETS_NAME"
