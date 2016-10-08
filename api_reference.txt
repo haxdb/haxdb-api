@@ -185,6 +185,5 @@
     /new
         * [assets_id] or [assets_name]
         * [actions_id] or [actions_name]
-        * [nodes_id] or [nodes_name]
         * [people_id]
         * [description]

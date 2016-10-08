@@ -28,22 +28,24 @@ def run():
         
         sql = """
         SELECT LOGS.*, ASSETS.*, 
+        API_KEYS_DESCRIPTION AS LOGS_NODE_NAME,
         ACTION.LIST_ITEMS_VALUE as ACTION_VALUE, ACTION.LIST_ITEMS_DESCRIPTION as ACTION_DESCRIPTION,
-        NODE.LIST_ITEMS_VALUE as NODE_VALUE, NODE.LIST_ITEMS_DESCRIPTION as NODE_DESCRIPTION,
         PFN.PEOPLE_COLUMN_VALUES_VALUE as ACTION_FIRST_NAME,
         PLN.PEOPLE_COLUMN_VALUES_VALUE as ACTION_LAST_NAME
         FROM LOGS 
         LEFT OUTER JOIN ASSETS ON ASSETS_ID = LOGS_ASSETS_ID
         LEFT OUTER JOIN LIST_ITEMS ACTION ON ACTION.LIST_ITEMS_ID = LOGS_ACTION_ID AND ACTION.LIST_ITEMS_LISTS_ID = (SELECT LISTS_ID FROM LISTS WHERE LISTS_NAME='LOG ACTIONS')
-        LEFT OUTER JOIN LIST_ITEMS NODE ON NODE.LIST_ITEMS_ID = LOGS_NODE_ID AND NODE.LIST_ITEMS_LISTS_ID = (SELECT LISTS_ID FROM LISTS WHERE LISTS_NAME='LOG NODES')
         LEFT OUTER JOIN PEOPLE_COLUMN_VALUES PFN ON PFN.PEOPLE_COLUMN_VALUES_PEOPLE_ID = LOGS_ACTION_PEOPLE_ID AND PFN.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = (SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='FIRST_NAME')
         LEFT OUTER JOIN PEOPLE_COLUMN_VALUES PLN ON PLN.PEOPLE_COLUMN_VALUES_PEOPLE_ID = LOGS_ACTION_PEOPLE_ID AND PLN.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = (SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='LAST_NAME')
+        LEFT OUTER JOIN API_KEYS ON API_KEYS_ID = LOGS_API_KEYS_ID
         """
         if query:
             query = "%" + query + "%"
-            sql += "ASSETS_NAME LIKE ? OR ACTION_VALUE LIKE ? OR ACTION_DESCRIPTION LIKE ? OR NODE_VALUE LIKE ? OR NODE_DESCRIPTION LIKE ? OR ACTION_FIRST_NAME LIKE ? OR ACTION_LAST_NAME LIKE ?"
-            db.query(sql, (query, query, query, query, query, query, query))
+            sql += "WHERE ASSETS_NAME LIKE ? OR ACTION_VALUE LIKE ? OR ACTION_DESCRIPTION LIKE ? OR ACTION_FIRST_NAME LIKE ? OR ACTION_LAST_NAME LIKE ? OR LOGS_NODE_NAME LIKE ?"
+            sql += " ORDER BY LOGS_UPDATED DESC"
+            db.query(sql, (query, query, query, query, query, query,))
         else:
+            sql += " ORDER BY LOGS_UPDATED DESC"
             db.query(sql)
     
         if db.error:
@@ -67,12 +69,10 @@ def run():
         actions_id = api.data.get("actions_id")
         actions_name = api.data.get("actions_name")
         people_id = api.data.get("people_id")
-        nodes_id = api.data.get("nodes_id")
-        nodes_name = api.data.get("nodes_name")
         description = api.data.get("description")
         
         log_people_id = api.session.get("api_people_id")
-        log_api_key = api.session.get("api.api_key")
+        log_api_key_id = api.session.get("api_key_id")
         
         data = {}
         data["input"] = {}
@@ -83,8 +83,6 @@ def run():
         data["input"]["actions_id"] = actions_id
         data["input"]["actions_name"] = actions_name
         data["input"]["people_id"] = people_id
-        data["input"]["nodes_id"] = nodes_id
-        data["input"]["nodes_name"] = nodes_name
         data["input"]["description"] = description
         
         if assets_name and not assets_id:
@@ -103,17 +101,9 @@ def run():
                 return api.output(success=0, data=data, info="INVALID VALUE: actions_name")
             actionid = row["LIST_ITEMS_ID"]
 
-        if nodes_name and not nodes_id:
-            sql = "SELECT * FROM LISTS JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID=LISTS_ID WHERE LISTS_NAME='LOG NODES' and LIST_ITEMS_VALUE=?"
-            db.query(sql, (nodes_name,))
-            row = db.next()
-            if not row or not row["LIST_ITEMS_ID"]:
-                return api.output(success=0, data=data, info="INVALID VALUE: nodes_name")
-            nodeid = row["LIST_ITEMS_ID"]
-            
-        sql = "INSERT INTO LOGS (LOGS_ASSETS_ID, LOGS_ACTION_ID, LOGS_ACTION_PEOPLE_ID, LOGS_NODE_ID, LOGS_DESCRIPTION, LOGS_LOG_PEOPLE_ID, LOGS_API_KEY_ID) "
-        sql += "VALUES (?, ?, ?, ?, ?, ?, ?)"
-        db.query(sql, (assets_id, actions_id, people_id, nodes_id, description, log_people_id, log_api_key,))
+        sql = "INSERT INTO LOGS (LOGS_ASSETS_ID, LOGS_ACTION_ID, LOGS_ACTION_PEOPLE_ID, LOGS_DESCRIPTION, LOGS_LOG_PEOPLE_ID, LOGS_API_KEYS_ID) "
+        sql += "VALUES (?, ?, ?, ?, ?, ?)"
+        db.query(sql, (assets_id, actions_id, people_id, description, log_people_id, log_api_key_id,))
         if db.rowcount > 0:
             db.commit()
             data["rowid"] = db.lastrowid

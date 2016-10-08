@@ -25,7 +25,7 @@ def run():
         data["input"]["api"] = "ASSETS"
         data["input"]["action"] = "list"
         data["input"]["query"] = query
-        data["input"]["location"] = location
+        data["input"]["locations_id"] = locations_id
         
         sql = """
         SELECT * FROM LISTS 
@@ -47,7 +47,7 @@ def run():
         SELECT ASSETS.*, LIST_ITEMS_VALUE AS ASSETS_LOCATION_NAME FROM ASSETS
         LEFT OUTER JOIN LIST_ITEMS ON LIST_ITEMS_ID=ASSETS_LOCATION_ID
         """
-        if location:
+        if locations_id:
             if query:
                 query = "%" + query + "%"
                 sql += " WHERE ASSETS_LOCATION_ID = ? and (ASSETS_NAME LIKE ? or LIST_ITEMS_VALUE LIKE ?)"
@@ -56,7 +56,7 @@ def run():
             else:
                 sql += " WHERE ASSETS_LOCATION_ID = ?"
                 sql += " ORDER BY LIST_ITEMS_VALUE, ASSETS_NAME"
-                db.query(sql, (location,))
+                db.query(sql, (locations_id,))
         else:
             if query:
                 query = "%" + query + "%"

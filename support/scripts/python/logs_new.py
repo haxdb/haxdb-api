@@ -42,24 +42,10 @@ print ""
 
 #####################################################################################################
 
-url = "%s/LIST_ITEMS/list" % config["SCRIPT"]["HOST"] 
-data["lists_name"] = "LOG NODES"
-r = json.loads(requests.get(url, data=data).text)
-
-for p in r["rows"]:
-    print "%s) %s" % (p["LIST_ITEMS_ID"], p["LIST_ITEMS_VALUE"])
-
-print ""
-nodes_id = raw_input("Enter NODE_ID: ")
-print ""
-
-#####################################################################################################
-
 url = "%s/LOGS/new" % config["SCRIPT"]["HOST"]
 data["assets_id"] = assets_id
 data["actions_id"] = actions_id
 data["people_id"] = people_id
-data["nodes_id"] = nodes_id
 data["description"] = raw_input("Description: ")
 r = json.loads(requests.get(url, data=data).text)
 

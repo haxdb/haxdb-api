@@ -13,10 +13,9 @@ def init(app_db, app_config):
     t.add("LOGS_ASSETS_ID", "INT")
     t.add("LOGS_ACTION_ID", "INT")
     t.add("LOGS_ACTION_PEOPLE_ID", "INT")
-    t.add("LOGS_NODE_ID", "INT")
     t.add("LOGS_DESCRIPTION", "CHAR", col_size=255, col_required=True)
     t.add("LOGS_LOG_PEOPLE_ID", "INT")
-    t.add("LOGS_API_KEY_ID", "INT")
+    t.add("LOGS_API_KEYS_ID", "INT")
     tables.append(t)
     
     indexes = []
@@ -28,5 +27,4 @@ def init(app_db, app_config):
 def run():
     sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (?,1)"
     db.query(sql, ("LOG ACTIONS",))
-    db.query(sql, ("LOG NODES",))
 

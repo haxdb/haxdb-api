@@ -24,10 +24,27 @@ def init(app_config, app_db, app_api):
     db = app_db
     config = app_config
     
-def is_float(val):
-    try:
-        float(val)
-        return True
-    except:
+def log(people_id, actions_name, assets_id, description):
+    
+    sql = """
+    SELECT * FROM LISTS
+    JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID = LISTS_ID
+    WHERE LISTS_NAME='LOG ACTIONS'
+    AND LIST_ITEMS_VALUE = ?
+    """
+    db.query(sql, (actions_name,))
+    row = db.next()
+    if not row:
         return False
+    
+    actions_id = row["LIST_ITEMS_ID"]
+    log_people_id = api.session.get("api_people_id")
+    log_api_key_id = api.session.get("api_key_id")
+    
+    sql = """
+    INSERT INTO LOGS (LOGS_ASSETS_ID, LOGS_ACTION_ID, LOGS_ACTION_PEOPLE_ID, LOGS_DESCRIPTION, LOGS_LOG_PEOPLE_ID, LOGS_API_KEYS_ID)
+    VALUEs (?, ?, ?, ?, ?, ?)
+    """
+    db.query(sql, (assets_id, actions_id, people_id, description, log_people_id, log_api_key_id,))
+    
     

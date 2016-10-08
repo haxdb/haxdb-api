@@ -31,7 +31,8 @@ def run():
         data["input"]["rfid"] = rfid
         
         sql = """
-        SELECT 
+        SELECT
+        P.PEOPLE_ID,
         PFN.PEOPLE_COLUMN_VALUES_VALUE as PEOPLE_FIRST_NAME,
         PLN.PEOPLE_COLUMN_VALUES_VALUE as PEOPLE_LAST_NAME,
         A.ASSETS_NAME
@@ -57,8 +58,35 @@ def run():
         row = db.next()
         
         if row:
+            description = "%s %s AUTHENTICATED on %s" % (row["PEOPLE_FIRST_NAME"], row["PEOPLE_LAST_NAME"], row["ASSETS_NAME"])
+            tools.log(row["PEOPLE_ID"], "AUTHENTICATE", assets_id, description)
             data["row"] = dict(row)
             return api.output(success=1, data=data, info="ACCESS GRANTED")
         
+        sql = """
+            SELECT
+            P.PEOPLE_ID,
+            PFN.PEOPLE_COLUMN_VALUES_VALUE as PEOPLE_FIRST_NAME,
+            PLN.PEOPLE_COLUMN_VALUES_VALUE as PEOPLE_LAST_NAME,
+            A.ASSETS_NAME
+    
+            FROM PEOPLE P
+            JOIN PEOPLE_COLUMNS PC 
+            JOIN PEOPLE_COLUMN_VALUES PCV ON PCV.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = PC.PEOPLE_COLUMNS_ID AND PCV.PEOPLE_COLUMN_VALUES_PEOPLE_ID = P.PEOPLE_ID
+            JOIN ASSETS A
+            LEFT OUTER JOIN PEOPLE_COLUMN_VALUES PFN ON PFN.PEOPLE_COLUMN_VALUES_PEOPLE_ID = PEOPLE_ID AND PFN.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = (SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='FIRST_NAME')
+            LEFT OUTER JOIN PEOPLE_COLUMN_VALUES PLN ON PLN.PEOPLE_COLUMN_VALUES_PEOPLE_ID = PEOPLE_ID AND PLN.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = (SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='LAST_NAME')
+    
+            WHERE
+            PC.PEOPLE_COLUMNS_NAME='RFID'
+            AND PCV.PEOPLE_COLUMN_VALUES_VALUE = ?
+            AND A.ASSETS_ID = ?
+            """
+        db.query(sql, (rfid, assets_id))
+        row = db.next()
+        if row:
+            description = "%s %s PERMISSION DENIED on %s" % (row["PEOPLE_FIRST_NAME"], row["PEOPLE_LAST_NAME"], row["ASSETS_NAME"])
+            tools.log(row["PEOPLE_ID"], "DENY", assets_id, description)
+
         return api.output(success=0, info="PERMISSION DENIED", data=data)
 
