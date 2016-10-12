@@ -5,24 +5,25 @@ from config import config
 
 data = { "api_key": config["SCRIPT"]["KEY"] }
 
-url = "%s/ASSETS/list" % config["SCRIPT"]["HOST"]
+data["lists_name"] = "LOG ACTIONS"
+url = "%s/LIST_ITEMS/list" % config["SCRIPT"]["HOST"]
 r = json.loads(requests.get(url, data=data).text)
 
 for p in r["rows"]:
-    print "%s) %s \t [%s]" % (p["ASSETS_ID"], p["ASSETS_NAME"], p["ASSETS_LOCATION_NAME"])
+    print "%s" % (p["LIST_ITEMS_VALUE"],)
 
 print ""
-assets_id = raw_input("ASSETS_ID: ")
+action = raw_input("ACTION: ")
 print ""
 rfid = raw_input("RFID: ")
 
-data["assets_id"] = assets_id
 data["rfid"] = rfid
+data["action"] = action
 url = "%s/RFID/asset" % config["SCRIPT"]["HOST"]
 r = json.loads(requests.get(url, data=data).text)
 
 print
-print r["info"]
+print r["message"]
 
 if int(r["success"]) == 1:
     print r["row"]["ASSETS_NAME"]

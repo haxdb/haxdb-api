@@ -28,7 +28,7 @@ def require_auth(view_function):
         authenticated = session.get("api_authenticated")
 
         if not (key and authenticated==1):
-            return output(success=0, info="NOT AUTHENTICATED", authenticated=False)
+            return output(success=0, message="NOT AUTHENTICATED", authenticated=False)
         return view_function(*args, **kwargs)
 
     return decorated_function
@@ -40,7 +40,7 @@ def require_dba(view_function):
         sess.permanent = True
         dba = session.get("api_dba")
         if (not dba or (dba and int(dba) != 1)):
-            return output(success=0, info="INVALID PERMISSION")
+            return output(success=0, message="INVALID PERMISSION")
         return view_function(*args, **kwargs)
 
     return decorated_function
@@ -54,7 +54,7 @@ def no_readonly(view_function):
         readonly = session.get("api_readonly")
 
         if (readonly and readonly==1):
-            return output(success=0, info="INVALID PERMISSION")
+            return output(success=0, message="INVALID PERMISSION")
         return view_function(*args, **kwargs)
 
     return decorated_function

@@ -1,10 +1,10 @@
 from flask import session as sess, jsonify, request
 import time
 
-def output(success=0, info=None, data=None, rows=None, authenticated=True):
+def output(success=0, message=None, data=None, rows=None, authenticated=True):
     out = {}
     out["success"] = success
-    out["info"] = info
+    out["message"] = message
     out["timestamp"] = time.time()
     out["authenticated"] = 1 if authenticated else 0
     if data: 

@@ -9,6 +9,12 @@ def init(app_db, app_config):
     
     tables = []
     
+    t = db.tables.table("PEOPLE")
+    t.add("PEOPLE_EMAIL", "CHAR", col_size=255, col_required=True)
+    t.add("PEOPLE_DBA", "INT", col_size=1, col_required=True)
+    t.add("PEOPLE_NODES_ID", "INT")
+    tables.append(t)
+
     t = db.tables.table("PEOPLE_COLUMNS")
     t.add("PEOPLE_COLUMNS_NAME", "CHAR", col_size=50, col_required=True)
     t.add("PEOPLE_COLUMNS_ENABLED", "INT", col_size=1, col_required=True)
@@ -27,6 +33,7 @@ def init(app_db, app_config):
     tables.append(t)
     
     indexes = []
+    indexes.append(db.tables.index("PEOPLE", ["PEOPLE_EMAIL"], unique=True))
     indexes.append(db.tables.index("PEOPLE_COLUMNS", ["PEOPLE_COLUMNS_NAME"], unique=True))
     indexes.append(db.tables.index("PEOPLE_COLUMN_VALUES", ["PEOPLE_COLUMN_VALUES_PEOPLE_ID","PEOPLE_COLUMN_VALUES_PEOPLE_COLUMN_ID"], unique=True))
 

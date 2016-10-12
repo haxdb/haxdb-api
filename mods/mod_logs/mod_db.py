@@ -15,7 +15,7 @@ def init(app_db, app_config):
     t.add("LOGS_ACTION_PEOPLE_ID", "INT")
     t.add("LOGS_DESCRIPTION", "CHAR", col_size=255, col_required=True)
     t.add("LOGS_LOG_PEOPLE_ID", "INT")
-    t.add("LOGS_API_KEYS_ID", "INT")
+    t.add("LOGS_NODES_ID", "INT")
     tables.append(t)
     
     indexes = []

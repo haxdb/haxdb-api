@@ -7,7 +7,7 @@ class db:
         self.conn.row_factory = sqlite3.Row
         self.cur = self.conn.cursor()
         self.cur.execute("PRAGMA journal_mode=WAL")
-        self.cur.execute("PRAGMA foreign_keys = ON")
+        self.cur.execute("PRAGMA foreign_keys=ON")
     
     def get_datatype(self, datatype):
         if datatype == "INT":

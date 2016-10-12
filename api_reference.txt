@@ -14,7 +14,7 @@
 
 
 
-/API_KEYS
+/NODES
 
     /list
         * [query]

@@ -156,7 +156,7 @@ def run():
         db.query(sql, params)
             
         if db.error:
-            return api.output(success=0, data=data, info=db.error)
+            return api.output(success=0, data=data, message=db.error)
         
         row = db.next()
         rows = {}
@@ -206,7 +206,7 @@ def run():
         else:
             col = tools.get_col_definition(col_name=column)
             if not col:
-                return api.output(success=0, info="INVALID VALUE: col", data=data)
+                return api.output(success=0, message="INVALID VALUE: col", data=data)
             
             col_name = col["PEOPLE_COLUMNS_NAME"]
             col_type = col["PEOPLE_COLUMNS_TYPE"]
@@ -216,16 +216,16 @@ def run():
                 #check file
                 pass
             elif not tools.valid_col_value(col_name,col_type,value):
-                return api.output(success=0, info="INVALID VALUE: val", data=data)
+                return api.output(success=0, message="INVALID VALUE: val", data=data)
             
     
             if col_type == "FILE":
                 if 'value' not in request.files:
-                    return api.output(success=0, info="NO FILE UPLOADED")
+                    return api.output(success=0, message="NO FILE UPLOADED")
                 
                 f = request.files["value"]
                 if f.filename == '':
-                    return api.output(success=0, info="UPLOAD CANCELLED", data=data)
+                    return api.output(success=0, message="UPLOAD CANCELLED", data=data)
                 
                 #filename = secure_filename(file.filename)
                 fname, fext = os.path.splitext(f.filename)
@@ -242,12 +242,12 @@ def run():
  
         if db.rowcount > 0:
             db.commit()
-            return api.output(success=1, info="SAVED", data=data)
+            return api.output(success=1, message="SAVED", data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="UNKNOWN ERROR", data=data)
+        return api.output(success=0, message="UNKNOWN ERROR", data=data)
 
     @api.app.route("/PEOPLE/download", methods=["GET","POST"])
     @api.app.route("/PEOPLE/download/<int:rowid>/<col>", methods=["GET","POST"])
@@ -288,7 +288,7 @@ def run():
         data["input"]["email"] = email
 
         if not email:
-            return api.output(success=0, info="MISSING INPUT: email", data=data)
+            return api.output(success=0, message="MISSING INPUT: email", data=data)
 
         sql = "INSERT INTO PEOPLE (PEOPLE_EMAIL,PEOPLE_DBA) VALUES (?,0)"
         db.query(sql,(email,))
@@ -299,9 +299,9 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="UNKNOWN ERROR", data=data)
+        return api.output(success=0, message="UNKNOWN ERROR", data=data)
     
     @api.app.route("/PEOPLE/delete/", methods=["GET","POST"])
     @api.app.route("/PEOPLE/delete/<int:rowid>", methods=["GET","POST"])
@@ -318,7 +318,7 @@ def run():
         data["input"]["rowid"] = rowid
         
         if not rowid:
-            return api.output(success=0, info="MISSING INPUT: rowid", data=data)
+            return api.output(success=0, message="MISSING INPUT: rowid", data=data)
         
         sql = "DELETE FROM PEOPLE WHERE PEOPLE_ID = ?"
         db.query(sql,(rowid,))
@@ -328,9 +328,9 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="UNKNOWN ERROR", data=data)
+        return api.output(success=0, message="UNKNOWN ERROR", data=data)
     
     
     @api.app.route("/PEOPLE_COLUMNS/list", methods=["POST","GET"])
@@ -399,10 +399,10 @@ def run():
         data["oid"] = "PEOPLE_COLUMNS-%s-%s" % (rowid,column,)
         
         if not rowid:
-            return api.output(success=0, info="MISSING INPUT: rowid", data=data)
+            return api.output(success=0, message="MISSING INPUT: rowid", data=data)
         
         if not column:
-            return api.output(success=0, info="MISSING INPUT: col", data=data)
+            return api.output(success=0, message="MISSING INPUT: col", data=data)
         
         valid_columns = (
             "PEOPLE_COLUMNS_NAME",
@@ -425,19 +425,19 @@ def run():
             value = value.replace(" ","_")
             
         if column not in valid_columns:
-            return api.output(success=0, info="INVALID VALUE: col", data=data)
+            return api.output(success=0, message="INVALID VALUE: col", data=data)
         
         if column in ("PEOPLE_COLUMNS_ENABLED","PEOPLE_COLUMNS_KEY") and int(value) not in (0,1):
-            return api.output(success=0, info="INVALID VALUE: val", data=data)
+            return api.output(success=0, message="INVALID VALUE: val", data=data)
         
         if column == "PEOPLE_COLUMNS_ORDER":
             try:
                 int(value)
             except ValueError:
-                return api.output(success=0, info="INVALID VALUE: val", data=data)
+                return api.output(success=0, message="INVALID VALUE: val", data=data)
             
         if column == "PEOPLE_COLUMNS_TYPE" and value not in valid_types:
-            return api.output(success=0, info="INVALID VALUE: val", data=data)
+            return api.output(success=0, message="INVALID VALUE: val", data=data)
         
         if column in valid_internal:
             sql = "UPDATE PEOPLE_COLUMNS SET %s = ? WHERE PEOPLE_COLUMNS_ID=?" % column
@@ -447,12 +447,12 @@ def run():
  
         if db.rowcount > 0:
             db.commit()
-            return api.output(success=1, info="SAVED", data=data)
+            return api.output(success=1, message="SAVED", data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="UNABLE TO CHANGE INTERNAL DATA", data=data)
+        return api.output(success=0, message="UNABLE TO CHANGE INTERNAL DATA", data=data)
         
     @api.app.route("/PEOPLE_COLUMNS/new", methods=["GET","POST"])
     @api.app.route("/PEOPLE_COLUMNS/new/<name>", methods=["GET","POST"])
@@ -468,7 +468,7 @@ def run():
         scategory = api.data.get("category") or "NEW CATEGORY"
         
         if not sname:
-            return api.output(success=0, info="MISSING INPUT: name")
+            return api.output(success=0, message="MISSING INPUT: name")
 
         data = {}
         data["input"] = {}
@@ -484,16 +484,16 @@ def run():
         try:
             int(sorder)
         except ValueError:
-            return api.output(success=0, info="INVALID VALUE: order", data=data)
+            return api.output(success=0, message="INVALID VALUE: order", data=data)
         
         if int(senabled) not in (0,1):
-            return api.output(success=0, info="INVALID VALUE: enabled", data=data)
+            return api.output(success=0, message="INVALID VALUE: enabled", data=data)
 
         if int(skey) not in (0,1):
-            return api.output(success=0, info="INVALID VALUE: key", data=data)
+            return api.output(success=0, message="INVALID VALUE: key", data=data)
         
         if stype not in valid_types:
-            return api.output(success=0, info="INVALID VALUE: type", data=data)
+            return api.output(success=0, message="INVALID VALUE: type", data=data)
         
         sql = "INSERT INTO PEOPLE_COLUMNS (PEOPLE_COLUMNS_NAME, PEOPLE_COLUMNS_ENABLED, PEOPLE_COLUMNS_ORDER, PEOPLE_COLUMNS_TYPE, PEOPLE_COLUMNS_KEY, PEOPLE_COLUMNS_CATEGORY, PEOPLE_COLUMNS_INTERNAL) VALUES (?,?,?,?,?,?,0)"
         db.query(sql,(sname,senabled,sorder,stype,skey,scategory,))
@@ -507,9 +507,9 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="UNKNOWN ERROR", data=data)
+        return api.output(success=0, message="UNKNOWN ERROR", data=data)
     
     @api.app.route("/PEOPLE_COLUMNS/delete", methods=["GET","POST"])
     @api.app.route("/PEOPLE_COLUMNS/delete/<int:rowid>", methods=["GET","POST"])
@@ -526,7 +526,7 @@ def run():
         data["input"]["rowid"] = rowid
         
         if not rowid:
-            return api.output(success=0, info="MISSING INPUT: rowid", data=data)
+            return api.output(success=0, message="MISSING INPUT: rowid", data=data)
 
         
         sql = "DELETE FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_ID = ?"
@@ -537,6 +537,6 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="UNKNOWN ERROR", data=data)        
+        return api.output(success=0, message="UNKNOWN ERROR", data=data)        

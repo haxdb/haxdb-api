@@ -15,20 +15,30 @@ def init(app_api, app_db, app_config, mod_tools):
 
 def run():
     @api.app.route("/RFID/asset", methods=["POST", "GET"])
-    @api.app.route("/RFID/asset/<int:assets_id>/<rfid>", methods=["POST", "GET"])
+    @api.app.route("/RFID/asset/<rfid>", methods=["POST", "GET"])
     @api.require_auth
     @api.require_dba
-    @api.no_readonly
-    def mod_rfid_asset_auth(assets_id=None, rfid=None):
-        assets_id = assets_id or api.data.get("assets_id")
+    def mod_rfid_asset_auth(rfid=None):
+        api_key = api.session.get("api_key")
         rfid = rfid or api.data.get("rfid")
+        action = api.data.get("action") or "AUTHENTICATE"
         
         data = {}
         data["input"] = {}
         data["input"]["api"] = "RFID"
         data["input"]["action"] = "asset"
-        data["input"]["assets_id"] = assets_id
         data["input"]["rfid"] = rfid
+
+        sql = "SELECT * FROM NODES WHERE NODES_API_KEY = ?"
+        db.query(sql,(api_key,))
+        if db.error:
+            return api.output(success=0, data=data, info=db.error)
+      
+        row = db.next()
+        if not row:
+            return api.output(success=0, data=data, message="NO NODE/ASSET RELATIONSHIP")
+        assets_id = row["NODES_ASSETS_ID"]
+        data["assets_id"] = assets_id
         
         sql = """
         SELECT
@@ -53,15 +63,15 @@ def run():
         db.query(sql, (rfid,assets_id,))
         
         if db.error:
-            return api.output(success=0, data=data, info=db.error)
+            return api.output(success=0, data=data, message=db.error)
 
         row = db.next()
         
         if row:
-            description = "%s %s AUTHENTICATED on %s" % (row["PEOPLE_FIRST_NAME"], row["PEOPLE_LAST_NAME"], row["ASSETS_NAME"])
-            tools.log(row["PEOPLE_ID"], "AUTHENTICATE", assets_id, description)
+            description = "%s %s %s on %s" % (row["PEOPLE_FIRST_NAME"], row["PEOPLE_LAST_NAME"], action, row["ASSETS_NAME"])
+            tools.log(row["PEOPLE_ID"], action, assets_id, description)
             data["row"] = dict(row)
-            return api.output(success=1, data=data, info="ACCESS GRANTED")
+            return api.output(success=1, data=data, message="SUCCESS")
         
         sql = """
             SELECT
@@ -85,8 +95,8 @@ def run():
         db.query(sql, (rfid, assets_id))
         row = db.next()
         if row:
-            description = "%s %s PERMISSION DENIED on %s" % (row["PEOPLE_FIRST_NAME"], row["PEOPLE_LAST_NAME"], row["ASSETS_NAME"])
+            description = "%s %s DENY on %s" % (row["PEOPLE_FIRST_NAME"], row["PEOPLE_LAST_NAME"], row["ASSETS_NAME"])
             tools.log(row["PEOPLE_ID"], "DENY", assets_id, description)
 
-        return api.output(success=0, info="PERMISSION DENIED", data=data)
+        return api.output(success=0, message="FAIL", data=data)
 

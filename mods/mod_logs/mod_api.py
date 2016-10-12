@@ -28,7 +28,7 @@ def run():
         
         sql = """
         SELECT LOGS.*, ASSETS.*, 
-        API_KEYS_DESCRIPTION AS LOGS_NODE_NAME,
+        NODES_NAME AS LOGS_NODE_NAME,
         ACTION.LIST_ITEMS_VALUE as ACTION_VALUE, ACTION.LIST_ITEMS_DESCRIPTION as ACTION_DESCRIPTION,
         PFN.PEOPLE_COLUMN_VALUES_VALUE as ACTION_FIRST_NAME,
         PLN.PEOPLE_COLUMN_VALUES_VALUE as ACTION_LAST_NAME
@@ -37,7 +37,7 @@ def run():
         LEFT OUTER JOIN LIST_ITEMS ACTION ON ACTION.LIST_ITEMS_ID = LOGS_ACTION_ID AND ACTION.LIST_ITEMS_LISTS_ID = (SELECT LISTS_ID FROM LISTS WHERE LISTS_NAME='LOG ACTIONS')
         LEFT OUTER JOIN PEOPLE_COLUMN_VALUES PFN ON PFN.PEOPLE_COLUMN_VALUES_PEOPLE_ID = LOGS_ACTION_PEOPLE_ID AND PFN.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = (SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='FIRST_NAME')
         LEFT OUTER JOIN PEOPLE_COLUMN_VALUES PLN ON PLN.PEOPLE_COLUMN_VALUES_PEOPLE_ID = LOGS_ACTION_PEOPLE_ID AND PLN.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = (SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='LAST_NAME')
-        LEFT OUTER JOIN API_KEYS ON API_KEYS_ID = LOGS_API_KEYS_ID
+        LEFT OUTER JOIN NODES ON NODES_ID = LOGS_NODES_ID
         """
         if query:
             query = "%" + query + "%"
@@ -49,7 +49,9 @@ def run():
             db.query(sql)
     
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
+        
+        data["sql"]=sql
         
         row = db.next()
         rows = []
@@ -72,7 +74,7 @@ def run():
         description = api.data.get("description")
         
         log_people_id = api.session.get("api_people_id")
-        log_api_key_id = api.session.get("api_key_id")
+        log_nodes_id = api.session.get("nodes_id")
         
         data = {}
         data["input"] = {}
@@ -90,7 +92,7 @@ def run():
             db.query(sql, (assets_name,))
             row = db.next()
             if not row or not row["ASSETS_ID"]:
-                return api.output(success=0, data=data, info="INVALID VALUE: assets_name")
+                return api.output(success=0, data=data, message="INVALID VALUE: assets_name")
             assets_id = row["ASSETS_ID"]
             
         if actions_name and not actions_id:
@@ -98,18 +100,18 @@ def run():
             db.query(sql, (actions_name,))
             row = db.next()
             if not row or not row["LIST_ITEMS_ID"]:
-                return api.output(success=0, data=data, info="INVALID VALUE: actions_name")
+                return api.output(success=0, data=data, message="INVALID VALUE: actions_name")
             actionid = row["LIST_ITEMS_ID"]
 
-        sql = "INSERT INTO LOGS (LOGS_ASSETS_ID, LOGS_ACTION_ID, LOGS_ACTION_PEOPLE_ID, LOGS_DESCRIPTION, LOGS_LOG_PEOPLE_ID, LOGS_API_KEYS_ID) "
+        sql = "INSERT INTO LOGS (LOGS_ASSETS_ID, LOGS_ACTION_ID, LOGS_ACTION_PEOPLE_ID, LOGS_DESCRIPTION, LOGS_LOG_PEOPLE_ID, LOGS_NODES_ID) "
         sql += "VALUES (?, ?, ?, ?, ?, ?)"
-        db.query(sql, (assets_id, actions_id, people_id, description, log_people_id, log_api_key_id,))
+        db.query(sql, (assets_id, actions_id, people_id, description, log_people_id, log_nodes_id,))
         if db.rowcount > 0:
             db.commit()
             data["rowid"] = db.lastrowid
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="UNKNOWN ERROR", data=data)
+        return api.output(success=0, message="UNKNOWN ERROR", data=data)

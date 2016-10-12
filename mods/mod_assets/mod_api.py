@@ -87,7 +87,7 @@ def run():
         data["input"]["rowid"] = rowid
 
         if not rowid:
-            return api.ouput(success=0, data=data, info="MISSING VALUE: rowid")
+            return api.ouput(success=0, data=data, message="MISSING VALUE: rowid")
 
         
         sql = """
@@ -113,7 +113,7 @@ def run():
         """
         db.query(sql, (rowid,))
         if db.error:
-            return api.output(success=0, data=data, info=db.error)
+            return api.output(success=0, data=data, message=db.error)
         
         data["row"] = dict(db.next())
     
@@ -140,12 +140,12 @@ def run():
         if db.rowcount > 0:
             db.commit()
             data["rowid"] = db.lastrowid
-            return api.output(success=1, data=data, info="ASSET INSERTED")
+            return api.output(success=1, data=data, message="ASSET INSERTED")
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="UNKNOWN ERROR", data=data)
+        return api.output(success=0, message="UNKNOWN ERROR", data=data)
 
     @api.app.route("/ASSETS/delete", methods=["GET","POST"])
     @api.app.route("/ASSETS/delete/<int:rowid>", methods=["GET","POST"])
@@ -169,9 +169,9 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="UNKNOWN rowid OR ASSET IS INTERNAL", data=data)
+        return api.output(success=0, message="UNKNOWN rowid OR ASSET IS INTERNAL", data=data)
         
     @api.app.route("/ASSETS/save", methods=["GET","POST"])
     @api.app.route("/ASSETS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
@@ -195,7 +195,7 @@ def run():
         data["oid"] = "ASSETS-%s-%s" % (rowid,col,)
         
         if col not in valid_cols:
-            return api.output(success=0, data=data, info="INVALID VALUE: col")
+            return api.output(success=0, data=data, message="INVALID VALUE: col")
         
         sql = "UPDATE ASSETS SET %s=? WHERE ASSETS_ID=? and ASSETS_INTERNAL!=1" % (col)
         db.query(sql, (val,rowid,))
@@ -205,9 +205,9 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, data=data, info="INVALID ASSET ID OR ASSET IS INTERNAL")
+        return api.output(success=0, data=data, message="INVALID ASSET ID OR ASSET IS INTERNAL")
     
 
     @api.app.route("/ASSET_LINKS/list", methods=["POST","GET"])
@@ -227,7 +227,7 @@ def run():
         db.query(sql,(assets_id,))
         row = db.next()
         if not row:
-            return api.output(success=0, data=data, info="UNKNOWN ASSET")
+            return api.output(success=0, data=data, message="UNKNOWN ASSET")
         
         data["name"] = row["ASSETS_NAME"]
         
@@ -275,9 +275,9 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="UNKNOWN ERROR", data=data)
+        return api.output(success=0, message="UNKNOWN ERROR", data=data)
 
     @api.app.route("/ASSET_LINKS/save", methods=["GET","POST"])
     @api.app.route("/ASSET_LINKS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
@@ -301,10 +301,10 @@ def run():
         data["oid"] = "ASSET_LINKS-%s-%s" % (rowid, col,)
         
         if col not in valid_cols:
-            return api.output(success=0, data=data, info="INVALID VALUE: col")
+            return api.output(success=0, data=data, message="INVALID VALUE: col")
         
         if col == "ASSET_LINKS_ORDER" and not tools.is_float(val):
-            return api.output(success=0, data=data, info="INVALID VALUE: val")
+            return api.output(success=0, data=data, message="INVALID VALUE: val")
         
         sql = "UPDATE ASSET_LINKS SET %s=? WHERE ASSET_LINKS_ID=?" % col
         db.query(sql, (val,rowid,))
@@ -314,9 +314,9 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="INVALID VALUE: rowid", data=data)
+        return api.output(success=0, message="INVALID VALUE: rowid", data=data)
     
     @api.app.route("/ASSET_LINKS/delete", methods=["GET","POST"])
     @api.app.route("/ASSET_LINKS/delete/<int:rowid>", methods=["GET","POST"])
@@ -340,9 +340,9 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="INVALID VALUE: rowid", data=data)
+        return api.output(success=0, message="INVALID VALUE: rowid", data=data)
     
     @api.app.route("/ASSET_AUTHS/list", methods=["POST","GET"])
     @api.app.route("/ASSET_AUTHS/list/<int:assets_id>", methods=["POST","GET"])
@@ -398,7 +398,7 @@ def run():
         db.query(sql,params)
         
         if db.error:
-            return api.output(success=0, data=data, info=db.error)
+            return api.output(success=0, data=data, message=db.error)
         
         row = db.next()
         rows = []
@@ -433,9 +433,9 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="UNKNOWN ERROR", data=data)
+        return api.output(success=0, message="UNKNOWN ERROR", data=data)
 
     
     @api.app.route("/ASSET_AUTHS/delete", methods=["GET","POST"])
@@ -466,13 +466,13 @@ def run():
             db.query(sql, (assets_id, people_id,))
             
         else:
-            return api.output(success=0, data=data, info="MISSING VALUES: rowid OR (assets_id and people_id)")
+            return api.output(success=0, data=data, message="MISSING VALUES: rowid OR (assets_id and people_id)")
         
         if db.rowcount > 0:
             db.commit()
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="INVALID VALUE: rowid", data=data)    
+        return api.output(success=0, message="INVALID VALUE: rowid", data=data)    

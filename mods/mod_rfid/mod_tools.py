@@ -38,13 +38,14 @@ def log(people_id, actions_name, assets_id, description):
         return False
     
     actions_id = row["LIST_ITEMS_ID"]
-    log_people_id = api.session.get("api_people_id")
-    log_api_key_id = api.session.get("api_key_id")
+    log_nodes_id = api.session.get("nodes_id")
     
     sql = """
-    INSERT INTO LOGS (LOGS_ASSETS_ID, LOGS_ACTION_ID, LOGS_ACTION_PEOPLE_ID, LOGS_DESCRIPTION, LOGS_LOG_PEOPLE_ID, LOGS_API_KEYS_ID)
-    VALUEs (?, ?, ?, ?, ?, ?)
+    INSERT INTO LOGS (LOGS_ASSETS_ID, LOGS_ACTION_ID, LOGS_ACTION_PEOPLE_ID, LOGS_DESCRIPTION, LOGS_NODES_ID)
+    VALUEs (?, ?, ?, ?, ?)
     """
-    db.query(sql, (assets_id, actions_id, people_id, description, log_people_id, log_api_key_id,))
+    db.query(sql, (assets_id, actions_id, people_id, description, log_nodes_id,))
+    
+    print db.error
     
     

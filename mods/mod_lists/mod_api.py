@@ -74,9 +74,9 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="UNKNOWN ERROR", data=data)
+        return api.output(success=0, message="UNKNOWN ERROR", data=data)
 
     @api.app.route("/LISTS/delete", methods=["GET","POST"])
     @api.app.route("/LISTS/delete/<int:rowid>", methods=["GET","POST"])
@@ -100,9 +100,9 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="UNKNOWN LIST ID OR LIST IS INTERNAL", data=data)
+        return api.output(success=0, message="UNKNOWN LIST ID OR LIST IS INTERNAL", data=data)
         
     @api.app.route("/LISTS/save", methods=["GET","POST"])
     @api.app.route("/LISTS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
@@ -126,7 +126,7 @@ def run():
         data["oid"] = "LISTS-%s-%s" % (rowid,col,)
 
         if col not in valid_cols:
-            return api.output(success=0, data=data, info="INVALID COLUMN")
+            return api.output(success=0, data=data, message="INVALID COLUMN")
         
         sql = "UPDATE LISTS SET LISTS_NAME=? WHERE LISTS_ID=? and LISTS_INTERNAL!=1"
         db.query(sql, (val,rowid,))
@@ -136,9 +136,9 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="UNKNOWN rowid OR LIST IS INTERNAL", data=data)
+        return api.output(success=0, message="UNKNOWN rowid OR LIST IS INTERNAL", data=data)
     
 
     @api.app.route("/LIST_ITEMS/list", methods=["POST","GET"])
@@ -161,7 +161,7 @@ def run():
         data["input"]["lists_name"] = lists_name
 
         if not lists_id and not lists_name:
-            return api.output(success=0, data=data, info="MISSING VALUE: lists_id or lists_name")
+            return api.output(success=0, data=data, message="MISSING VALUE: lists_id or lists_name")
         
         params = ()
         sql = "SELECT * FROM LISTS WHERE"
@@ -175,7 +175,7 @@ def run():
         db.query(sql,params)
         row = db.next()
         if not row:
-            return api.output(success=0, data=data, info="UNKNOWN LIST")
+            return api.output(success=0, data=data, message="UNKNOWN LIST")
         data["name"] = row["LISTS_NAME"]
         lists_id = row["LISTS_ID"]
         
@@ -199,7 +199,7 @@ def run():
         db.query(sql,params)
         
         if db.error:
-            return api.output(success=0, data=data, info=db.error)
+            return api.output(success=0, data=data, message=db.error)
 
         row = db.next()
         rows = []
@@ -235,9 +235,9 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="UNKNOWN ERROR", data=data)
+        return api.output(success=0, message="UNKNOWN ERROR", data=data)
 
     @api.app.route("/LIST_ITEMS/save", methods=["GET","POST"])
     @api.app.route("/LIST_ITEMS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
@@ -261,13 +261,13 @@ def run():
         data["oid"] = "LIST_ITEMS-%s-%s" % (rowid,col)
         
         if col not in valid_cols:
-            return api.output(success=0, data=data, info="INVALID VALUE: col")
+            return api.output(success=0, data=data, message="INVALID VALUE: col")
         
         if col == "LIST_ITEMS_ENABLED" and val not in ('0','1'):
-            return api.output(success=0, data=data, info="INVALID VALUE: val")
+            return api.output(success=0, data=data, message="INVALID VALUE: val")
         
         if col == "LIST_ITEMS_ORDER" and not tools.is_float(val):
-            return api.output(success=0, data=data, info="INVALID VALUE: val")
+            return api.output(success=0, data=data, message="INVALID VALUE: val")
         
         sql = "UPDATE LIST_ITEMS SET %s=? WHERE LIST_ITEMS_ID=?" % col
         db.query(sql, (val,rowid,))
@@ -277,9 +277,9 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="INVALID VALUE: rowid")        
+        return api.output(success=0, message="INVALID VALUE: rowid")        
     
     @api.app.route("/LIST_ITEMS/delete", methods=["GET","POST"])
     @api.app.route("/LIST_ITEMS/delete/<int:rowid>", methods=["GET","POST"])
@@ -303,6 +303,6 @@ def run():
             return api.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, info=db.error, data=data)
+            return api.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, info="INVALID VALUE: rowid")
+        return api.output(success=0, message="INVALID VALUE: rowid")
