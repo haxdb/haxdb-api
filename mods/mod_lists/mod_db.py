@@ -56,8 +56,7 @@ def run():
     db.query(find_sql, ("MEMBERSHIP TYPES",))
     row = db.next()
     options_sql = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER) VALUES (%s, ?, ?, 1, ?)" % row["LISTS_ID"]
-    db.query(options_sql, ( "NONE", "NONE", 1 ) )  
-    db.query(options_sql, ( "TRIAL", "TRIAL", 2 ) )      
-    db.query(options_sql, ( "MEMBER", "MEMBER", 3 ) )      
+    db.query(options_sql, ( "TRIAL", "TRIAL", 1 ) )      
+    db.query(options_sql, ( "MEMBER", "MEMBER", 2 ) )      
     db.commit()
     

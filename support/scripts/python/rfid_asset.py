@@ -19,7 +19,7 @@ rfid = raw_input("RFID: ")
 
 data["rfid"] = rfid
 data["action"] = action
-url = "%s/RFID/asset" % config["SCRIPT"]["HOST"]
+url = "%s/RFID/asset/auth" % config["SCRIPT"]["HOST"]
 r = json.loads(requests.get(url, data=data).text)
 
 print

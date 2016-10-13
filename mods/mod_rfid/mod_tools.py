@@ -1,3 +1,5 @@
+import base64,os
+
 class tool_error:
 
     message = ""
@@ -24,7 +26,7 @@ def init(app_config, app_db, app_api):
     db = app_db
     config = app_config
     
-def log(people_id, actions_name, assets_id, description):
+def log(people_id, actions_name, assets_id, description, log_nodes_id=None):
     
     sql = """
     SELECT * FROM LISTS
@@ -38,14 +40,16 @@ def log(people_id, actions_name, assets_id, description):
         return False
     
     actions_id = row["LIST_ITEMS_ID"]
-    log_nodes_id = api.session.get("nodes_id")
+    log_nodes_id = log_nodes_id or api.session.get("nodes_id")
     
     sql = """
     INSERT INTO LOGS (LOGS_ASSETS_ID, LOGS_ACTION_ID, LOGS_ACTION_PEOPLE_ID, LOGS_DESCRIPTION, LOGS_NODES_ID)
     VALUEs (?, ?, ?, ?, ?)
     """
     db.query(sql, (assets_id, actions_id, people_id, description, log_nodes_id,))
+    db.commit()
     
-    print db.error
     
+def create_api_key():
+    return base64.urlsafe_b64encode(os.urandom(500))[5:260]
     

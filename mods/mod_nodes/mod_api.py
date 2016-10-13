@@ -52,7 +52,7 @@ def run():
         people_id = api.data.get("people_id")
         assets_id = api.data.get("assets_id")
         query = api.data.get("query")
-        status = api.data.get("status") or '1'
+        status = api.data.get("status")
         dba = api.data.get("dba")
         readonly = api.data.get("readonly")
 
@@ -170,8 +170,8 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_nodes_save (rowid=None, col=None, val=None):
-        valid_cols = ["NODES_DBA","NODES_READONLY","NODES_NAME","NODES_DESCRIPTION","NODES_IP","NODES_ENABLED","NODES_ASSETS_ID"]
-        limited_cols = ["NODES_DBA","NODES_READONLY","NODES_IP","NODES_NAME","NODES_ENABLED","NODES_ASSETS_ID"]
+        valid_cols = ["NODES_DBA","NODES_READONLY","NODES_NAME","NODES_DESCRIPTION","NODES_IP","NODES_ENABLED","NODES_ASSETS_ID","NODES_STATUS"]
+        limited_cols = ["NODES_DBA","NODES_READONLY","NODES_IP","NODES_NAME","NODES_ENABLED","NODES_ASSETS_ID","NODES_STATUS"]
         
         rowid = rowid or api.data.get("rowid")
         col = col or api.data.get("col")

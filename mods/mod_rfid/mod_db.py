@@ -33,6 +33,10 @@ def run():
     log_action = "ACTIVATE"
     db.query(sql, (lists_id, log_action, log_action,))
     db.commit()
+
+    log_action = "REGISTER"
+    db.query(sql, (lists_id, log_action, log_action,))
+    db.commit()
     
     log_action = "DEACTIVATE"
     db.query(sql, (lists_id, log_action, log_action,))

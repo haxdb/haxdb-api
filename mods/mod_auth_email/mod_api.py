@@ -20,12 +20,16 @@ def run():
     @api.app.route("/AUTH/email/login/<email>", methods=["GET","POST"])
     def mod_auth_email(email=None):
         email = email or api.data.get("email")
+        subject = api.data.get("subject")
+        message = api.data.get("message")
         
         data = {}
         data["input"] = {}
         data["input"]["api"] = "AUTH/email"
         data["input"]["action"] = "login"
         data["input"]["email"] = email
+        data["input"]["subject"] = subject
+        data["input"]["message"] = message
         
         if not tools.valid_email(email):
             return api.output(success=0, message="INVALID VALUE: email", data=data)
@@ -35,11 +39,9 @@ def run():
             return api.output(success=0, message="NEW USER", data=data)
             
         token = tools.create_token(email)
-        url = "%sauth/token/%s" % (config["GUI"]["URL"], token)
-        subject = "%s AUTHENTICATION" % config["GENERAL"]["ORG"]
-        msg = "To authenticate please follow this long and ugly link:\n\n%s" % url
+        message = message.replace("[token]",token)
         
-        result = tools.send_email(email, subject, msg)
+        result = tools.send_email(email, subject, message)
         if not result:
             return api.output(success=0, message=result, data=data)
         return api.output(success=1, message="EMAIL SENT", data=data)
@@ -49,13 +51,17 @@ def run():
     @api.app.route("/AUTH/email/register/<email>", methods=["GET","POST"])
     def mod_auth_register(email=None):
         email = email or api.data.get("email")
-
+        subject = api.data.get("subject")
+        message = api.data.get("message")
+        
         data = {}
         data["input"] = {}
         data["input"]["api"] = "AUTH/email"
         data["input"]["action"] = "register"
         data["input"]["email"] = email
-
+        data["input"]["subject"] = subject
+        data["input"]["message"] = message
+        
         if not tools.valid_email(email):
             return api.output(success=0, message="INVALID VALUE: email", data=data)
 
@@ -65,11 +71,9 @@ def run():
             return api.output(success=0, message="USER ALREADY EXISTS", data=data)
         
         token = tools.create_token(email)
-        url = "%sauth/token/%s" % (config["GUI"]["URL"], token)
-        subject = "%s REGISTRATION" % config["GENERAL"]["ORG"]
-        msg = "To authenticate please follow this long and ugly link:\n\n%s" % url
+        message = message.replace("[token]",token)
         
-        result = tools.send_email(email, subject, msg)
+        result = tools.send_email(email, subject, message)
         if not result:
             return api.output(success=0, message=result, data=data)
         return api.output(success=1, message="EMAIL SENT", data=data)
