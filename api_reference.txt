@@ -1,4 +1,4 @@
-/auth
+/AUTH
 
     /email/login/<email>
         * <email>
