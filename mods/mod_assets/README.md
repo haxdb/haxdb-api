@@ -7,11 +7,13 @@ This module adds tables and api calls meant to store assets.
 Database
 --------
 
-- *ASSETS*
-- *ASSET_LINKS*
-- *ASSET_AUTHS*
+Creates the following tables:
+- **ASSETS**
+- **ASSET_LINKS**
+- **ASSET_AUTHS**
 
-Creates an internal *LISTS* entry with name *ASSET LOCATIONS*
+Creates the following entry in *LISTS*:
+- **ASSET LOCATIONS**
 
 API
 ---
