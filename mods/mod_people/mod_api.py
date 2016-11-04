@@ -413,12 +413,14 @@ def run():
             "PEOPLE_COLUMNS_KEY",
             "PEOPLE_COLUMNS_CATEGORY",
             "PEOPLE_COLUMNS_DEFAULT",
+            "PEOPLE_COLUMNS_QUICKEDIT",
         )
         
         valid_internal = (
             "PEOPLE_COLUMNS_KEY",
             "PEOPLE_COLUMNS_ORDER",
             "PEOPLE_COLUMNS_CATEGORY",
+            "PEOPLE_COLUMNS_QUICKEDIT",
         )
         
         if column == "PEOPLE_COLUMNS_NAME" and value:
@@ -427,7 +429,7 @@ def run():
         if column not in valid_columns:
             return api.output(success=0, message="INVALID VALUE: col", data=data)
         
-        if column in ("PEOPLE_COLUMNS_ENABLED","PEOPLE_COLUMNS_KEY") and int(value) not in (0,1):
+        if column in ("PEOPLE_COLUMNS_ENABLED","PEOPLE_COLUMNS_KEY","PEOPLE_COLUMNS_QUICKEDIT") and int(value) not in (0,1):
             return api.output(success=0, message="INVALID VALUE: val", data=data)
         
         if column == "PEOPLE_COLUMNS_ORDER":

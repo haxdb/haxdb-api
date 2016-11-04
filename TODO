@@ -1,9 +1,8 @@
-EXPAND AUTH_EMAIL MOD TO ALLOW CUSTOM EMAILS 
+Add GUI show option to PEOPLE_COLUMNS 
 
-NODE API + REGISTRATION
+Add /FILES API and refactor file uploading/downloading from PEOPLE data
 
-LOGS ALTER TO STORE NODE INFORMATION
+MOD_ASSETS files and photos
 
-MOD_ASSETS FILES AND PHOTOS
-
+Flesh out NODES/RFID API for rfid readers.
 
