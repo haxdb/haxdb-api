@@ -7,7 +7,26 @@ def init(app_db, app_config):
     db = app_db
     config = app_config
     
-    
+    t = db.tables.table('RFID_ASSET')
+    t.add("RFID_ASSET_ASSETS_ID", "INT", col_required=True, fk_table="ASSETS", fk_col="ASSETS_ID")
+    t.add("RFID_ASSET_AUTO_LOG", "INT", col_size=1)
+    t.add("RFID_ASSET_REQUIRE_AUTH", "INT", col_size=1)
+    t.add("RFID_ASSET_IDLE_TIMEOUT", "INT")
+    t.add("RFID_ASSET_STATUS", "CHAR", col_size=25)
+    t.add("RFID_ASSET_STATUS_PEOPLE_ID", "INT", fk_table="PEOPLE", fk_col="PEOPLE_ID")
+    t.add("RFID_ASSET_STATUS_START", "INT")
+    t.add("RFID_ASSET_STATUS_LAST", "INT")
+
+
+    t = db.tables.table('RFID_ASSET_AUTHS')
+    t.add("RFID_ASSET_AUTHS_ASSETS_ID", "INT", col_required=True)
+    t.add("RFID_ASSET_AUTHS_PEOPLE_ID", "INT", col_required=True)
+    tables.append(t)
+        
+    indexes = []
+    indexes.append(db.tables.index("RFID_ASSET_AUTHS", ["RFID_ASSET_AUTHS_ASSETS_ID", "RFID_ASSET_AUTHS_PEOPLE_ID"], unique=True))
+
+    db.create(tables=tables, indexes=indexes)    
     
 def run():
     
