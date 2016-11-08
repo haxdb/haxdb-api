@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import Flask
-import os, time
+import os, time, shlex
 from datetime import timedelta
 from flask_cors import CORS
 from data import *
@@ -58,3 +58,102 @@ def no_readonly(view_function):
         return view_function(*args, **kwargs)
 
     return decorated_function
+
+
+###################################################################################
+
+def valid_value(col_type, val):
+    if col_type == "BOOL" and val in (0,1,'0','1'):
+        return True
+
+    if col_type == "INT":
+        try:
+            int(val)
+        except: 
+            return False
+        return True
+    
+    if col_type == "STR":
+        return True
+    
+    return False
+
+###################################################################################
+
+def api_list (data, sql, query, query_cols, search_cols, order_cols):
+    params = ()
+    if query:
+        queries = shlex.split(query)
+        for query in queries:
+            qs = query.split(":")
+            if len(qs) > 1:
+                col = qs[0]
+                if col in query_cols:
+                    vals = qs[1].split("|")
+                    
+                    sql += " AND ("
+                    valcount = 0
+                    for val in vals:
+                        if valcount > 0:
+                            sql += " OR "
+                            
+                        if val == "NULL":
+                            sql += "%s IS NULL" % (col,)
+                        else:
+                            sql += "%s = ?" % (col,)
+                            params += (val,)
+                        
+                        valcount += 1
+                        
+                    sql += ")"
+            else:
+                sql += " AND ("
+                valcount = 0
+
+                for col in search_cols:
+                    if valcount > 0:
+                        sql += " OR "
+                    sql += " %s LIKE ? " % (col,)
+                    params += (query,)
+                    valcount += 1
+                    
+                sql += ")"
+                
+    if len(order_cols) > 0:
+        sql += " ORDER BY %s" % ",".join(order_cols)
+    
+    print sql
+    print params
+    
+    db.query(sql,params)
+    if db.error:
+        return output(success=0, data=data, message=db.error)
+
+    row = db.next()
+    rows = []
+    while row:
+        rows.append(dict(row))
+        row = db.next()
+
+    return output(success=1, data=data, rows=rows)
+                    
+def api_save(data,sql,params,col,val,valid_cols):
+    if col not in valid_cols:
+        return output(success=0, data=data, message="INVALID COL: %s" % (col,))
+    
+    col_type = valid_cols[col]
+    if not valid_value(col_type, val):
+        return output(success=0, data=data, message="INVALID %s VALUE FOR COL (%s): %s" % (col_type, col, val))
+    
+    sql = sql % (col,)
+    db.query(sql, params)
+    
+    if db.error:
+        return output(success=0, data=data, message=db.error)
+    
+    data["rowcount"] = db.rowcount
+    if data["rowcount"] > 0:
+        db.commit()
+        return output(success=1, data=data, message="SAVED")
+    else:
+        return output(success=0, data=data, message="NO ROWS SAVED")

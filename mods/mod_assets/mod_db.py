@@ -44,13 +44,13 @@ def init(app_db, app_config):
     t.add("ASSET_FILES_DATA", "BLOB")
     t.add("ASSET_FILES_ORDER", "INT")
     tables.append(t)
-    """
+    """    
 
     t = db.tables.table('ASSET_AUTHS')
     t.add("ASSET_AUTHS_ASSETS_ID", "INT", col_required=True)
     t.add("ASSET_AUTHS_PEOPLE_ID", "CHAR", col_size=50, col_required=True)
     tables.append(t)
-    
+
     
     indexes = []
     indexes.append(db.tables.index("ASSETS", ["ASSETS_NAME"], unique=True))
@@ -64,5 +64,4 @@ def run():
     
     sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (?,1)"
     db.query(sql, ("ASSET LOCATIONS",))
-
     db.commit()

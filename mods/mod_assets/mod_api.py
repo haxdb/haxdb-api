@@ -16,17 +16,20 @@ def init(app_api, app_db, app_config, app_tools):
 
 def run():
     @api.app.route("/ASSETS/list", methods=["POST","GET"])
-    def mod_assets_list():
-        query = api.data.get("query")
-        locations_id = api.data.get("locations_id")
+    @api.app.route("/ASSETS/list/<path:query>", methods=["POST","GET"])
+    def mod_assets_list(query=None):
+        query = query or api.data.get("query")
+    
+        query_cols = ["ASSETS_ID","ASSETS_LOCATION_ID","ASSETS_NAME","ASSETS_MANUFACTURER","ASSETS_PRODUCT_ID","ASSETS_SERIAL_NUMBER"]
+        search_cols = ["ASSETS_NAME","ASSETS_LOCATION_NAME","ASSETS_TYPE","ASSETS_MANUFACTURER","ASSETS_PRODUCT_ID","ASSETS_SERIAL_NUMBER"]
+        order_cols = ["ASSETS_LOCATION_NAME","ASSETS_NAME"]
         
         data = {}
         data["input"] = {}
         data["input"]["api"] = "ASSETS"
         data["input"]["action"] = "list"
         data["input"]["query"] = query
-        data["input"]["locations_id"] = locations_id
-        
+    
         sql = """
         SELECT * FROM LISTS 
         JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID = LISTS_ID
@@ -46,35 +49,12 @@ def run():
         sql = """
         SELECT ASSETS.*, LIST_ITEMS_VALUE AS ASSETS_LOCATION_NAME FROM ASSETS
         LEFT OUTER JOIN LIST_ITEMS ON LIST_ITEMS_ID=ASSETS_LOCATION_ID
+        WHERE 1=1
         """
-        if locations_id:
-            if query:
-                query = "%" + query + "%"
-                sql += " WHERE ASSETS_LOCATION_ID = ? and (ASSETS_NAME LIKE ? or LIST_ITEMS_VALUE LIKE ?)"
-                sql += " ORDER BY LIST_ITEMS_VALUE, ASSETS_NAME"
-                db.query(sql, (locations_id, query, query,))
-            else:
-                sql += " WHERE ASSETS_LOCATION_ID = ?"
-                sql += " ORDER BY LIST_ITEMS_VALUE, ASSETS_NAME"
-                db.query(sql, (locations_id,))
-        else:
-            if query:
-                query = "%" + query + "%"
-                sql += " WHERE ASSETS_NAME LIKE ? OR LIST_ITEMS_VALUE LIKE ?"
-                sql += " ORDER BY LIST_ITEMS_VALUE, ASSETS_NAME"
-                db.query(sql, (query, query))
-            else:
-                sql += " ORDER BY LIST_ITEMS_VALUE, ASSETS_NAME"
-                db.query(sql)
 
-        row = db.next()
-        rows = []
-        while row:
-            rows.append(dict(row))
-            row = db.next()
+        return api.api_list(data,sql,query,query_cols,search_cols,order_cols)
     
-        return api.output(success=1, data=data, rows=rows)
-
+    
     @api.app.route("/ASSETS/view", methods=["POST","GET"])
     @api.app.route("/ASSETS/view/<int:rowid>", methods=["POST","GET"])
     def mod_assets_view(rowid=None):
