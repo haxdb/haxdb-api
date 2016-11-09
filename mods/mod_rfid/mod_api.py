@@ -91,9 +91,6 @@ def run():
         row = db.next()
         
         if row:
-            if auto_log and int(auto_log) == 1:
-                description = "%s %s %s on %s" % (row["PEOPLE_FIRST_NAME"], row["PEOPLE_LAST_NAME"], action, row["ASSETS_NAME"])
-                tools.log(row["PEOPLE_ID"], action, assets_id, description)
             data["row"] = dict(row)
             
             auth_now = time.time()
@@ -103,6 +100,9 @@ def run():
             else:
                 sql = "UPDATE RFID_ASSETS SET RFID_ASSETS_AUTH_PEOPLE_ID=?, RFID_ASSETS_AUTH_START=?, RFID_ASSETS_AUTH_LAST=?  WHERE RFID_ASSETS_ASSETS_ID=?"
                 db.query(sql,(row["PEOPLE_ID"],auth_now,auth_now,assets_id))
+                if auto_log and int(auto_log) == 1:
+                    description = "%s %s %s on %s" % (row["PEOPLE_FIRST_NAME"], row["PEOPLE_LAST_NAME"], action, row["ASSETS_NAME"])
+                    tools.log(row["PEOPLE_ID"], action, assets_id, description)
 
             return api.output(success=1, data=data, message="SUCCESS")
         
@@ -251,10 +251,15 @@ def run():
         row = db.next()
         if not row:
             return api.output(success=0, data=data, message="UNKNOWN ASSET")
+        
         data["row"] = dict(row)
         data["row"]["RFID_ASSETS_AUTH_STATUS"] = 0
-        if (row["RFID_ASSETS_AUTH_PEOPLE_ID"] and row["RFID_ASSETS_AUTH_LAST"] and (time.time()-int(row["RFID_ASSETS_AUTH_LAST"])) < int(row["RFID_ASSETS_AUTH_TIMEOUT"])):
+        data["row"]["RFID_ASSETS_AUTH_STATUS_TEXT"] = "INACTIVE"
+        time_since = time.time()-int(row["RFID_ASSETS_AUTH_LAST"])
+        data["row"]["RFID_ASSETS_AUTH_SINCE"] = time_since
+        if (row["RFID_ASSETS_AUTH_PEOPLE_ID"] and row["RFID_ASSETS_AUTH_LAST"] and (time_since) < int(row["RFID_ASSETS_AUTH_TIMEOUT"])):
             data["row"]["RFID_ASSETS_AUTH_STATUS"] = 1
+            data["row"]["RFID_ASSETS_AUTH_STATUS_TEXT"] = "ACTIVE"
         return api.output(success=1, data=data)
     
     @api.app.route("/RFID_ASSETS/save", methods=["POST","GET"])
