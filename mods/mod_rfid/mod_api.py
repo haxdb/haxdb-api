@@ -89,7 +89,6 @@ def run():
             return api.output(success=0, data=data, message=db.error)
 
         row = db.next()
-        
         if row:
             data["row"] = dict(row)
             
