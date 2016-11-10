@@ -254,8 +254,12 @@ def run():
         data["row"] = dict(row)
         data["row"]["RFID_ASSETS_AUTH_STATUS"] = 0
         data["row"]["RFID_ASSETS_AUTH_STATUS_TEXT"] = "INACTIVE"
-        time_since = time.time()-int(row["RFID_ASSETS_AUTH_LAST"])
-        data["row"]["RFID_ASSETS_AUTH_SINCE"] = time_since
+        try:
+            time_since = time.time()-int(row["RFID_ASSETS_AUTH_LAST"])
+            data["row"]["RFID_ASSETS_AUTH_SINCE"] = time_since
+        except:
+            time_since = 0
+            
         if (row["RFID_ASSETS_AUTH_PEOPLE_ID"] and row["RFID_ASSETS_AUTH_LAST"] and (time_since) < int(row["RFID_ASSETS_AUTH_TIMEOUT"])):
             data["row"]["RFID_ASSETS_AUTH_STATUS"] = 1
             data["row"]["RFID_ASSETS_AUTH_STATUS_TEXT"] = "ACTIVE"
