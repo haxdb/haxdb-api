@@ -62,18 +62,28 @@ def run():
         data["input"]["subject"] = subject
         data["input"]["message"] = message
         
+        print "1"
+        
         if not tools.valid_email(email):
             return api.output(success=0, message="INVALID VALUE: email", data=data)
 
+        print "2"
+        
         email = email.upper()
         people = tools.get_people(email)
         if people:
             return api.output(success=0, message="USER ALREADY EXISTS", data=data)
         
+        print "3"
+        
         token = tools.create_token(email)
         message = message.replace("[token]",token)
         
+        print "4"
+        
         result = tools.send_email(email, subject, message)
+        
+        print "5"
         if not result:
             return api.output(success=0, message=result, data=data)
         return api.output(success=1, message="EMAIL SENT", data=data)

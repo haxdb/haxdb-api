@@ -98,18 +98,26 @@ def send_email(receiver, subject, msg):
     header += "\r\n\r\n"
     msg = header + msg
     
+    print "4.1"
+    
     import smtplib
     try:
-        server = smtplib.SMTP(config["EMAIL"]["HOST"])
+        print "4.2"
+        server = smtplib.SMTP(config["EMAIL"]["HOST"], config["EMAIL"]["PORT"],None,10)
+        print "4.3"
         server.starttls()
+        print "4.4"
         server.login(config["EMAIL"]["USER"], config["EMAIL"]["PASS"])
+        print "4.5"
         server.sendmail(sender, receiver, msg)
+        print "4.6"
         server.quit()
+        print "4.7"
     except smtplib.SMTPRecipientsRefused:
         return tool_error("INVALID EMAIL ADDRESS")
     except smtplib.SMTPException:
         return tool_error("FAILED TO SEND EMAIL")
-    
+    print "4.8"
     return True
 
 def get_api_key(nodes_id):

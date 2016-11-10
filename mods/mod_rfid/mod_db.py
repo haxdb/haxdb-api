@@ -35,7 +35,7 @@ def run():
     lists_id = row["LISTS_ID"]
     
     sql = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER) VALUES (?, ?, ?, 1, 99)"
-    log_actions = ["AUTHENTICATE","DENY","ACTIVATE","REGISTER","DEACTIVATE"]
+    log_actions = ["RFID AUTH","RFID DENY","RFID REGISTER","RFID DEAUTH"]
     for log_action in log_actions:
         db.query(sql, (lists_id, log_action, log_action,))
         db.commit()

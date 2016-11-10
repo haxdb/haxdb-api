@@ -24,7 +24,6 @@ def run():
     def mod_rfid_asset_auth(rfid=None):
         api_key = api.session.get("api_key")
         rfid = rfid or api.data.get("rfid")
-        action = api.data.get("action") or "AUTHENTICATE"
         
         data = {}
         data["input"] = {}
@@ -58,7 +57,7 @@ def run():
         auth_last = row["RFID_ASSETS_AUTH_LAST"]
         
         if row["RFID_ASSETS_REQUIRE_AUTH"] == None:
-            return api .output(success=0, data=data, message="AUTH NOT CONFIGURED FOR ASSET: %s" % (assets_name,))
+            return api.output(success=0, data=data, message="AUTH NOT CONFIGURED FOR ASSET: %s" % (assets_name,))
         
         if int(row["RFID_ASSETS_REQUIRE_AUTH"]) != 1:
             return api.output(success=1, data=data, message="NO AUTH REQUIRED FOR ASSET: %s" % (assets_name,))
@@ -100,8 +99,8 @@ def run():
                 sql = "UPDATE RFID_ASSETS SET RFID_ASSETS_AUTH_PEOPLE_ID=?, RFID_ASSETS_AUTH_START=?, RFID_ASSETS_AUTH_LAST=?  WHERE RFID_ASSETS_ASSETS_ID=?"
                 db.query(sql,(row["PEOPLE_ID"],auth_now,auth_now,assets_id))
                 if auto_log and int(auto_log) == 1:
-                    description = "%s %s %s on %s" % (row["PEOPLE_FIRST_NAME"], row["PEOPLE_LAST_NAME"], action, row["ASSETS_NAME"])
-                    tools.log(row["PEOPLE_ID"], action, assets_id, description)
+                    description = "%s %s %s on %s" % (row["PEOPLE_FIRST_NAME"], row["PEOPLE_LAST_NAME"], "RFID AUTH", row["ASSETS_NAME"])
+                    tools.log(row["PEOPLE_ID"], "RFID AUTH", assets_id, description)
 
             return api.output(success=1, data=data, message="SUCCESS")
         
@@ -129,13 +128,18 @@ def run():
             row = db.next()
             if row:
                 description = "%s %s DENY ON %s" % (row["PEOPLE_FIRST_NAME"], row["PEOPLE_LAST_NAME"], row["ASSETS_NAME"])
-                tools.log(row["PEOPLE_ID"], "DENY", assets_id, description)
+                tools.log(row["PEOPLE_ID"], "RFID DENY", assets_id, description)
             else:
                 description = "UNKNOWN USER ATTEMPT ON %s" % (assets_name,)
                 tools.log(None, "DENY", assets_id, description)
 
         return api.output(success=0, message="ASSET: %s\nPERMISSION DENIED" % (assets_name,), data=data)
 
+
+    @api.app.route("/RFID_ASSETS/deauth", methods=["POST", "GET"])
+    def mod_rfid_asset_deauth():
+        api_key = api.session.get("api_key")
+        
     @api.app.route("/RFID/asset/register", methods=["POST", "GET"])
     @api.app.route("/RFID/asset/register/<rfid>", methods=["POST", "GET"])
     @api.app.route("/RFID_ASSETS/register", methods=["POST", "GET"])
