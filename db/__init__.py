@@ -12,11 +12,11 @@ class db:
     def create(self, tables, indexes):
         return self.db.create(tables, indexes)
         
-    def query(self, sql, data=None):
+    def query(self, sql, data=None, squelch=False):
         self.rowcount = None
         self.lastrowid = None
         self.error = None
-        result = self.db.query(sql, data)
+        result = self.db.query(sql, data, squelch)
         self.rowcount = self.db.rowcount
         self.lastrowid = self.db.lastrowid
         self.error = self.db.error

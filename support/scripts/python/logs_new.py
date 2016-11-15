@@ -21,7 +21,7 @@ url = "%s/ASSETS/list" % config["SCRIPT"]["HOST"]
 r = json.loads(requests.get(url, data=data).text)
 
 for p in r["rows"]:
-        print "%s) %s \t [%s]" % (p["ASSETS_ID"], p["ASSETS_NAME"], p["ASSETS_LOCATION_NAME"])
+        print "%s) %s \t [%s]" % (p["ASSETS_ID"], p["ASSETS_NAME"], p["ASSETS_LOCATION"])
 
 print ""
 assets_id = raw_input("Enter ASSETS_ID: ")

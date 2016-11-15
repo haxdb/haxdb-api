@@ -19,12 +19,12 @@ def init(app_db, app_config):
     tables.append(t)
     
     indexes = []
-    indexes.append(db.tables.index("LOGS", ["LOGS_ASSET_ID"]))
+    indexes.append(db.tables.index("LOGS", ["LOGS_ASSETS_ID"]))
     indexes.append(db.tables.index("LOGS", ["LOGS_ACTION_ID"]))
     db.create(tables=tables, indexes=indexes)    
     
     
 def run():
     sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (?,1)"
-    db.query(sql, ("LOG ACTIONS",))
+    db.query(sql, ("LOG ACTIONS",), squelch=True)
 

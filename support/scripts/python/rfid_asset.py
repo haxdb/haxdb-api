@@ -9,7 +9,7 @@ print ""
 rfid = raw_input("RFID: ")
 
 data["rfid"] = rfid
-url = "%s/RFID_ASSETS/auth" % config["SCRIPT"]["HOST"]
+url = "%s/ASSETS_RFID/auth" % config["SCRIPT"]["HOST"]
 r = json.loads(requests.get(url, data=data).text)
 
 print

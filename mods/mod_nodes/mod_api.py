@@ -20,7 +20,7 @@ def run():
     @api.app.before_request
     def mod_api_keys_before_request():
         api.sess.permanent = True
-        key = api.data.get("api_key", use_session=True)
+        key = api.var.get("api_key", use_session=True)
         
         if key:
             ip = str(request.environ['REMOTE_ADDR'])
@@ -49,12 +49,12 @@ def run():
     @api.require_auth
     @api.require_dba
     def mod_api_keys_list():
-        people_id = api.data.get("people_id")
-        assets_id = api.data.get("assets_id")
-        query = api.data.get("query")
-        status = api.data.get("status")
-        dba = api.data.get("dba")
-        readonly = api.data.get("readonly")
+        people_id = api.var.get("people_id")
+        assets_id = api.var.get("assets_id")
+        query = api.var.get("query")
+        status = api.var.get("status")
+        dba = api.var.get("dba")
+        readonly = api.var.get("readonly")
 
         data = {}
         data["input"] = {}
@@ -122,9 +122,9 @@ def run():
     @api.no_readonly
     def mod_nodes_create():
         is_dba = (api.session.get("api_dba") == 1)
-        people_id = api.data.get("people_id") or api.session.get("api_people_id")
-        dba = api.data.get("dba") or '0'
-        readonly = api.data.get("readonly") or '0'
+        people_id = api.var.get("people_id") or api.session.get("api_people_id")
+        dba = api.var.get("dba") or '0'
+        readonly = api.var.get("readonly") or '0'
         
         data = {}
         data["input"] = {}
@@ -173,9 +173,9 @@ def run():
         valid_cols = ["NODES_DBA","NODES_READONLY","NODES_NAME","NODES_DESCRIPTION","NODES_IP","NODES_ENABLED","NODES_ASSETS_ID","NODES_STATUS"]
         limited_cols = ["NODES_DBA","NODES_READONLY","NODES_IP","NODES_NAME","NODES_ENABLED","NODES_ASSETS_ID","NODES_STATUS"]
         
-        rowid = rowid or api.data.get("rowid")
-        col = col or api.data.get("col")
-        val = val or api.data.get("val")
+        rowid = rowid or api.var.get("rowid")
+        col = col or api.var.get("col")
+        val = val or api.var.get("val")
         
         dba = (api.session.get("api_dba") == 1)
         people_id = api.session.get("api_people_id")
@@ -225,7 +225,7 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_nodes_delete(rowid=None):
-        rowid = rowid or api.data.get("rowid")
+        rowid = rowid or api.var.get("rowid")
         
         dba = (api.session.get("api_dba") == 1)
         people_id = api.session.get("api_people_id")

@@ -19,6 +19,7 @@ def init(app_db, app_config):
     t.add("LIST_ITEMS_VALUE", "CHAR", col_size=255, col_required=True)
     t.add("LIST_ITEMS_DESCRIPTION", "CHAR", col_size=255, col_required=True)
     t.add("LIST_ITEMS_ENABLED", "INT", col_size=1, col_required=True)
+    t.add("LIST_ITEMS_INTERNAL", "INT", col_size=1)
     t.add("LIST_ITEMS_ORDER", "INT", col_required=True)
     tables.append(t)
     
@@ -29,9 +30,8 @@ def init(app_db, app_config):
     db.create(tables=tables, indexes=indexes)    
     
     sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (?,1)"
-    db.query(sql, ("MEMBERSHIP TYPES",))
-    db.query(sql, ("YES/NO",))
-    db.query(sql, ("TRUE/FALSE",))
+    db.query(sql, ("MEMBERSHIP TYPES",), squelch=True)
+    db.query(sql, ("YES/NO",), squelch=True)
     db.commit()
 
     
@@ -42,21 +42,14 @@ def run():
     db.query(find_sql, ("YES/NO",))
     row = db.next()
     options_sql = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER) VALUES (%s, ?, ?, 1, ?)" % row["LISTS_ID"]
-    db.query(options_sql, ( "1", "YES", 1 ) )  
-    db.query(options_sql, ( "0", "NO", 2 ) )  
-    db.commit()
-
-    db.query(find_sql, ("TRUE/FALSE",))
-    row = db.next()
-    options_sql = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER) VALUES (%s, ?, ?, 1, ?)" % row["LISTS_ID"]
-    db.query(options_sql, ( "1", "TRUE", 1 ) )  
-    db.query(options_sql, ( "0", "FALSE", 2 ) )      
+    db.query(options_sql, ( "1", "YES", 1 ), squelch=True )
+    db.query(options_sql, ( "0", "NO", 2 ), squelch=True )  
     db.commit()
 
     db.query(find_sql, ("MEMBERSHIP TYPES",))
     row = db.next()
     options_sql = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER) VALUES (%s, ?, ?, 1, ?)" % row["LISTS_ID"]
-    db.query(options_sql, ( "TRIAL", "TRIAL", 1 ) )      
-    db.query(options_sql, ( "MEMBER", "MEMBER", 2 ) )      
+    db.query(options_sql, ( "TRIAL", "TRIAL", 1 ), squelch=True )      
+    db.query(options_sql, ( "MEMBER", "MEMBER", 2 ), squelch=True )      
     db.commit()
     

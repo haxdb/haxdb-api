@@ -19,9 +19,9 @@ def run():
     @api.app.route("/AUTH/email/login", methods=["GET","POST"])
     @api.app.route("/AUTH/email/login/<email>", methods=["GET","POST"])
     def mod_auth_email(email=None):
-        email = email or api.data.get("email")
-        subject = api.data.get("subject")
-        message = api.data.get("message")
+        email = email or api.var.get("email")
+        subject = api.var.get("subject")
+        message = api.var.get("message")
         
         data = {}
         data["input"] = {}
@@ -50,9 +50,9 @@ def run():
     @api.app.route("/AUTH/email/register", methods=["GET","POST"])
     @api.app.route("/AUTH/email/register/<email>", methods=["GET","POST"])
     def mod_auth_register(email=None):
-        email = email or api.data.get("email")
-        subject = api.data.get("subject")
-        message = api.data.get("message")
+        email = email or api.var.get("email")
+        subject = api.var.get("subject")
+        message = api.var.get("message")
         
         data = {}
         data["input"] = {}
@@ -92,7 +92,7 @@ def run():
     @api.app.route("/AUTH/email/token", methods=["GET","POST"])
     @api.app.route("/AUTH/email/token/<token>", methods=["GET","POST"])
     def mod_auth_token(token=None):
-        token = token or api.data.get("token")
+        token = token or api.var.get("token")
         
         data = {}
         data["input"] = {}

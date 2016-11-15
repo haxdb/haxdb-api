@@ -18,11 +18,11 @@ def run():
     @api.app.route("/ASSETS/list", methods=["POST","GET"])
     @api.app.route("/ASSETS/list/<path:query>", methods=["POST","GET"])
     def mod_assets_list(query=None):
-        query = query or api.data.get("query")
+        query = query or api.var.get("query")
     
-        query_cols = ["ASSETS_ID","ASSETS_LOCATION_LIID","ASSETS_NAME","ASSETS_MANUFACTURER","ASSETS_PRODUCT_ID","ASSETS_SERIAL_NUMBER"]
-        search_cols = ["ASSETS_NAME","ASSETS_LOCATION_NAME","ASSETS_TYPE","ASSETS_MANUFACTURER","ASSETS_PRODUCT_ID","ASSETS_SERIAL_NUMBER"]
-        order_cols = ["ASSETS_LOCATION_NAME","ASSETS_NAME"]
+        query_cols = ["ASSETS_ID","ASSETS_LOCATION","ASSETS_NAME","ASSETS_MANUFACTURER","ASSETS_PRODUCT_ID","ASSETS_SERIAL_NUMBER"]
+        search_cols = ["ASSETS_NAME","ASSETS_LOCATION","ASSETS_TYPE","ASSETS_MANUFACTURER","ASSETS_PRODUCT_ID","ASSETS_SERIAL_NUMBER"]
+        order_cols = ["ASSETS_LOCATION","ASSETS_NAME"]
         lists = ["ASSET STATUSES", "ASSET LOCATIONS"]
         
         data = {}
@@ -32,9 +32,8 @@ def run():
         data["input"]["query"] = query
             
         sql = """
-        SELECT ASSETS.*, STAT.LIST_ITEMS_VALUE AS ASSETS_STATUS_NAME, LOC.LIST_ITEMS_VALUE AS ASSETS_LOCATION_NAME FROM ASSETS
-        LEFT OUTER JOIN LIST_ITEMS LOC ON LOC.LIST_ITEMS_ID=ASSETS_LOCATION_LIID
-        LEFT OUTER JOIN LIST_ITEMS STAT ON STAT.LIST_ITEMS_ID=ASSETS_STATUS_LIID
+        SELECT *
+        FROM ASSETS
         WHERE 1=1
         """
 
@@ -46,7 +45,7 @@ def run():
     def mod_assets_view(rowid=None):
         lists = ["ASSET STATUSES", "ASSET LOCATIONS"]
         
-        rowid = rowid or api.data.get("rowid")
+        rowid = rowid or api.var.get("rowid")
         
         data = {}
         data["input"] = {}
@@ -55,9 +54,8 @@ def run():
         data["input"]["rowid"] = rowid
            
         sql = """
-        SELECT ASSETS.*, STAT.LIST_ITEMS_VALUE AS ASSETS_STATUS_NAME, LOC.LIST_ITEMS_VALUE AS ASSETS_LOCATION_NAME FROM ASSETS
-        LEFT OUTER JOIN LIST_ITEMS LOC ON LOC.LIST_ITEMS_ID=ASSETS_LOCATION_LIID
-        LEFT OUTER JOIN LIST_ITEMS STAT ON STAT.LIST_ITEMS_ID=ASSETS_STATUS_LIID
+        SELECT *
+        FROM ASSETS
         WHERE ASSETS_ID=?
         """
         params = (rowid,)
@@ -69,8 +67,8 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_assets_new(name=None):
-        name = name or api.data.get("name")
-        qty = api.data.get("qty") or 1
+        name = name or api.var.get("name")
+        qty = api.var.get("qty") or 1
         
         data = {}
         data["input"] = {}
@@ -97,7 +95,7 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_assets_delete(rowid=None):
-        rowid = rowid or api.data.get("rowid")
+        rowid = rowid or api.var.get("rowid")
 
         data = {}
         data["input"] = {}
@@ -132,15 +130,15 @@ def run():
             "ASSETS_PRODUCT_ID": "STR",
             "ASSETS_SERIAL_NUMBER": "STR",
             "ASSETS_QUANTITY": "INT",
-            "ASSETS_LOCATION_LIID": "INT",
+            "ASSETS_LOCATION": "STR",
             "ASSETS_DESCRIPTION": "STR",
-            "ASSETS_STATUS_LIID": "STR",
-            "ASSETS_STATUS_DESC": "STR"
+            "ASSETS_STATUS": "STR",
+            "ASSETS_STATUS_DESCRIPTION": "STR"
         }
         
-        rowid = rowid or api.data.get("rowid")
-        col = col or api.data.get("col")
-        val = val or api.data.get("val")
+        rowid = rowid or api.var.get("rowid")
+        col = col or api.var.get("col")
+        val = val or api.var.get("val")
         
         data = {}
         data["input"] = {}
@@ -159,8 +157,8 @@ def run():
     @api.app.route("/ASSET_LINKS/list", methods=["POST","GET"])
     @api.app.route("/ASSET_LINKS/list/<int:assets_id>", methods=["POST","GET"])
     def mod_asset_links_asset(assets_id=None):
-        assets_id = assets_id or api.data.get("assets_id")
-        query = api.data.get("query")
+        assets_id = assets_id or api.var.get("assets_id")
+        query = api.var.get("query")
 
         data = {}
         data["input"] = {}
@@ -200,9 +198,9 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_asset_links_new(assets_id=None, name=None, link=None):
-        assets_id = assets_id or api.data.get("assets_id")
-        name = name or api.data.get("name")
-        link = link or api.data.get("link") or ""
+        assets_id = assets_id or api.var.get("assets_id")
+        name = name or api.var.get("name")
+        link = link or api.var.get("link") or ""
         
         data = {}
         data["input"] = {}
@@ -233,9 +231,9 @@ def run():
     def mod_asset_links_save (rowid=None, col=None, val=None):
         valid_cols = ["ASSET_LINKS_NAME","ASSET_LINKS_LINK","ASSET_LINKS_ORDER"]
         
-        rowid = rowid or api.data.get("rowid")
-        col = col or api.data.get("col")
-        val = val or api.data.get("val")
+        rowid = rowid or api.var.get("rowid")
+        col = col or api.var.get("col")
+        val = val or api.var.get("val")
         
         data = {}
         data["input"] = {}
@@ -270,7 +268,7 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_asset_links_delete(rowid=None):
-        rowid = rowid or api.data.get("rowid")
+        rowid = rowid or api.var.get("rowid")
 
         data = {}
         data["input"] = {}
@@ -293,8 +291,8 @@ def run():
     @api.app.route("/ASSET_AUTHS/list", methods=["POST","GET"])
     @api.app.route("/ASSET_AUTHS/list/<int:assets_id>", methods=["POST","GET"])
     def mod_ASSET_AUTHS_asset(assets_id=None):
-        assets_id = assets_id or api.data.get("assets_id")
-        query = api.data.get("query")
+        assets_id = assets_id or api.var.get("assets_id")
+        query = api.var.get("query")
 
         data = {}
         data["input"] = {}
@@ -360,8 +358,8 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_ASSET_AUTHS_new(assets_id=None, people_id=None):
-        assets_id = assets_id or api.data.get("assets_id")
-        people_id = people_id or api.data.get("people_id")
+        assets_id = assets_id or api.var.get("assets_id")
+        people_id = people_id or api.var.get("people_id")
         
         data = {}
         data["input"] = {}
@@ -391,9 +389,9 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_ASSET_AUTHS_delete(rowid=None, assets_id=None, people_id=None):
-        rowid = rowid or api.data.get("rowid")
-        assets_id = assets_id or api.data.get("assets_id")
-        people_id = people_id or api.data.get("people_id")
+        rowid = rowid or api.var.get("rowid")
+        assets_id = assets_id or api.var.get("assets_id")
+        people_id = people_id or api.var.get("people_id")
 
         data = {}
         data["input"] = {}

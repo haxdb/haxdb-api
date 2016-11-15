@@ -18,10 +18,10 @@ def init(app_db, app_config):
     t.add("ASSETS_PRODUCT_ID", "CHAR", col_size=50)
     t.add("ASSETS_SERIAL_NUMBER", "CHAR", col_size=50)
     t.add("ASSETS_QUANTITY", "INT")
-    t.add("ASSETS_LOCATION_LIID", "INT")
+    t.add("ASSETS_LOCATION", "STR")
     t.add("ASSETS_DESCRIPTION", "TEXT")
-    t.add("ASSETS_STATUS_LIID","CHAR",col_size=50)       # LIST "ASSET STATUSES"
-    t.add("ASSETS_STATUS_DESC","CHAR",col_size=50)
+    t.add("ASSETS_STATUS","CHAR",col_size=50)
+    t.add("ASSETS_STATUS_DESCRIPTION","CHAR",col_size=50)
     t.add("ASSETS_INTERNAL", "INT", col_size=1)
     tables.append(t)
     
@@ -56,7 +56,7 @@ def init(app_db, app_config):
     
     indexes = []
     indexes.append(db.tables.index("ASSETS", ["ASSETS_NAME"], unique=True))
-    indexes.append(db.tables.index("ASSET_LINKS", ["ASSET_LINKS_ASSETS_ID","LIST_ITEMS_VALUE"], unique=True))
+    indexes.append(db.tables.index("ASSET_LINKS", ["ASSET_LINKS_ASSETS_ID"], unique=True))
     indexes.append(db.tables.index("ASSET_AUTHS", ["ASSET_AUTHS_ASSETS_ID", "ASSET_AUTHS_PEOPLE_ID"], unique=True))
 
     db.create(tables=tables, indexes=indexes)    
@@ -65,8 +65,8 @@ def init(app_db, app_config):
 def run():
     
     sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (?,1)"
-    db.query(sql, ("ASSET LOCATIONS",))
+    db.query(sql, ("ASSET LOCATIONS",), squelch=True)
     db.commit()
     
-    db.query(sql, ("ASSET STATUSES",))
+    db.query(sql, ("ASSET STATUSES",), squelch=True)
     db.commit()    

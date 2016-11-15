@@ -1,7 +1,18 @@
-from flask import session as sess, jsonify, request
+from flask import session as sess, jsonify, json, request
+import msgpack
 import time
 
 def output(success=0, message=None, data=None, rows=None, authenticated=True):
+    output_format = var.get("format")
+        
+    if output_format and output_format in ("min", "minjson"):
+        out = {}
+        out["success"] = success
+        out["value"] = None
+        if "value" in data and data["value"]: out["value"] = data["value"]
+        out["message"] = message
+        return json.dumps(out)
+
     out = {}
     out["success"] = success
     out["message"] = message
@@ -12,7 +23,11 @@ def output(success=0, message=None, data=None, rows=None, authenticated=True):
         out = data
     if rows:
         out["rows"] = rows
-    return jsonify(out)
+
+    if output_format and output_format == "msgpack":
+        return msgpack.packb(out)
+
+    return json.dumps(out) #jsonify(out)
 
 
 class get_class:
@@ -51,7 +66,7 @@ class session_class:
         sess.clear()
     
 
-class data_class:
+class var_class:
     def get(self, key, use_session=False):
         val = None
         val = post.get(key)
@@ -68,4 +83,4 @@ class data_class:
 get = get_class()
 post = post_class()
 session = session_class()
-data = data_class()
+var = var_class()

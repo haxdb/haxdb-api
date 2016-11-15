@@ -72,6 +72,13 @@ def valid_value(col_type, val):
         except: 
             return False
         return True
+
+    if col_type == "FLOAT":
+        try:
+            float(val)
+        except:
+            return False
+        return True
     
     if col_type == "STR":
         return True
@@ -80,14 +87,14 @@ def valid_value(col_type, val):
 
 ###################################################################################
 
-def api_list (d, sql, query, query_cols, search_cols, order_cols, lists=None):
-    include_lists = data.get("include_lists")
-    d["input"]["include_lists"] = include_lists
+def api_list (data, sql, query, query_cols, search_cols, order_cols, lists=None, calc_row=None):
+    include_lists = var.get("include_lists")
+    data["input"]["include_lists"] = include_lists
     if include_lists and lists:
-        d["lists"] = {}
+        data["lists"] = {}
         
         for list_name in lists:
-            d["lists"][list_name] = []
+            data["lists"][list_name] = []
             list_sql = """
             SELECT * FROM LIST_ITEMS 
             JOIN LISTS ON LISTS_ID = LIST_ITEMS_LISTS_ID AND LISTS_NAME=?
@@ -96,10 +103,12 @@ def api_list (d, sql, query, query_cols, search_cols, order_cols, lists=None):
             ORDER BY LIST_ITEMS_ORDER
             """
             db.query(list_sql, (list_name,))
-            print db.error
+            if db.error:
+                print db.error
+                print list_sql
             row = db.next()
             while row:
-                d["lists"][list_name].append(dict(row))
+                data["lists"][list_name].append(dict(row))
                 row = db.next()
                 
     params = ()
@@ -143,28 +152,29 @@ def api_list (d, sql, query, query_cols, search_cols, order_cols, lists=None):
     if len(order_cols) > 0:
         sql += " ORDER BY %s" % ",".join(order_cols)
     
-    
     db.query(sql,params)
     if db.error:
-        print sql
         return output(success=0, data=d, message=db.error)
 
     row = db.next()
     rows = []
     while row:
-        rows.append(dict(row))
+        row = dict(row)
+        if calc_row:
+            row = calc_row(dict(row))
+        rows.append(row)
         row = db.next()
 
-    return output(success=1, data=d, rows=rows)
+    return output(success=1, data=data, rows=rows)
                 
-def api_view(d,sql,params, lists=None):
-    include_lists = data.get("include_lists")
-    d["input"]["include_lists"] = include_lists
+def api_view(data,sql,params, lists=None, calc_row=None):
+    include_lists = var.get("include_lists")
+    data["input"]["include_lists"] = include_lists
     if include_lists and lists:
-        d["lists"] = {}
+        data["lists"] = {}
         
         for list_name in lists:
-            d["lists"][list_name] = []
+            data["lists"][list_name] = []
             list_sql = """
             SELECT * FROM LIST_ITEMS 
             JOIN LISTS ON LISTS_ID = LIST_ITEMS_LISTS_ID AND LISTS_NAME=?
@@ -175,7 +185,7 @@ def api_view(d,sql,params, lists=None):
             db.query(list_sql, (list_name,))
             row = db.next()
             while row:
-                d["lists"][list_name].append(dict(row))
+                data["lists"][list_name].append(dict(row))
                 row = db.next()
                 
                 
@@ -186,8 +196,9 @@ def api_view(d,sql,params, lists=None):
     if not row:
         return output(success=0, data=d, message="NO DATA")
     
-    d["row"] = dict(row)
-    return output(success=1, data=d)
+    data["row"] = dict(row)
+    if calc_row: data["row"] = calc_row(data["row"])
+    return output(success=1, data=data)
 
 def api_save(data,sql,params,col,val,valid_cols):
     if col not in valid_cols:

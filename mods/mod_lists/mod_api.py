@@ -18,9 +18,9 @@ def run():
     @api.app.route("/LISTS/list", methods=["POST","GET"])
     @api.require_auth
     def mod_lists_list():
-        query = api.data.get("query")
-        name = api.data.get("name")
-        rowid = api.data.get("rowid")
+        query = api.var.get("query")
+        name = api.var.get("name")
+        rowid = api.var.get("rowid")
 
         data = {}
         data["input"] = {}
@@ -58,7 +58,7 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_lists_new(name=None):
-        name = name or api.data.get("name")
+        name = name or api.var.get("name")
         
         data = {}
         data["input"] = {}
@@ -84,7 +84,7 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_lists_delete(rowid=None):
-        rowid = rowid or api.data.get("rowid")
+        rowid = rowid or api.var.get("rowid")
 
         data = {}
         data["input"] = {}
@@ -112,9 +112,9 @@ def run():
     def mod_lists_save (rowid=None, col=None, val=None):
         valid_cols = ["LISTS_NAME"]
         
-        rowid = rowid or api.data.get("rowid")
-        col = col or api.data.get("col")
-        val = val or api.data.get("val")
+        rowid = rowid or api.var.get("rowid")
+        col = col or api.var.get("col")
+        val = val or api.var.get("val")
 
         data = {}
         data["input"] = {}
@@ -146,10 +146,10 @@ def run():
     @api.app.route("/LIST_ITEMS/list/<lists_name>", methods=["POST","GET"])
     @api.require_auth
     def mod_list_items_list(lists_id=None, lists_name=None):
-        lists_id = lists_id or api.data.get("lists_id")
-        lists_name = lists_name or api.data.get("lists_name")
-        query = api.data.get("query")
-        include_disabled = api.data.get("include_disabled")
+        lists_id = lists_id or api.var.get("lists_id")
+        lists_name = lists_name or api.var.get("lists_name")
+        query = api.var.get("query")
+        include_disabled = api.var.get("include_disabled")
         
         data = {}
         data["input"] = {}
@@ -216,8 +216,8 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_list_items_new(lists_id=None, name=None):
-        lists_id = lists_id or api.data.get("lists_id")
-        name = name or api.data.get("name")
+        lists_id = lists_id or api.var.get("lists_id")
+        name = name or api.var.get("name")
         
         data = {}
         data["input"] = {}
@@ -245,11 +245,15 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_list_items_save (rowid=None, col=None, val=None):
-        valid_cols = ["LIST_ITEMS_VALUE","LIST_ITEMS_DESCRIPTION","LIST_ITEMS_ENABLED","LIST_ITEMS_ORDER"]
+        valid_cols = {
+            "LIST_ITEMS_DESCRIPTION": "STR",
+            "LIST_ITEMS_ENABLED": "BOOL",
+            "LIST_ITEMS_ORDER": "FLOAT"
+        }
         
-        rowid = rowid or api.data.get("rowid")
-        col = col or api.data.get("col")
-        val = val or api.data.get("val")
+        rowid = rowid or api.var.get("rowid")
+        col = col or api.var.get("col")
+        val = val or api.var.get("val")
 
         data = {}
         data["input"] = {}
@@ -260,26 +264,11 @@ def run():
         data["input"]["val"] = val
         data["oid"] = "LIST_ITEMS-%s-%s" % (rowid,col)
         
-        if col not in valid_cols:
-            return api.output(success=0, data=data, message="INVALID VALUE: col")
+        sql = "UPDATE LIST_ITEMS SET %s=? WHERE LIST_ITEMS_ID=?"
+        params = (val, rowid,)
+        return api.api_save(data,sql,params,col,val,valid_cols)
         
-        if col == "LIST_ITEMS_ENABLED" and val not in ('0','1'):
-            return api.output(success=0, data=data, message="INVALID VALUE: val")
         
-        if col == "LIST_ITEMS_ORDER" and not tools.is_float(val):
-            return api.output(success=0, data=data, message="INVALID VALUE: val")
-        
-        sql = "UPDATE LIST_ITEMS SET %s=? WHERE LIST_ITEMS_ID=?" % col
-        db.query(sql, (val,rowid,))
-        
-        if db.rowcount > 0:
-            db.commit()
-            return api.output(success=1, data=data)
-        
-        if db.error:
-            return api.output(success=0, message=db.error, data=data)
-        
-        return api.output(success=0, message="INVALID VALUE: rowid")        
     
     @api.app.route("/LIST_ITEMS/delete", methods=["GET","POST"])
     @api.app.route("/LIST_ITEMS/delete/<int:rowid>", methods=["GET","POST"])
@@ -287,7 +276,7 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_list_items_delete(rowid=None):
-        rowid = rowid or api.data.get("rowid")
+        rowid = rowid or api.var.get("rowid")
 
         data = {}
         data["input"] = {}

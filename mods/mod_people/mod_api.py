@@ -23,8 +23,8 @@ def run():
     @api.require_dba
     def mod_people_list(category=None):
         people_id = None
-        category = category or api.data.get("category")
-        query = api.data.get("query")
+        category = category or api.var.get("category")
+        query = api.var.get("query")
         
         data = {}
         data["input"] = {}
@@ -186,9 +186,9 @@ def run():
     def mod_people_save(rowid=None,col=None,val=None):
         table_cols = { "EMAIL": "PEOPLE_EMAIL", "DBA": "PEOPLE_DBA" }
         
-        rowid = rowid or api.data.get("rowid")
-        column = col or api.data.get("col")
-        value = val or api.data.get("val")
+        rowid = rowid or api.var.get("rowid")
+        column = col or api.var.get("col")
+        value = val or api.var.get("val")
         
         data = {}
         data["input"] = {}
@@ -255,8 +255,8 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_people_download(rowid=None,col=None):
-        rowid = rowid or api.data.get("rowid")
-        column = col or api.data.get("col")
+        rowid = rowid or api.var.get("rowid")
+        column = col or api.var.get("col")
         
         sql = """SELECT * FROM PEOPLE
         JOIN PEOPLE_COLUMNS ON PEOPLE_COLUMNS_NAME=?
@@ -279,7 +279,7 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_people_new(email=None):
-        email = email or api.data.get("email")
+        email = email or api.var.get("email")
 
         data = {}
         data["input"] = {}
@@ -309,7 +309,7 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_people_delete(rowid=None):
-        rowid = rowid or api.data.get("rowid")
+        rowid = rowid or api.var.get("rowid")
         
         data = {}
         data["input"] = {}
@@ -337,7 +337,7 @@ def run():
     @api.require_auth
     @api.require_dba
     def mod_people_columns_list():
-        query = api.data.get("query")
+        query = api.var.get("query")
  
         data = {}
         data["input"] = {}
@@ -385,9 +385,9 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_PEOPLE_COLUMNS_save(rowid=None,col=None,val=None):
-        rowid = rowid or api.data.get("rowid")
-        column = col or api.data.get("col")
-        value = val or api.data.get("val")
+        rowid = rowid or api.var.get("rowid")
+        column = col or api.var.get("col")
+        value = val or api.var.get("val")
 
         data = {}
         data["input"] = {}
@@ -462,12 +462,12 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_people_columns_new(name=None):
-        sname = name or api.data.get("name")
-        senabled = api.data.get("enabled") or 0
-        sorder = api.data.get("order") or 999
-        stype = api.data.get("type") or "TEXT"
-        skey = api.data.get("key") or 0
-        scategory = api.data.get("category") or "NEW CATEGORY"
+        sname = name or api.var.get("name")
+        senabled = api.var.get("enabled") or 0
+        sorder = api.var.get("order") or 999
+        stype = api.var.get("type") or "TEXT"
+        skey = api.var.get("key") or 0
+        scategory = api.var.get("category") or "NEW CATEGORY"
         
         if not sname:
             return api.output(success=0, message="MISSING INPUT: name")
@@ -519,7 +519,7 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_people_columns_delete(rowid=None):
-        rowid = rowid or api.data.get("rowid")
+        rowid = rowid or api.var.get("rowid")
 
         data = {}
         data["input"] = {}

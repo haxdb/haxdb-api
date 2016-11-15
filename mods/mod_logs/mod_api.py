@@ -18,7 +18,7 @@ def run():
     @api.require_auth
     @api.require_dba
     def mod_logs_list():
-        query = api.data.get("query")
+        query = api.var.get("query")
     
         data = {}
         data["input"] = {}
@@ -66,12 +66,12 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_logs_new():
-        assets_id = api.data.get("assets_id")
-        assets_name = api.data.get("assets_name")
-        actions_id = api.data.get("actions_id")
-        actions_name = api.data.get("actions_name")
-        people_id = api.data.get("people_id")
-        description = api.data.get("description")
+        assets_id = api.var.get("assets_id")
+        assets_name = api.var.get("assets_name")
+        actions_id = api.var.get("actions_id")
+        actions_name = api.var.get("actions_name")
+        people_id = api.var.get("people_id")
+        description = api.var.get("description")
         
         log_people_id = api.session.get("api_people_id")
         log_nodes_id = api.session.get("nodes_id")
