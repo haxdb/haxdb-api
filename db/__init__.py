@@ -22,6 +22,11 @@ class db:
         self.error = self.db.error
         return result
     
+    def qaf (self, sql, data=None):
+        self.query(sql, data)
+        if self.error:
+            return False
+        return self.next()
     
     def next(self):
         return self.db.next()

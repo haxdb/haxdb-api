@@ -20,44 +20,32 @@ def run():
     def mod_assets_list(query=None):
         query = query or api.data.get("query")
     
-        query_cols = ["ASSETS_ID","ASSETS_LOCATION_ID","ASSETS_NAME","ASSETS_MANUFACTURER","ASSETS_PRODUCT_ID","ASSETS_SERIAL_NUMBER"]
+        query_cols = ["ASSETS_ID","ASSETS_LOCATION_LIID","ASSETS_NAME","ASSETS_MANUFACTURER","ASSETS_PRODUCT_ID","ASSETS_SERIAL_NUMBER"]
         search_cols = ["ASSETS_NAME","ASSETS_LOCATION_NAME","ASSETS_TYPE","ASSETS_MANUFACTURER","ASSETS_PRODUCT_ID","ASSETS_SERIAL_NUMBER"]
         order_cols = ["ASSETS_LOCATION_NAME","ASSETS_NAME"]
+        lists = ["ASSET STATUSES", "ASSET LOCATIONS"]
         
         data = {}
         data["input"] = {}
         data["input"]["api"] = "ASSETS"
         data["input"]["action"] = "list"
         data["input"]["query"] = query
-    
-        sql = """
-        SELECT * FROM LISTS 
-        JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID = LISTS_ID
-        WHERE
-        LISTS_NAME = 'ASSET LOCATIONS'
-        ORDER BY LIST_ITEMS_ORDER
-        """
-        data["lists"] = {}
-        data["lists"]["ASSET LOCATIONS"] = []
-
-        db.query(sql)
-        row = db.next()
-        while row:
-            data["lists"]["ASSET LOCATIONS"].append((row["LIST_ITEMS_ID"],row["LIST_ITEMS_DESCRIPTION"]))
-            row = db.next()
             
         sql = """
-        SELECT ASSETS.*, LIST_ITEMS_VALUE AS ASSETS_LOCATION_NAME FROM ASSETS
-        LEFT OUTER JOIN LIST_ITEMS ON LIST_ITEMS_ID=ASSETS_LOCATION_ID
+        SELECT ASSETS.*, STAT.LIST_ITEMS_VALUE AS ASSETS_STATUS_NAME, LOC.LIST_ITEMS_VALUE AS ASSETS_LOCATION_NAME FROM ASSETS
+        LEFT OUTER JOIN LIST_ITEMS LOC ON LOC.LIST_ITEMS_ID=ASSETS_LOCATION_LIID
+        LEFT OUTER JOIN LIST_ITEMS STAT ON STAT.LIST_ITEMS_ID=ASSETS_STATUS_LIID
         WHERE 1=1
         """
 
-        return api.api_list(data,sql,query,query_cols,search_cols,order_cols)
+        return api.api_list(data,sql,query,query_cols,search_cols,order_cols,lists)
     
     
     @api.app.route("/ASSETS/view", methods=["POST","GET"])
     @api.app.route("/ASSETS/view/<int:rowid>", methods=["POST","GET"])
     def mod_assets_view(rowid=None):
+        lists = ["ASSET STATUSES", "ASSET LOCATIONS"]
+        
         rowid = rowid or api.data.get("rowid")
         
         data = {}
@@ -65,39 +53,15 @@ def run():
         data["input"]["api"] = "ASSETS"
         data["input"]["action"] = "view"
         data["input"]["rowid"] = rowid
-
-        if not rowid:
-            return api.ouput(success=0, data=data, message="MISSING VALUE: rowid")
-
-        
+           
         sql = """
-        SELECT * FROM LISTS 
-        JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID = LISTS_ID
-        WHERE
-        LISTS_NAME = 'ASSET LOCATIONS'
-        ORDER BY LIST_ITEMS_ORDER
-        """
-        data["lists"] = {}
-        data["lists"]["ASSET LOCATIONS"] = []
-
-        db.query(sql)
-        row = db.next()
-        while row:
-            data["lists"]["ASSET LOCATIONS"].append((row["LIST_ITEMS_ID"],row["LIST_ITEMS_DESCRIPTION"]))
-            row = db.next()
-            
-        sql = """
-        SELECT ASSETS.*, LIST_ITEMS_VALUE AS ASSETS_LOCATION_NAME FROM ASSETS
-        LEFT OUTER JOIN LIST_ITEMS ON LIST_ITEMS_ID=ASSETS_LOCATION_ID
+        SELECT ASSETS.*, STAT.LIST_ITEMS_VALUE AS ASSETS_STATUS_NAME, LOC.LIST_ITEMS_VALUE AS ASSETS_LOCATION_NAME FROM ASSETS
+        LEFT OUTER JOIN LIST_ITEMS LOC ON LOC.LIST_ITEMS_ID=ASSETS_LOCATION_LIID
+        LEFT OUTER JOIN LIST_ITEMS STAT ON STAT.LIST_ITEMS_ID=ASSETS_STATUS_LIID
         WHERE ASSETS_ID=?
         """
-        db.query(sql, (rowid,))
-        if db.error:
-            return api.output(success=0, data=data, message=db.error)
-        
-        data["row"] = dict(db.next())
-    
-        return api.output(success=1, data=data)
+        params = (rowid,)
+        return api.api_view(data, sql, params, lists)
     
     @api.app.route("/ASSETS/new", methods=["POST", "GET"])
     @api.app.route("/ASSETS/new/<name>", methods=["POST", "GET"])
@@ -159,7 +123,20 @@ def run():
     @api.require_dba
     @api.no_readonly
     def mod_assets_save (rowid=None, col=None, val=None):
-        valid_cols = ["ASSETS_NAME","ASSETS_TYPE","ASSETS_REQUIRE_AUTH","ASSETS_AUTO_LOG","ASSETS_MANUFACTURER","ASSETS_PRODUCT_ID","ASSETS_SERIAL_NUMBER","ASSETS_QUANTITY","ASSETS_LOCATION_ID","ASSETS_AREA_LISTS_ID","ASSETS_DESCRIPTION"]
+        valid_cols = {
+            "ASSETS_NAME": "STR",
+            "ASSETS_TYPE": "STR",
+            "ASSETS_REQUIRE_AUTH": "STR",
+            "ASSETS_AUTO_LOG": "BOOL",
+            "ASSETS_MANUFACTURER": "STR",
+            "ASSETS_PRODUCT_ID": "STR",
+            "ASSETS_SERIAL_NUMBER": "STR",
+            "ASSETS_QUANTITY": "INT",
+            "ASSETS_LOCATION_LIID": "INT",
+            "ASSETS_DESCRIPTION": "STR",
+            "ASSETS_STATUS_LIID": "STR",
+            "ASSETS_STATUS_DESC": "STR"
+        }
         
         rowid = rowid or api.data.get("rowid")
         col = col or api.data.get("col")
@@ -173,22 +150,11 @@ def run():
         data["input"]["rowid"] = rowid
         data["input"]["val"] = val
         data["oid"] = "ASSETS-%s-%s" % (rowid,col,)
+
+        sql = "UPDATE ASSETS SET %s=? WHERE ASSETS_ID=? and ASSETS_INTERNAL!=1"
+        params = (val,rowid,)
+        return api.api_save(data,sql,params,col,val,valid_cols)
         
-        if col not in valid_cols:
-            return api.output(success=0, data=data, message="INVALID VALUE: col")
-        
-        sql = "UPDATE ASSETS SET %s=? WHERE ASSETS_ID=? and ASSETS_INTERNAL!=1" % (col)
-        db.query(sql, (val,rowid,))
-        
-        if db.rowcount > 0:
-            db.commit()
-            return api.output(success=1, data=data)
-        
-        if db.error:
-            return api.output(success=0, message=db.error, data=data)
-        
-        return api.output(success=0, data=data, message="INVALID ASSET ID OR ASSET IS INTERNAL")
-    
 
     @api.app.route("/ASSET_LINKS/list", methods=["POST","GET"])
     @api.app.route("/ASSET_LINKS/list/<int:assets_id>", methods=["POST","GET"])
