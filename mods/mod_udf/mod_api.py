@@ -31,10 +31,10 @@ def run():
     @haxdb.require_auth
     @haxdb.no_readonly
     @haxdb.require_dba
-    def mod_udf_def_list(context, id1, id2):
+    def mod_udf_def_list(context=None, id1=None, id2=None):
         context = context or haxdb.data.var.get("context")
-        id1 = id1 or haxdb.data.var.get("id1")
-        id2 = id2 or haxdb.data.var.get("id2")
+        id1 = id1 or haxdb.data.var.get("id1") or -1
+        id2 = id2 or haxdb.data.var.get("id2") or -1
         
         data = {}
         data["input"] = {}
@@ -49,10 +49,17 @@ def run():
         FROM UDF_DEF
         WHERE
         UDF_DEF_CONTEXT=?
-        and UDF_DEF_CONTEXT_ID1=?
-        and UDF_DEF_CONTEXT_ID2=?
         """
-        params = (context, id1, id2)
+        params = (context,)
+        
+        if id1:
+            sql += " and UDF_DEF_CONTEXT_ID1=?"
+            params += (int(id1),)
+
+        if id2:
+            sql += " and UDF_DEF_CONTEXT_ID2=?"
+            params += (int(id2),)
+        
         return apis["UDF_DEF"].list_call(sql, params, data)
     
     
@@ -63,18 +70,24 @@ def run():
     @haxdb.require_dba
     def mod_udf_def_new(name=None):
         name = name or haxdb.data.var.get("name")
+        context = haxdb.data.var.get("context")
+        id1 = haxdb.data.var.get("id1") or -1
+        id2 = haxdb.data.var.get("id2") or -1
         
         data = {}
         data["input"] = {}
         data["input"]["api"] = "UDF_DEF"
         data["input"]["action"] = "new"
         data["input"]["name"] = name
+        data["input"]["context"] = context
+        data["input"]["id1"] = id1
+        data["input"]["id2"] = id2
         
         sql = """
-        INSERT INTO UDF_DEF (UDF_DEF_CATEGORY, UDF_DEF_NAME, UDF_DEF_ORDER, UDF_ENABLED, UDF_DEF_INTERNAL) 
-        VALUES ("NEW CATEGORY", ?, 999, 0, 0)
+        INSERT INTO UDF_DEF (UDF_DEF_CONTEXT, UDF_DEF_CONTEXT_ID1, UDF_DEF_CONTEXT_ID2, UDF_DEF_CATEGORY, UDF_DEF_NAME, UDF_DEF_TYPE, UDF_DEF_ORDER, UDF_DEF_KEY, UDF_DEF_ENABLED, UDF_DEF_INTERNAL) 
+        VALUES (?, ?, ?, "NEW CATEGORY", ?, "TEXT", 999, 0, 0, 0)
         """
-        params = (name,)
+        params = (context, id1, id2, name,)
         return apis["UDF_DEF"].new_call(sql, params, data)
     
 
@@ -92,7 +105,7 @@ def run():
         data["input"]["action"] = "delete"
         data["input"]["rowid"] = rowid
         
-        sql = "DELETE FROM UDF_DEF WHERE ASSETS_ID=? and ASSETS_INTERNAL!=1"
+        sql = "DELETE FROM UDF_DEF WHERE UDF_DEF_ID=? and UDF_DEF_INTERNAL!=1"
         params = (rowid,)
         return apis["UDF_DEF"].delete_call(sql, params, data)
         
@@ -115,7 +128,7 @@ def run():
         data["input"]["val"] = val
         data["oid"] = "UDF_DEF-%s-%s" % (rowid,col,)
 
-        sql = "UPDATE UDF_DEF SET %s=? WHERE ASSETS_ID=? and ASSETS_INTERNAL!=1"
+        sql = "UPDATE UDF_DEF SET %s=? WHERE UDF_DEF_ID=? and UDF_DEF_INTERNAL!=1"
         params = (val,rowid,)
         return apis["UDF_DEF"].save_call(sql, params, data, col, val)
         

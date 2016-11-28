@@ -63,7 +63,6 @@ class api_call:
                     data["lists"][list_name].append(dict(row))
                     row = db.next()
                     
-        params = ()
         if query:
             queries = shlex.split(query)
             for query in queries:
@@ -106,7 +105,7 @@ class api_call:
         
         db.query(sql,params)
         if db.error:
-            return output(success=0, data=d, message=db.error)
+            return output(success=0, data=data, message=db.error)
     
         row = db.next()
         rows = []
@@ -154,6 +153,16 @@ class api_call:
         return output(success=1, data=data)    
 
     def new_call(self, sql, params, data):
+        db.query(sql, params)
+        if db.error:
+            return output(success=0, data=data, message=db.error)
+        
+        data["rowcount"] = db.rowcount
+        if data["rowcount"] > 0:
+            db.commit()
+            return output(success=1, data=data, message="DELETED")
+        else:
+            return output(success=0, data=data, message="NO ROWS DELETED")            
         return None
     
     def delete_call(self, sql, params, data):

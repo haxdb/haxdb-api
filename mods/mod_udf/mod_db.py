@@ -11,7 +11,7 @@ def init(app_db, app_config):
     
     t = db.tables.table("UDF_DEF")
     t.add("UDF_DEF_CONTEXT", "CHAR", col_size=50, col_required=True)
-    t.add("UDF_DEF_CONTEXT_ID1", "INT", col_required=True)
+    t.add("UDF_DEF_CONTEXT_ID1", "INT")
     t.add("UDF_DEF_CONTEXT_ID2", "INT")
     t.add("UDF_DEF_CATEGORY", "CHAR", col_size=50)    
     t.add("UDF_DEF_NAME", "CHAR", col_size=50, col_required=True)
