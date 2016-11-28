@@ -1,26 +1,26 @@
 import os, base64, json, time
-from flask import request
+from flask import request, session
 
-api = None
+haxdb = None
 db = None
 config = None
 tools = None
 
-def init(app_api, app_db, app_config, mod_tools):
-    global api, db, config, tools
-    api = app_api
+def init(app_haxdb, app_db, app_config, mod_tools):
+    global haxdb, db, config, tools
+    haxdb = app_haxdb
     db = app_db
     config = app_config
     tools = mod_tools
 
 
 def run():
-    global api, config, db, tools
+    global haxdb, db, config, tools
 
-    @api.app.before_request
+    @haxdb.app.before_request
     def mod_api_keys_before_request():
-        api.sess.permanent = True
-        key = api.var.get("api_key", use_session=True)
+        session.permanent = True
+        key = haxdb.data.var.get("api_key", use_session=True)
         
         if key:
             ip = str(request.environ['REMOTE_ADDR'])
@@ -35,26 +35,26 @@ def run():
             db.query(sql,(key,ip))
             row = db.next()
             if row and row["NODES_API_KEY"] == key:
-                api.session.set("api_authenticated", 1)
-                api.session.set("api_people_id",row["NODES_PEOPLE_ID"])
-                api.session.set("nodes_id",row["NODES_ID"])
-                api.session.set("api_key",row["NODES_API_KEY"])
-                api.session.set("api_readonly",row["NODES_READONLY"])
-                api.session.set("api_dba",row["NODES_DBA"])
+                haxdb.data.session.set("api_authenticated", 1)
+                haxdb.data.session.set("api_people_id",row["NODES_PEOPLE_ID"])
+                haxdb.data.session.set("nodes_id",row["NODES_ID"])
+                haxdb.data.session.set("api_key",row["NODES_API_KEY"])
+                haxdb.data.session.set("api_readonly",row["NODES_READONLY"])
+                haxdb.data.session.set("api_dba",row["NODES_DBA"])
             else:
-                api.session.set("api_authenticated", 0)
+                haxdb.data.session.set("api_authenticated", 0)
         
   
-    @api.app.route("/NODES/list", methods=["POST","GET"])
-    @api.require_auth
-    @api.require_dba
+    @haxdb.app.route("/NODES/list", methods=["POST","GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
     def mod_api_keys_list():
-        people_id = api.var.get("people_id")
-        assets_id = api.var.get("assets_id")
-        query = api.var.get("query")
-        status = api.var.get("status")
-        dba = api.var.get("dba")
-        readonly = api.var.get("readonly")
+        people_id = haxdb.data.var.get("people_id")
+        assets_id = haxdb.data.var.get("assets_id")
+        query = haxdb.data.var.get("query")
+        status = haxdb.data.var.get("status")
+        dba = haxdb.data.var.get("dba")
+        readonly = haxdb.data.var.get("readonly")
 
         data = {}
         data["input"] = {}
@@ -114,17 +114,17 @@ def run():
             rows.append(dict(row))
             row = db.next()
 
-        return api.output(success=1, rows=rows, data=data)
+        return haxdb.data.output(success=1, rows=rows, data=data)
 
-    @api.app.route("/NODES/new", methods=["POST", "GET"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/NODES/new", methods=["POST", "GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_nodes_create():
-        is_dba = (api.session.get("api_dba") == 1)
-        people_id = api.var.get("people_id") or api.session.get("api_people_id")
-        dba = api.var.get("dba") or '0'
-        readonly = api.var.get("readonly") or '0'
+        is_dba = (haxdb.session.get("api_dba") == 1)
+        people_id = haxdb.data.var.get("people_id") or haxdb.session.get("api_people_id")
+        dba = haxdb.data.var.get("dba") or '0'
+        readonly = haxdb.data.var.get("readonly") or '0'
         
         data = {}
         data["input"] = {}
@@ -135,7 +135,7 @@ def run():
         data["input"]["readonly"] = readonly
 
         if not is_dba:
-            people_id = api.session.get("api_people_id")
+            people_id = haxdb.session.get("api_people_id")
             dba = 0
 
         api_key = tools.create_api_key()
@@ -147,39 +147,39 @@ def run():
         db.query(sql, (api_key,people_id,readonly,dba,))
 
         if db.error:
-            return api.output(success=0, data=data, message=db.error)
+            return haxdb.data.output(success=0, data=data, message=db.error)
 
         if db.rowcount > 0:
             data["rowid"] = db.lastrowid
             sql = "SELECT * FROM NODES WHERE NODES_ID=?"
             db.query(sql, (data["rowid"],))
             if db.error:
-                return api.output(success=0, data=data, message=db.error)
+                return haxdb.data.output(success=0, data=data, message=db.error)
             data["row"] = dict(db.next())
             db.commit()
-            return api.output(success=1, data=data)
+            return haxdb.data.output(success=1, data=data)
 
-        return api.output(success=0, data=data, message="UNKNOWN ERROR")
+        return haxdb.data.output(success=0, data=data, message="UNKNOWN ERROR")
         
   
         
     
-    @api.app.route("/NODES/save", methods=["GET","POST"])
-    @api.app.route("/NODES/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/NODES/save", methods=["GET","POST"])
+    @haxdb.app.route("/NODES/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_nodes_save (rowid=None, col=None, val=None):
         valid_cols = ["NODES_DBA","NODES_READONLY","NODES_NAME","NODES_DESCRIPTION","NODES_IP","NODES_ENABLED","NODES_ASSETS_ID","NODES_STATUS"]
         limited_cols = ["NODES_DBA","NODES_READONLY","NODES_IP","NODES_NAME","NODES_ENABLED","NODES_ASSETS_ID","NODES_STATUS"]
         
-        rowid = rowid or api.var.get("rowid")
-        col = col or api.var.get("col")
-        val = val or api.var.get("val")
+        rowid = rowid or haxdb.data.var.get("rowid")
+        col = col or haxdb.data.var.get("col")
+        val = val or haxdb.data.var.get("val")
         
-        dba = (api.session.get("api_dba") == 1)
-        people_id = api.session.get("api_people_id")
-        key_id = api.session.get("nodes_id")
+        dba = (haxdb.data.session.get("api_dba") == 1)
+        people_id = haxdb.data.session.get("api_people_id")
+        key_id = haxdb.data.session.get("nodes_id")
 
         data = {}
         data["input"] = {}
@@ -191,16 +191,16 @@ def run():
         data["oid"] = "NODES-%s-%s" % (rowid,col,)
         
         if col not in valid_cols:
-            return api.output(success=0, message="INVALID VALUE: col", data=data)
+            return haxdb.data.output(success=0, message="INVALID VALUE: col", data=data)
 
         if col in limited_cols and int(key_id) == int(rowid):
-            return api.output(success=0, message="CANNOT UPDATE KEY YOU ARE CURRENTLY USING", data=data)
+            return haxdb.data.output(success=0, message="CANNOT UPDATE KEY YOU ARE CURRENTLY USING", data=data)
         
         if col in ("NODES_DBA","NODES_READONLY") and val not in ("0","1"):
-            return api.output(success=0, message="INVALID VALUE: val", data=data)
+            return haxdb.data.output(success=0, message="INVALID VALUE: val", data=data)
 
         if col == "NODES_DBA" and not dba:
-            return api.output(success=0, message="INVALID PERMISSION", data=data)
+            return haxdb.data.output(success=0, message="INVALID PERMISSION", data=data)
         
         if dba:
             sql = "UPDATE NODES SET %s=? WHERE NODES_ID=?" % (col,)
@@ -211,25 +211,25 @@ def run():
  
         if db.rowcount > 0:
             db.commit()
-            return api.output(success=1, message="SAVED", data=data)
+            return haxdb.data.output(success=1, message="SAVED", data=data)
         
         if db.error:
-            return api.output(success=0, message=db.error, data=data)
+            return haxdb.data.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, message="INVALID PERMISSION", data=data)
+        return haxdb.data.output(success=0, message="INVALID PERMISSION", data=data)
         
     
-    @api.app.route("/NODES/delete", methods=["GET","POST"])
-    @api.app.route("/NODES/delete/<int:rowid>", methods=["GET","POST"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/NODES/delete", methods=["GET","POST"])
+    @haxdb.app.route("/NODES/delete/<int:rowid>", methods=["GET","POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_nodes_delete(rowid=None):
-        rowid = rowid or api.var.get("rowid")
+        rowid = rowid or haxdb.data.var.get("rowid")
         
-        dba = (api.session.get("api_dba") == 1)
-        people_id = api.session.get("api_people_id")
-        key_id = api.session.get("nodes_id")
+        dba = (haxdb.session.get("api_dba") == 1)
+        people_id = haxdb.session.get("api_people_id")
+        key_id = haxdb.session.get("nodes_id")
         
         data = {}
         data["input"] = {}
@@ -238,7 +238,7 @@ def run():
         data["input"]["rowid"] = rowid
         
         if key_id == rowid:
-            return api.output(success=0, message="CANNOT DELETE KEY YOU ARE CURRENTLY USING", data=data)
+            return haxdb.data.output(success=0, message="CANNOT DELETE KEY YOU ARE CURRENTLY USING", data=data)
         
         if dba:
             sql = "DELETE FROM NODES WHERE NODES_ID=?"
@@ -249,11 +249,11 @@ def run():
  
         if db.rowcount > 0:
             db.commit()
-            return api.output(success=1, message="DELETED", data=data)
+            return haxdb.data.output(success=1, message="DELETED", data=data)
         
         if db.error:
-            return api.output(success=0, message=db.error, data=data)
+            return haxdb.data.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, message="INVALID PERMISSION", data=data)         
+        return haxdb.data.output(success=0, message="INVALID PERMISSION", data=data)         
     
     

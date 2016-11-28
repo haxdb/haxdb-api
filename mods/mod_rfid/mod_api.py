@@ -1,29 +1,39 @@
+import mod_data
 from flask import request
 import time
 
-api = None
+haxdb = None
 db = None
 config = None
 tools = None
+apis = {}
 
-def init(app_api, app_db, app_config, mod_tools):
-    global api, db, config, tools
-    api = app_api
+def init(app_haxdb, app_db, app_config, mod_tools):
+    global haxdb, db, config, tools, apis
+    haxdb = app_haxdb
     db = app_db
     config = app_config
     tools = mod_tools
 
+    for api_name in mod_data.apis:
+        apis[api_name] = haxdb.api.api_call()
+        apis[api_name].lists = mod_data.apis[api_name]["lists"]
+        apis[api_name].cols = mod_data.apis[api_name]["cols"]
+        apis[api_name].query_cols = mod_data.apis[api_name]["query_cols"]
+        apis[api_name].search_cols = mod_data.apis[api_name]["search_cols"]
+        apis[api_name].order_cols = mod_data.apis[api_name]["order_cols"]
+
 
 def run():
-    @api.app.route("/RFID/asset/auth", methods=["POST", "GET"])
-    @api.app.route("/RFID/asset/auth/<rfid>", methods=["POST", "GET"])
-    @api.app.route("/ASSETS_RFID/auth", methods=["POST", "GET"])
-    @api.app.route("/ASSETS_RFID/auth/<rfid>", methods=["POST", "GET"])
-    @api.require_auth
-    @api.require_dba
+    @haxdb.app.route("/RFID/asset/auth", methods=["POST", "GET"])
+    @haxdb.app.route("/RFID/asset/auth/<rfid>", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS_RFID/auth", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS_RFID/auth/<rfid>", methods=["POST", "GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
     def mod_rfid_asset_auth(rfid=None):
-        api_key = api.session.get("api_key")
-        rfid = rfid or api.var.get("rfid")
+        api_key = haxdb.session.get("api_key")
+        rfid = rfid or haxdb.data.var.get("rfid")
         
         data = {}
         data["input"] = {}
@@ -40,11 +50,11 @@ def run():
         """
         db.query(sql,(api_key,))
         if db.error:
-            return api.output(success=0, data=data, info=db.error)
+            return haxdb.data.output(success=0, data=data, info=db.error)
       
         row = db.next()
         if not row:
-            return api.output(success=0, data=data, message="NO NODE/ASSET RELATIONSHIP")
+            return haxdb.data.output(success=0, data=data, message="NO NODE/ASSET RELATIONSHIP")
 
         assets_id = row["ASSETS_ID"]
         assets_name = row["ASSETS_NAME"]
@@ -57,10 +67,10 @@ def run():
         auth_last = row["ASSETS_RFID_AUTH_LAST"]
         
         if row["ASSETS_RFID_REQUIRE_AUTH"] == None:
-            return api.output(success=0, data=data, message="AUTH NOT CONFIGURED FOR ASSET: %s" % (assets_name,))
+            return haxdb.data.output(success=0, data=data, message="AUTH NOT CONFIGURED FOR ASSET: %s" % (assets_name,))
         
         if int(row["ASSETS_RFID_REQUIRE_AUTH"]) != 1:
-            return api.output(success=1, data=data, message="NO AUTH REQUIRED FOR ASSET: %s" % (assets_name,))
+            return haxdb.data.output(success=1, data=data, message="NO AUTH REQUIRED FOR ASSET: %s" % (assets_name,))
             
         sql = """
         SELECT
@@ -85,7 +95,7 @@ def run():
         db.query(sql, (rfid,assets_id,))
         
         if db.error:
-            return api.output(success=0, data=data, message=db.error)
+            return haxdb.data.output(success=0, data=data, message=db.error)
 
         row = db.next()
         if row:
@@ -102,7 +112,7 @@ def run():
                     description = "%s %s %s on %s" % (row["PEOPLE_FIRST_NAME"], row["PEOPLE_LAST_NAME"], "RFID AUTH", row["ASSETS_NAME"])
                     tools.log(row["PEOPLE_ID"], "RFID AUTH", assets_id, description)
 
-            return api.output(success=1, data=data, message="SUCCESS")
+            return haxdb.data.output(success=1, data=data, message="SUCCESS")
         
         if auto_log and int(auto_log) == 1:
             sql = """
@@ -133,19 +143,19 @@ def run():
                 description = "UNKNOWN USER ATTEMPT ON %s" % (assets_name,)
                 tools.log(None, "DENY", assets_id, description)
 
-        return api.output(success=0, message="ASSET: %s\nPERMISSION DENIED" % (assets_name,), data=data)
+        return haxdb.data.output(success=0, message="ASSET: %s\nPERMISSION DENIED" % (assets_name,), data=data)
 
 
-    @api.app.route("/ASSETS_RFID/deauth", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS_RFID/deauth", methods=["POST", "GET"])
     def mod_rfid_asset_deauth():
-        api_key = api.session.get("api_key")
+        api_key = haxdb.session.get("api_key")
         
-    @api.app.route("/RFID/asset/register", methods=["POST", "GET"])
-    @api.app.route("/RFID/asset/register/<rfid>", methods=["POST", "GET"])
-    @api.app.route("/ASSETS_RFID/register", methods=["POST", "GET"])
-    @api.app.route("/ASSETS_RFID/register/<rfid>", methods=["POST", "GET"])
+    @haxdb.app.route("/RFID/asset/register", methods=["POST", "GET"])
+    @haxdb.app.route("/RFID/asset/register/<rfid>", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS_RFID/register", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS_RFID/register/<rfid>", methods=["POST", "GET"])
     def mod_rfid_asset_register(rfid=None):
-        rfid = rfid or api.var.get("rfid")
+        rfid = rfid or haxdb.data.var.get("rfid")
 
         data = {}
         data["input"] = {}
@@ -169,11 +179,11 @@ def run():
         """
         db.query(sql, (rfid,))
         if db.error:
-            return api.output(success=0, data=data, message=db.error)
+            return haxdb.data.output(success=0, data=data, message=db.error)
         
         people = db.next()
         if not people:
-            return api.output(success=0, data=data, message="INVALID RFID")
+            return haxdb.data.output(success=0, data=data, message="INVALID RFID")
         
         sql = """
         INSERT INTO NODES (NODES_API_KEY, NODES_PEOPLE_ID, NODES_NAME, NODES_READONLY, NODES_DBA, NODES_IP, NODES_ENABLED, NODES_STATUS)
@@ -189,30 +199,23 @@ def run():
             data["api_key"] = api_key
             description = "%s %s REGISTERED A NODE WITH RFID" % (people["PEOPLE_FIRST_NAME"],people["PEOPLE_LAST_NAME"])
             tools.log(people["PEOPLE_ID"], "REGISTER", None, description,db.lastrowid)
-            return api.output(success=1, data=data, message="NODE REGISTERED")
+            return haxdb.data.output(success=1, data=data, message="NODE REGISTERED")
         
-        return api.output(success=0, data=data, message="UNKNOWN ERROR")
+        return haxdb.data.output(success=0, data=data, message="UNKNOWN ERROR")
     
 
-    @api.app.route("/RFID/asset/list", methods=["POST", "GET"])
-    @api.app.route("/RFID/asset/list/<path:query>", methods=["POST", "GET"])
-    @api.app.route("/ASSETS_RFID/list", methods=["POST", "GET"])
-    @api.app.route("/ASSETS_RFID/list/<path:query>", methods=["POST", "GET"])
-    @api.require_auth
-    @api.require_dba
+    @haxdb.app.route("/RFID/asset/list", methods=["POST", "GET"])
+    @haxdb.app.route("/RFID/asset/list/<path:query>", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS_RFID/list", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS_RFID/list/<path:query>", methods=["POST", "GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
     def mod_rfid_asset_list(query=None):
-        query = query or api.var.get("query")
-
-        query_cols = ["ASSETS_ID","PEOPLE_ID","ASSETS_RFID_ID","PEOPLE_FIRST_NAME","PEOPLE_LAST_NAME","RFID_AUTH_PEOPLE_ID"]
-        search_cols = ["ASSETS_NAME","PEOPLE_FIRST_NAME","PEOPLE_LAST_NAME"]
-        order_cols = ["ASSETS_NAME","PEOPLE_LAST_NAME","PEOPLE_FIRST_NAME"]
-        
         data = {}
         data["input"] = {}
         data["input"]["api"] = "ASSETS_RFID"
         data["input"]["action"] = "list"
-        data["input"]["query"] = query
-        
+
         sql = """
         SELECT *, 
         FNAME.PEOPLE_COLUMN_VALUES_VALUE AS PEOPLE_FIRST_NAME, 
@@ -226,13 +229,12 @@ def run():
         WHERE
         1=1
         """
-
-        return api.api_list(data, sql, query, query_cols, search_cols, order_cols)
+        return apis["ASSETS_RFID"].list_call(sql, (), data)
     
-    @api.app.route("/ASSETS_RFID/view", methods=["POST","GET"])
-    @api.app.route("/ASSETS_RFID/view/<int:rowid>", methods=["POST","GET"])
-    @api.require_auth
-    @api.require_dba
+    @haxdb.app.route("/ASSETS_RFID/view", methods=["POST","GET"])
+    @haxdb.app.route("/ASSETS_RFID/view/<int:rowid>", methods=["POST","GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
     def mod_ASSETS_RFID_view(rowid=None):
         def calc_row(row):
             row["ASSETS_RFID_IN_USE"] = 0
@@ -240,7 +242,7 @@ def run():
                 row["ASSETS_RFID_IN_USE"] = 1
             return row
         
-        rowid = rowid or api.var.get("rowid")
+        rowid = rowid or haxdb.data.var.get("rowid")
         
         data = {}
         data["input"] = {}
@@ -259,23 +261,17 @@ def run():
         ASSETS_ID=?
         """
         params = (rowid,)
-        return api.api_view(data,sql,params, calc_row=calc_row)
+        return apis["ASSETS_RFID"].view_call(sql, params, data, calc_row)
         
     
-    @api.app.route("/ASSETS_RFID/save", methods=["POST","GET"])
-    @api.app.route("/ASSETS_RFID/save/<int:rowid>/<col>/<path:val>", methods=["POST","GET"])
-    @api.require_auth
-    @api.require_dba
+    @haxdb.app.route("/ASSETS_RFID/save", methods=["POST","GET"])
+    @haxdb.app.route("/ASSETS_RFID/save/<int:rowid>/<col>/<path:val>", methods=["POST","GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
     def mod_ASSETS_RFID_save(rowid=None, col=None, val=None):
-        valid_cols = {
-            "ASSETS_RFID_REQUIRE_AUTH": "BOOL",
-            "ASSETS_RFID_AUTO_LOG": "BOOL",
-            "ASSETS_RFID_AUTH_TIMEOUT": "INT",
-        }
-        
-        rowid = rowid or api.var.get("rowid")
-        col = col or api.var.get("col")
-        val = val or api.var.get("val")
+        rowid = rowid or haxdb.data.var.get("rowid")
+        col = col or haxdb.data.var.get("col")
+        val = val or haxdb.data.var.get("val")
         
         data = {}
         data["input"] = {}
@@ -292,17 +288,13 @@ def run():
         """
         params = (val, rowid,)
         
-        return api.api_save(data,sql,params,col,val,valid_cols)
+        return apis["ASSSETS_RFID"].save_call(sql,params,data,col,val)
     
-    @api.app.route("/PEOPLE_RFID/list", methods=["POST","GET"])
-    @api.app.route("/PEOPLE_RFID/list/<path:query>", methods=["POST","GET"])
-    @api.require_auth
-    @api.require_dba
+    @haxdb.app.route("/PEOPLE_RFID/list", methods=["POST","GET"])
+    @haxdb.app.route("/PEOPLE_RFID/list/<path:query>", methods=["POST","GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
     def mod_PEOPLE_RFID_list (people_id=None):
-        query_cols = ["PEOPLE_RFID_ID","PEOPLE_ID","PEOPLE_FIRST_NAME","PEOPLE_LAST_NAME","PEOPLE_RFID_RFID"]
-        search_cols = ["PEOPLE_FIRST_NAME","PEOPLE_LAST_NAME","PEOPLE_RFID_RFID"]
-        order_cols = ["PEOPLE_RFID_RFID"]
-        
         data = {}
         data["input"] = {}
         data["input"]["api"] = "PEOPLE_RFID"
@@ -320,4 +312,4 @@ def run():
         WHERE
         1=1
         """
-        return api.api_list(data, sql, query, query_cols, search_cols, order_cols)
+        return apis["PEOPLE_RFID"].list_call(sql, (), data)

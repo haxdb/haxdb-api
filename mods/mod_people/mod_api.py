@@ -2,29 +2,29 @@ from flask import request, send_from_directory
 from werkzeug.utils import secure_filename
 import os, shlex
 
-api = None
+haxdb = None
 db = None
 config = None
 tools = None
 
 valid_types = ("STATIC","TEXT","TEXTAREA","CHECKBOX","FILE","SELECT","NUMERIC","INTEGER","FLOAT","DATE","LIST")
 
-def init(app_api, app_db, app_config, app_tools):
-    global api, db, config, tools
-    api = app_api
+def init(app_haxdb, app_db, app_config, app_tools):
+    global haxdb, db, config, tools
+    haxdb = app_haxdb
     db = app_db
     config = app_config
     tools = app_tools
 
 def run():
-    @api.app.route("/PEOPLE/list", methods=["POST","GET"])
-    @api.app.route("/PEOPLE/list/<int:category>", methods=["POST","GET"])
-    @api.require_auth
-    @api.require_dba
+    @haxdb.app.route("/PEOPLE/list", methods=["POST","GET"])
+    @haxdb.app.route("/PEOPLE/list/<int:category>", methods=["POST","GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
     def mod_people_list(category=None):
         people_id = None
-        category = category or api.var.get("category")
-        query = api.var.get("query")
+        category = category or haxdb.data.var.get("category")
+        query = haxdb.data.var.get("query")
         
         data = {}
         data["input"] = {}
@@ -156,7 +156,7 @@ def run():
         db.query(sql, params)
             
         if db.error:
-            return api.output(success=0, data=data, message=db.error)
+            return haxdb.data.output(success=0, data=data, message=db.error)
         
         row = db.next()
         rows = {}
@@ -174,21 +174,21 @@ def run():
             tmp[pid]["PEOPLE_ID"] = pid
             rows.append(tmp[pid])
 
-        return api.output(success=1, data=data, rows=rows)
+        return haxdb.data.output(success=1, data=data, rows=rows)
             
 
 
-    @api.app.route("/PEOPLE/save", methods=["GET","POST"])
-    @api.app.route("/PEOPLE/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/PEOPLE/save", methods=["GET","POST"])
+    @haxdb.app.route("/PEOPLE/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_people_save(rowid=None,col=None,val=None):
         table_cols = { "EMAIL": "PEOPLE_EMAIL", "DBA": "PEOPLE_DBA" }
         
-        rowid = rowid or api.var.get("rowid")
-        column = col or api.var.get("col")
-        value = val or api.var.get("val")
+        rowid = rowid or haxdb.data.var.get("rowid")
+        column = col or haxdb.data.var.get("col")
+        value = val or haxdb.data.var.get("val")
         
         data = {}
         data["input"] = {}
@@ -206,7 +206,7 @@ def run():
         else:
             col = tools.get_col_definition(col_name=column)
             if not col:
-                return api.output(success=0, message="INVALID VALUE: col", data=data)
+                return haxdb.data.output(success=0, message="INVALID VALUE: col", data=data)
             
             col_name = col["PEOPLE_COLUMNS_NAME"]
             col_type = col["PEOPLE_COLUMNS_TYPE"]
@@ -216,16 +216,16 @@ def run():
                 #check file
                 pass
             elif not tools.valid_col_value(col_name,col_type,value):
-                return api.output(success=0, message="INVALID VALUE: val", data=data)
+                return haxdb.data.output(success=0, message="INVALID VALUE: val", data=data)
             
     
             if col_type == "FILE":
                 if 'value' not in request.files:
-                    return api.output(success=0, message="NO FILE UPLOADED")
+                    return haxdb.data.output(success=0, message="NO FILE UPLOADED")
                 
                 f = request.files["value"]
                 if f.filename == '':
-                    return api.output(success=0, message="UPLOAD CANCELLED", data=data)
+                    return haxdb.data.output(success=0, message="UPLOAD CANCELLED", data=data)
                 
                 #filename = secure_filename(file.filename)
                 fname, fext = os.path.splitext(f.filename)
@@ -242,21 +242,21 @@ def run():
  
         if db.rowcount > 0:
             db.commit()
-            return api.output(success=1, message="SAVED", data=data)
+            return haxdb.data.output(success=1, message="SAVED", data=data)
         
         if db.error:
-            return api.output(success=0, message=db.error, data=data)
+            return haxdb.data.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, message="UNKNOWN ERROR", data=data)
+        return haxdb.data.output(success=0, message="UNKNOWN ERROR", data=data)
 
-    @api.app.route("/PEOPLE/download", methods=["GET","POST"])
-    @api.app.route("/PEOPLE/download/<int:rowid>/<col>", methods=["GET","POST"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/PEOPLE/download", methods=["GET","POST"])
+    @haxdb.app.route("/PEOPLE/download/<int:rowid>/<col>", methods=["GET","POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_people_download(rowid=None,col=None):
-        rowid = rowid or api.var.get("rowid")
-        column = col or api.var.get("col")
+        rowid = rowid or haxdb.data.var.get("rowid")
+        column = col or haxdb.data.var.get("col")
         
         sql = """SELECT * FROM PEOPLE
         JOIN PEOPLE_COLUMNS ON PEOPLE_COLUMNS_NAME=?
@@ -273,13 +273,13 @@ def run():
             return send_from_directory(directory=config["API"]["UPLOADS"], filename=f, as_attachment=True)
         return False
     
-    @api.app.route("/PEOPLE/new", methods=["GET","POST"])
-    @api.app.route("/PEOPLE/new/<email>", methods=["GET","POST"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/PEOPLE/new", methods=["GET","POST"])
+    @haxdb.app.route("/PEOPLE/new/<email>", methods=["GET","POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_people_new(email=None):
-        email = email or api.var.get("email")
+        email = email or haxdb.data.var.get("email")
 
         data = {}
         data["input"] = {}
@@ -288,7 +288,7 @@ def run():
         data["input"]["email"] = email
 
         if not email:
-            return api.output(success=0, message="MISSING INPUT: email", data=data)
+            return haxdb.data.output(success=0, message="MISSING INPUT: email", data=data)
 
         sql = "INSERT INTO PEOPLE (PEOPLE_EMAIL,PEOPLE_DBA) VALUES (?,0)"
         db.query(sql,(email,))
@@ -296,20 +296,20 @@ def run():
         if db.rowcount > 0:
             data["rowid"] = db.lastrowid
             db.commit()
-            return api.output(success=1, data=data)
+            return haxdb.data.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, message=db.error, data=data)
+            return haxdb.data.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, message="UNKNOWN ERROR", data=data)
+        return haxdb.data.output(success=0, message="UNKNOWN ERROR", data=data)
     
-    @api.app.route("/PEOPLE/delete/", methods=["GET","POST"])
-    @api.app.route("/PEOPLE/delete/<int:rowid>", methods=["GET","POST"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/PEOPLE/delete/", methods=["GET","POST"])
+    @haxdb.app.route("/PEOPLE/delete/<int:rowid>", methods=["GET","POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_people_delete(rowid=None):
-        rowid = rowid or api.var.get("rowid")
+        rowid = rowid or haxdb.data.var.get("rowid")
         
         data = {}
         data["input"] = {}
@@ -318,26 +318,26 @@ def run():
         data["input"]["rowid"] = rowid
         
         if not rowid:
-            return api.output(success=0, message="MISSING INPUT: rowid", data=data)
+            return haxdb.data.output(success=0, message="MISSING INPUT: rowid", data=data)
         
         sql = "DELETE FROM PEOPLE WHERE PEOPLE_ID = ?"
         db.query(sql,(rowid,))
 
         if db.rowcount > 0:
             db.commit();
-            return api.output(success=1, data=data)
+            return haxdb.data.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, message=db.error, data=data)
+            return haxdb.data.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, message="UNKNOWN ERROR", data=data)
+        return haxdb.data.output(success=0, message="UNKNOWN ERROR", data=data)
     
     
-    @api.app.route("/PEOPLE_COLUMNS/list", methods=["POST","GET"])
-    @api.require_auth
-    @api.require_dba
+    @haxdb.app.route("/PEOPLE_COLUMNS/list", methods=["POST","GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
     def mod_people_columns_list():
-        query = api.var.get("query")
+        query = haxdb.data.var.get("query")
  
         data = {}
         data["input"] = {}
@@ -358,11 +358,11 @@ def run():
             rows[row["PEOPLE_COLUMNS_ID"]] = dict(row)
             row = db.next()
             
-        return api.output(success=1, rows=rows, data=data)
+        return haxdb.data.output(success=1, rows=rows, data=data)
 
-    @api.app.route("/PEOPLE_COLUMNS/categories", methods=["POST","GET"])
-    @api.require_auth
-    @api.require_dba
+    @haxdb.app.route("/PEOPLE_COLUMNS/categories", methods=["POST","GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
     def mod_people_list_categories():
         data = {}
         data["input"] = {}
@@ -377,17 +377,17 @@ def run():
             data["categories"].append(row["PEOPLE_COLUMNS_CATEGORY"])
             row = db.next()
             
-        return api.output(success=1, data=data)
+        return haxdb.data.output(success=1, data=data)
     
-    @api.app.route("/PEOPLE_COLUMNS/save", methods=["GET","POST"])
-    @api.app.route("/PEOPLE_COLUMNS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/PEOPLE_COLUMNS/save", methods=["GET","POST"])
+    @haxdb.app.route("/PEOPLE_COLUMNS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_PEOPLE_COLUMNS_save(rowid=None,col=None,val=None):
-        rowid = rowid or api.var.get("rowid")
-        column = col or api.var.get("col")
-        value = val or api.var.get("val")
+        rowid = rowid or haxdb.data.var.get("rowid")
+        column = col or haxdb.data.var.get("col")
+        value = val or haxdb.data.var.get("val")
 
         data = {}
         data["input"] = {}
@@ -399,10 +399,10 @@ def run():
         data["oid"] = "PEOPLE_COLUMNS-%s-%s" % (rowid,column,)
         
         if not rowid:
-            return api.output(success=0, message="MISSING INPUT: rowid", data=data)
+            return haxdb.data.output(success=0, message="MISSING INPUT: rowid", data=data)
         
         if not column:
-            return api.output(success=0, message="MISSING INPUT: col", data=data)
+            return haxdb.data.output(success=0, message="MISSING INPUT: col", data=data)
         
         valid_columns = (
             "PEOPLE_COLUMNS_NAME",
@@ -427,19 +427,19 @@ def run():
             value = value.replace(" ","_")
             
         if column not in valid_columns:
-            return api.output(success=0, message="INVALID VALUE: col", data=data)
+            return haxdb.data.output(success=0, message="INVALID VALUE: col", data=data)
         
         if column in ("PEOPLE_COLUMNS_ENABLED","PEOPLE_COLUMNS_KEY","PEOPLE_COLUMNS_QUICKEDIT") and int(value) not in (0,1):
-            return api.output(success=0, message="INVALID VALUE: val", data=data)
+            return haxdb.data.output(success=0, message="INVALID VALUE: val", data=data)
         
         if column == "PEOPLE_COLUMNS_ORDER":
             try:
                 int(value)
             except ValueError:
-                return api.output(success=0, message="INVALID VALUE: val", data=data)
+                return haxdb.data.output(success=0, message="INVALID VALUE: val", data=data)
             
         if column == "PEOPLE_COLUMNS_TYPE" and value not in valid_types:
-            return api.output(success=0, message="INVALID VALUE: val", data=data)
+            return haxdb.data.output(success=0, message="INVALID VALUE: val", data=data)
         
         if column in valid_internal:
             sql = "UPDATE PEOPLE_COLUMNS SET %s = ? WHERE PEOPLE_COLUMNS_ID=?" % column
@@ -449,28 +449,28 @@ def run():
  
         if db.rowcount > 0:
             db.commit()
-            return api.output(success=1, message="SAVED", data=data)
+            return haxdb.data.output(success=1, message="SAVED", data=data)
         
         if db.error:
-            return api.output(success=0, message=db.error, data=data)
+            return haxdb.data.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, message="UNABLE TO CHANGE INTERNAL DATA", data=data)
+        return haxdb.data.output(success=0, message="UNABLE TO CHANGE INTERNAL DATA", data=data)
         
-    @api.app.route("/PEOPLE_COLUMNS/new", methods=["GET","POST"])
-    @api.app.route("/PEOPLE_COLUMNS/new/<name>", methods=["GET","POST"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/PEOPLE_COLUMNS/new", methods=["GET","POST"])
+    @haxdb.app.route("/PEOPLE_COLUMNS/new/<name>", methods=["GET","POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_people_columns_new(name=None):
-        sname = name or api.var.get("name")
-        senabled = api.var.get("enabled") or 0
-        sorder = api.var.get("order") or 999
-        stype = api.var.get("type") or "TEXT"
-        skey = api.var.get("key") or 0
-        scategory = api.var.get("category") or "NEW CATEGORY"
+        sname = name or haxdb.data.var.get("name")
+        senabled = haxdb.data.var.get("enabled") or 0
+        sorder = haxdb.data.var.get("order") or 999
+        stype = haxdb.data.var.get("type") or "TEXT"
+        skey = haxdb.data.var.get("key") or 0
+        scategory = haxdb.data.var.get("category") or "NEW CATEGORY"
         
         if not sname:
-            return api.output(success=0, message="MISSING INPUT: name")
+            return haxdb.data.output(success=0, message="MISSING INPUT: name")
 
         data = {}
         data["input"] = {}
@@ -486,16 +486,16 @@ def run():
         try:
             int(sorder)
         except ValueError:
-            return api.output(success=0, message="INVALID VALUE: order", data=data)
+            return haxdb.data.output(success=0, message="INVALID VALUE: order", data=data)
         
         if int(senabled) not in (0,1):
-            return api.output(success=0, message="INVALID VALUE: enabled", data=data)
+            return haxdb.data.output(success=0, message="INVALID VALUE: enabled", data=data)
 
         if int(skey) not in (0,1):
-            return api.output(success=0, message="INVALID VALUE: key", data=data)
+            return haxdb.data.output(success=0, message="INVALID VALUE: key", data=data)
         
         if stype not in valid_types:
-            return api.output(success=0, message="INVALID VALUE: type", data=data)
+            return haxdb.data.output(success=0, message="INVALID VALUE: type", data=data)
         
         sql = "INSERT INTO PEOPLE_COLUMNS (PEOPLE_COLUMNS_NAME, PEOPLE_COLUMNS_ENABLED, PEOPLE_COLUMNS_ORDER, PEOPLE_COLUMNS_TYPE, PEOPLE_COLUMNS_KEY, PEOPLE_COLUMNS_CATEGORY, PEOPLE_COLUMNS_INTERNAL) VALUES (?,?,?,?,?,?,0)"
         db.query(sql,(sname,senabled,sorder,stype,skey,scategory,))
@@ -506,20 +506,20 @@ def run():
             sql = "SELECT * FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_ID=?"
             db.query(sql, (data["rowid"],))
             data["row"] = dict(db.next())
-            return api.output(success=1, data=data)
+            return haxdb.data.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, message=db.error, data=data)
+            return haxdb.data.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, message="UNKNOWN ERROR", data=data)
+        return haxdb.data.output(success=0, message="UNKNOWN ERROR", data=data)
     
-    @api.app.route("/PEOPLE_COLUMNS/delete", methods=["GET","POST"])
-    @api.app.route("/PEOPLE_COLUMNS/delete/<int:rowid>", methods=["GET","POST"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/PEOPLE_COLUMNS/delete", methods=["GET","POST"])
+    @haxdb.app.route("/PEOPLE_COLUMNS/delete/<int:rowid>", methods=["GET","POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_people_columns_delete(rowid=None):
-        rowid = rowid or api.var.get("rowid")
+        rowid = rowid or haxdb.data.var.get("rowid")
 
         data = {}
         data["input"] = {}
@@ -528,7 +528,7 @@ def run():
         data["input"]["rowid"] = rowid
         
         if not rowid:
-            return api.output(success=0, message="MISSING INPUT: rowid", data=data)
+            return haxdb.data.output(success=0, message="MISSING INPUT: rowid", data=data)
 
         
         sql = "DELETE FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_ID = ?"
@@ -536,9 +536,9 @@ def run():
 
         if db.rowcount > 0:
             db.commit();
-            return api.output(success=1, data=data)
+            return haxdb.data.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, message=db.error, data=data)
+            return haxdb.data.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, message="UNKNOWN ERROR", data=data)        
+        return haxdb.data.output(success=0, message="UNKNOWN ERROR", data=data)        

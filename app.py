@@ -1,19 +1,16 @@
 #!/usr/bin/python
 
 from config import config
-import db, api, mods
+import db, haxdb, mods
 
-haxdb = db.db(config["DB"])
-api.db = haxdb
-api.config = config["API"]
-    
-mods.init(config, api, haxdb)
+haxdb.init(config["API"], db.db(config["DB"]))
+mods.init(config, haxdb, haxdb.db)
 mods.run()
 
-app = api.app
+app = haxdb.app
 
 if __name__ == "__main__":
-    api.run()
+    haxdb.run()
 
 
 

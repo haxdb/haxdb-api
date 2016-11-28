@@ -1,27 +1,27 @@
 import os, base64, json, time
 
-api = None
+haxdb = None
 db = None
 config = None
 tools = None
 
-def init(app_api, app_db, app_config, mod_tools):
-    global api, db, config, tools
-    api = app_api
+def init(app_haxdb, app_db, app_config, mod_tools):
+    global haxdb, db, config, tools
+    haxdb = app_haxdb
     db = app_db
     config = app_config
     tools = mod_tools
 
 
 def run():
-    global api, config, db, tools
+    global haxdb, config, db, tools
 
-    @api.app.route("/AUTH/email/login", methods=["GET","POST"])
-    @api.app.route("/AUTH/email/login/<email>", methods=["GET","POST"])
+    @haxdb.app.route("/AUTH/email/login", methods=["GET","POST"])
+    @haxdb.app.route("/AUTH/email/login/<email>", methods=["GET","POST"])
     def mod_auth_email(email=None):
-        email = email or api.var.get("email")
-        subject = api.var.get("subject")
-        message = api.var.get("message")
+        email = email or haxdb.data.var.get("email")
+        subject = haxdb.data.var.get("subject")
+        message = haxdb.data.var.get("message")
         
         data = {}
         data["input"] = {}
@@ -32,27 +32,27 @@ def run():
         data["input"]["message"] = message
         
         if not tools.valid_email(email):
-            return api.output(success=0, message="INVALID VALUE: email", data=data)
+            return haxdb.data.output(success=0, message="INVALID VALUE: email", data=data)
         
         people = tools.get_people(email)
         if not people:
-            return api.output(success=0, message="NEW USER", data=data)
+            return haxdb.data.output(success=0, message="NEW USER", data=data)
             
         token = tools.create_token(email)
         message = message.replace("[token]",token)
         
         result = tools.send_email(email, subject, message)
         if not result:
-            return api.output(success=0, message=result, data=data)
-        return api.output(success=1, message="EMAIL SENT", data=data)
+            return haxdb.data.output(success=0, message=result, data=data)
+        return haxdb.data.output(success=1, message="EMAIL SENT", data=data)
         
     
-    @api.app.route("/AUTH/email/register", methods=["GET","POST"])
-    @api.app.route("/AUTH/email/register/<email>", methods=["GET","POST"])
+    @haxdb.app.route("/AUTH/email/register", methods=["GET","POST"])
+    @haxdb.app.route("/AUTH/email/register/<email>", methods=["GET","POST"])
     def mod_auth_register(email=None):
-        email = email or api.var.get("email")
-        subject = api.var.get("subject")
-        message = api.var.get("message")
+        email = email or haxdb.data.var.get("email")
+        subject = haxdb.data.var.get("subject")
+        message = haxdb.data.var.get("message")
         
         data = {}
         data["input"] = {}
@@ -62,37 +62,28 @@ def run():
         data["input"]["subject"] = subject
         data["input"]["message"] = message
         
-        print "1"
-        
         if not tools.valid_email(email):
-            return api.output(success=0, message="INVALID VALUE: email", data=data)
+            return haxdb.data.output(success=0, message="INVALID VALUE: email", data=data)
 
-        print "2"
-        
         email = email.upper()
         people = tools.get_people(email)
         if people:
-            return api.output(success=0, message="USER ALREADY EXISTS", data=data)
-        
-        print "3"
+            return haxdb.data.output(success=0, message="USER ALREADY EXISTS", data=data)
         
         token = tools.create_token(email)
         message = message.replace("[token]",token)
         
-        print "4"
-        
         result = tools.send_email(email, subject, message)
-        
-        print "5"
+
         if not result:
-            return api.output(success=0, message=result, data=data)
-        return api.output(success=1, message="EMAIL SENT", data=data)
+            return haxdb.data.output(success=0, message=result, data=data)
+        return haxdb.data.output(success=1, message="EMAIL SENT", data=data)
         
     
-    @api.app.route("/AUTH/email/token", methods=["GET","POST"])
-    @api.app.route("/AUTH/email/token/<token>", methods=["GET","POST"])
+    @haxdb.app.route("/AUTH/email/token", methods=["GET","POST"])
+    @haxdb.app.route("/AUTH/email/token/<token>", methods=["GET","POST"])
     def mod_auth_token(token=None):
-        token = token or api.var.get("token")
+        token = token or haxdb.data.var.get("token")
         
         data = {}
         data["input"] = {}
@@ -106,37 +97,37 @@ def run():
         if row and row["AUTH_TOKEN_EMAIL"] and row["AUTH_TOKEN_TOKEN"] == token:
             email = row["AUTH_TOKEN_EMAIL"]
         else:
-            return api.output(success=0, message="TOKEN IS INVALID OR EXPIRED.\nLOG IN AGAIN.", data=data)
+            return haxdb.data.output(success=0, message="TOKEN IS INVALID OR EXPIRED.\nLOG IN AGAIN.", data=data)
         
         # GET MATCHING PEOPLE
         people = tools.get_people(email=email)
         if not people:
             people = tools.create_people(email)
             if not people:
-                return api.output(success=0, message=people, data=data)
+                return haxdb.data.output(success=0, message=people, data=data)
 
         # GET API KEY
         api_key = tools.get_people_api_key(people["PEOPLE_ID"])
         
         if not api_key:
-            return api.output(success=0, message=str(api_key), data=data)
+            return haxdb.data.output(success=0, message=str(api_key), data=data)
             
         tools.delete_token(token)
 
         data["api_key"] = api_key
         data["email"] = people["PEOPLE_EMAIL"]
         
-        return api.output(success=1, message="AUTHENTICATED", data=data)
+        return haxdb.data.output(success=1, message="AUTHENTICATED", data=data)
 
-    @api.app.route("/AUTH/email/session", methods=["POST","GET"])
-    @api.require_auth
+    @haxdb.app.route("/AUTH/email/session", methods=["POST","GET"])
+    @haxdb.require_auth
     def mod_api_keys_session():
         data = {}
         data["input"] = {}
         data["input"]["api"] = "AUTH/email"
         data["input"]["action"] = "session"
 
-        data["readonly"] = api.session.get("api_readonly")
-        data["dba"] = api.session.get("api_dba")
-        data["member_id"] = api.session.get("member_id")
-        return api.output(success=1, message="SESSION VALID", data=data)    
+        data["readonly"] = haxdb.session.get("api_readonly")
+        data["dba"] = haxdb.session.get("api_dba")
+        data["member_id"] = haxdb.session.get("member_id")
+        return haxdb.data.output(success=1, message="SESSION VALID", data=data)    

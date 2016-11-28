@@ -1,26 +1,36 @@
+import mod_data
 from flask import request
 from werkzeug.utils import secure_filename
 import os
 
-api = None
+haxdb = None
 db = None
 config = None
 tools = None
+apis = {}
 
-def init(app_api, app_db, app_config, app_tools):
-    global api, db, config, tools
-    api = app_api
+def init(app_haxdb, app_db, app_config, app_tools):
+    global haxdb, db, config, tools
+    haxdb = app_haxdb
     db = app_db
     config = app_config
     tools = app_tools
+    
+    for api_name in mod_data.apis:
+        apis[api_name] = haxdb.api.api_call()
+        apis[api_name].lists = mod_data.apis[api_name]["lists"]
+        apis[api_name].cols = mod_data.apis[api_name]["cols"]
+        apis[api_name].query_cols = mod_data.apis[api_name]["query_cols"]
+        apis[api_name].search_cols = mod_data.apis[api_name]["search_cols"]
+        apis[api_name].order_cols = mod_data.apis[api_name]["order_cols"]    
 
 def run():
-    @api.app.route("/LISTS/list", methods=["POST","GET"])
-    @api.require_auth
+    @haxdb.app.route("/LISTS/list", methods=["POST","GET"])
+    @haxdb.require_auth
     def mod_lists_list():
-        query = api.var.get("query")
-        name = api.var.get("name")
-        rowid = api.var.get("rowid")
+        query = haxdb.data.var.get("query")
+        name = haxdb.data.var.get("name")
+        rowid = haxdb.data.var.get("rowid")
 
         data = {}
         data["input"] = {}
@@ -50,15 +60,15 @@ def run():
             rows.append(dict(row))
             row = db.next()
     
-        return api.output(success=1, rows=rows, data=data)
+        return haxdb.data.output(success=1, rows=rows, data=data)
 
-    @api.app.route("/LISTS/new", methods=["POST", "GET"])
-    @api.app.route("/LISTS/new/<name>", methods=["POST", "GET"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/LISTS/new", methods=["POST", "GET"])
+    @haxdb.app.route("/LISTS/new/<name>", methods=["POST", "GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_lists_new(name=None):
-        name = name or api.var.get("name")
+        name = name or haxdb.data.var.get("name")
         
         data = {}
         data["input"] = {}
@@ -71,20 +81,20 @@ def run():
         if db.rowcount > 0:
             db.commit()
             data["rowid"] = db.lastrowid
-            return api.output(success=1, data=data)
+            return haxdb.data.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, message=db.error, data=data)
+            return haxdb.data.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, message="UNKNOWN ERROR", data=data)
+        return haxdb.data.output(success=0, message="UNKNOWN ERROR", data=data)
 
-    @api.app.route("/LISTS/delete", methods=["GET","POST"])
-    @api.app.route("/LISTS/delete/<int:rowid>", methods=["GET","POST"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/LISTS/delete", methods=["GET","POST"])
+    @haxdb.app.route("/LISTS/delete/<int:rowid>", methods=["GET","POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_lists_delete(rowid=None):
-        rowid = rowid or api.var.get("rowid")
+        rowid = rowid or haxdb.data.var.get("rowid")
 
         data = {}
         data["input"] = {}
@@ -97,24 +107,24 @@ def run():
         
         if db.rowcount > 0:
             db.commit()
-            return api.output(success=1, data=data)
+            return haxdb.data.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, message=db.error, data=data)
+            return haxdb.data.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, message="UNKNOWN LIST ID OR LIST IS INTERNAL", data=data)
+        return haxdb.data.output(success=0, message="UNKNOWN LIST ID OR LIST IS INTERNAL", data=data)
         
-    @api.app.route("/LISTS/save", methods=["GET","POST"])
-    @api.app.route("/LISTS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/LISTS/save", methods=["GET","POST"])
+    @haxdb.app.route("/LISTS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_lists_save (rowid=None, col=None, val=None):
         valid_cols = ["LISTS_NAME"]
         
-        rowid = rowid or api.var.get("rowid")
-        col = col or api.var.get("col")
-        val = val or api.var.get("val")
+        rowid = rowid or haxdb.data.var.get("rowid")
+        col = col or haxdb.data.var.get("col")
+        val = val or haxdb.data.var.get("val")
 
         data = {}
         data["input"] = {}
@@ -126,30 +136,30 @@ def run():
         data["oid"] = "LISTS-%s-%s" % (rowid,col,)
 
         if col not in valid_cols:
-            return api.output(success=0, data=data, message="INVALID COLUMN")
+            return haxdb.data.output(success=0, data=data, message="INVALID COLUMN")
         
         sql = "UPDATE LISTS SET LISTS_NAME=? WHERE LISTS_ID=? and LISTS_INTERNAL!=1"
         db.query(sql, (val,rowid,))
         
         if db.rowcount > 0:
             db.commit()
-            return api.output(success=1, data=data)
+            return haxdb.data.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, message=db.error, data=data)
+            return haxdb.data.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, message="UNKNOWN rowid OR LIST IS INTERNAL", data=data)
+        return haxdb.data.output(success=0, message="UNKNOWN rowid OR LIST IS INTERNAL", data=data)
     
 
-    @api.app.route("/LIST_ITEMS/list", methods=["POST","GET"])
-    @api.app.route("/LIST_ITEMS/list/<int:lists_id>", methods=["POST","GET"])
-    @api.app.route("/LIST_ITEMS/list/<lists_name>", methods=["POST","GET"])
-    @api.require_auth
+    @haxdb.app.route("/LIST_ITEMS/list", methods=["POST","GET"])
+    @haxdb.app.route("/LIST_ITEMS/list/<int:lists_id>", methods=["POST","GET"])
+    @haxdb.app.route("/LIST_ITEMS/list/<lists_name>", methods=["POST","GET"])
+    @haxdb.require_auth
     def mod_list_items_list(lists_id=None, lists_name=None):
-        lists_id = lists_id or api.var.get("lists_id")
-        lists_name = lists_name or api.var.get("lists_name")
-        query = api.var.get("query")
-        include_disabled = api.var.get("include_disabled")
+        lists_id = lists_id or haxdb.data.var.get("lists_id")
+        lists_name = lists_name or haxdb.data.var.get("lists_name")
+        query = haxdb.data.var.get("query")
+        include_disabled = haxdb.data.var.get("include_disabled")
         
         data = {}
         data["input"] = {}
@@ -161,7 +171,7 @@ def run():
         data["input"]["lists_name"] = lists_name
 
         if not lists_id and not lists_name:
-            return api.output(success=0, data=data, message="MISSING VALUE: lists_id or lists_name")
+            return haxdb.data.output(success=0, data=data, message="MISSING VALUE: lists_id or lists_name")
         
         params = ()
         sql = "SELECT * FROM LISTS WHERE"
@@ -175,7 +185,7 @@ def run():
         db.query(sql,params)
         row = db.next()
         if not row:
-            return api.output(success=0, data=data, message="UNKNOWN LIST")
+            return haxdb.data.output(success=0, data=data, message="UNKNOWN LIST")
         data["name"] = row["LISTS_NAME"]
         lists_id = row["LISTS_ID"]
         
@@ -199,7 +209,7 @@ def run():
         db.query(sql,params)
         
         if db.error:
-            return api.output(success=0, data=data, message=db.error)
+            return haxdb.data.output(success=0, data=data, message=db.error)
 
         row = db.next()
         rows = []
@@ -207,17 +217,17 @@ def run():
             rows.append(dict(row))
             row = db.next()
     
-        return api.output(success=1, data=data, rows=rows)
+        return haxdb.data.output(success=1, data=data, rows=rows)
 
-    @api.app.route("/LIST_ITEMS/new", methods=["POST", "GET"])
-    @api.app.route("/LIST_ITEMS/new/<int:lists_id>", methods=["POST", "GET"])
-    @api.app.route("/LIST_ITEMS/new/<int:lists_id>/<name>", methods=["POST", "GET"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/LIST_ITEMS/new", methods=["POST", "GET"])
+    @haxdb.app.route("/LIST_ITEMS/new/<int:lists_id>", methods=["POST", "GET"])
+    @haxdb.app.route("/LIST_ITEMS/new/<int:lists_id>/<name>", methods=["POST", "GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_list_items_new(lists_id=None, name=None):
-        lists_id = lists_id or api.var.get("lists_id")
-        name = name or api.var.get("name")
+        lists_id = lists_id or haxdb.data.var.get("lists_id")
+        name = name or haxdb.data.var.get("name")
         
         data = {}
         data["input"] = {}
@@ -232,28 +242,22 @@ def run():
         if db.rowcount > 0:
             db.commit()
             data["rowid"] = db.lastrowid
-            return api.output(success=1, data=data)
+            return haxdb.data.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, message=db.error, data=data)
+            return haxdb.data.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, message="UNKNOWN ERROR", data=data)
+        return haxdb.data.output(success=0, message="UNKNOWN ERROR", data=data)
 
-    @api.app.route("/LIST_ITEMS/save", methods=["GET","POST"])
-    @api.app.route("/LIST_ITEMS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/LIST_ITEMS/save", methods=["GET","POST"])
+    @haxdb.app.route("/LIST_ITEMS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_list_items_save (rowid=None, col=None, val=None):
-        valid_cols = {
-            "LIST_ITEMS_DESCRIPTION": "STR",
-            "LIST_ITEMS_ENABLED": "BOOL",
-            "LIST_ITEMS_ORDER": "FLOAT"
-        }
-        
-        rowid = rowid or api.var.get("rowid")
-        col = col or api.var.get("col")
-        val = val or api.var.get("val")
+        rowid = rowid or haxdb.data.var.get("rowid")
+        col = col or haxdb.data.var.get("col")
+        val = val or haxdb.data.var.get("val")
 
         data = {}
         data["input"] = {}
@@ -266,17 +270,17 @@ def run():
         
         sql = "UPDATE LIST_ITEMS SET %s=? WHERE LIST_ITEMS_ID=?"
         params = (val, rowid,)
-        return api.api_save(data,sql,params,col,val,valid_cols)
+        return apis["LIST_ITEMS"].save_call(sql,params,data,col,val)
         
         
     
-    @api.app.route("/LIST_ITEMS/delete", methods=["GET","POST"])
-    @api.app.route("/LIST_ITEMS/delete/<int:rowid>", methods=["GET","POST"])
-    @api.require_auth
-    @api.require_dba
-    @api.no_readonly
+    @haxdb.app.route("/LIST_ITEMS/delete", methods=["GET","POST"])
+    @haxdb.app.route("/LIST_ITEMS/delete/<int:rowid>", methods=["GET","POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
     def mod_list_items_delete(rowid=None):
-        rowid = rowid or api.var.get("rowid")
+        rowid = rowid or haxdb.data.var.get("rowid")
 
         data = {}
         data["input"] = {}
@@ -289,9 +293,9 @@ def run():
         
         if db.rowcount > 0:
             db.commit()
-            return api.output(success=1, data=data)
+            return haxdb.data.output(success=1, data=data)
         
         if db.error:
-            return api.output(success=0, message=db.error, data=data)
+            return haxdb.data.output(success=0, message=db.error, data=data)
         
-        return api.output(success=0, message="INVALID VALUE: rowid")
+        return haxdb.data.output(success=0, message="INVALID VALUE: rowid")

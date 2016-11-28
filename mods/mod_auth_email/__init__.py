@@ -3,17 +3,17 @@ import mod_tools
 
 db = None
 config = None
-api = None
+haxdb = None
 
-def init(app_config, app_db, app_api):
-    global config, db, api
+def init(app_config, app_db, app_haxdb):
+    global config, db, haxdb
     config = app_config
     db = app_db
-    api = app_api
+    haxdb = app_haxdb
     
-    mod_tools.init(config, db, api)
+    mod_tools.init(config, db, haxdb)
     mod_db.init(db,config)
-    mod_api.init(api,db,config,mod_tools)
+    mod_api.init(haxdb,db,config,mod_tools)
     
     
 def run ():

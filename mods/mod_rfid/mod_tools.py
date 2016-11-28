@@ -16,13 +16,13 @@ class tool_error:
     __str__ = __repr__
     
 
-api = None
+haxdb = None
 db = None
 config = None
 
-def init(app_config, app_db, app_api):
-    global api, db, config
-    api = app_api
+def init(app_config, app_db, app_haxdb):
+    global haxdb, db, config
+    haxdb = app_haxdb
     db = app_db
     config = app_config
     
@@ -40,7 +40,7 @@ def log(people_id, actions_name, assets_id, description, log_nodes_id=None):
         return False
     
     actions_id = row["LIST_ITEMS_ID"]
-    log_nodes_id = log_nodes_id or api.session.get("nodes_id")
+    log_nodes_id = log_nodes_id or haxdb.session.get("nodes_id")
     
     sql = """
     INSERT INTO LOGS (LOGS_ASSETS_ID, LOGS_ACTION_ID, LOGS_ACTION_PEOPLE_ID, LOGS_DESCRIPTION, LOGS_NODES_ID)

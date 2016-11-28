@@ -16,13 +16,13 @@ class tool_error:
     __str__ = __repr__
     
 
-api = None
+haxdb = None
 db = None
 config = None
 
-def init(app_config, app_db, app_api):
-    global api, db, config
-    api = app_api
+def init(app_config, app_db, app_haxdb):
+    global haxdb, db, config
+    haxdb = app_haxdb
     db = app_db
     config = app_config
 
@@ -98,26 +98,17 @@ def send_email(receiver, subject, msg):
     header += "\r\n\r\n"
     msg = header + msg
     
-    print "4.1"
-    
     import smtplib
     try:
-        print "4.2"
         server = smtplib.SMTP(config["EMAIL"]["HOST"], config["EMAIL"]["PORT"],None,10)
-        print "4.3"
         server.starttls()
-        print "4.4"
         server.login(config["EMAIL"]["USER"], config["EMAIL"]["PASS"])
-        print "4.5"
         server.sendmail(sender, receiver, msg)
-        print "4.6"
         server.quit()
-        print "4.7"
     except smtplib.SMTPRecipientsRefused:
         return tool_error("INVALID EMAIL ADDRESS")
     except smtplib.SMTPException:
         return tool_error("FAILED TO SEND EMAIL")
-    print "4.8"
     return True
 
 def get_api_key(nodes_id):
