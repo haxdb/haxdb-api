@@ -1,4 +1,5 @@
 from data import *
+import shlex
 db = None
 
 def init(app_db):
@@ -23,7 +24,7 @@ def valid_value(col_type, val):
             return False
         return True
     
-    if col_type == "STR":
+    if col_type in ("TEXT","STR"):
         return True
     
     return False
@@ -35,9 +36,18 @@ class api_call:
     query_cols = []
     search_cols = []
     order_cols = []
-    udf = False
-    
+    udf_context = None
+    udf_context_id = None
+    udf_rowid = None
+
     def list_call(self, sql, params, data, calc_row_function=None):
+        if not self.udf_context_id:
+            self.udf_context_id = -1
+            
+        if self.udf_context:
+            context_sql = "UDF_CONTEXT=? and UDF_DATA_ROWID=%s AND UDF_CONTEXT_ID=? AND UDF_ENABLED=1" % (self.udf_rowid,)
+            context_params = (self.udf_context,self.udf_context_id)
+
         query = var.get("query")
         include_lists = var.get("include_lists")
         data["input"]["query"] = query
@@ -62,16 +72,17 @@ class api_call:
                 while row:
                     data["lists"][list_name].append(dict(row))
                     row = db.next()
-                    
+
+        sql += " WHERE 1=1"
+        
         if query:
             queries = shlex.split(query)
             for query in queries:
                 qs = query.split(":")
                 if len(qs) > 1:
                     col = qs[0]
+                    vals = qs[1].split("|")
                     if col in self.query_cols:
-                        vals = qs[1].split("|")
-                        
                         sql += " AND ("
                         valcount = 0
                         for val in vals:
@@ -87,6 +98,19 @@ class api_call:
                             valcount += 1
                             
                         sql += ")"
+                    elif self.udf_context:
+                        sql += " AND ("
+                        valcount = 0
+                        for val in vals:
+                            if valcount > 0:
+                                sql += " OR "
+                            if val == "NULL":
+                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE %s and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=? and UDF_ENABLED=1) < 1" % (context_sql,)
+                                params += context_params + (col,)
+                            else:
+                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE %s and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=? and UDF_ENABLED=1 and UDF_DATA_VALUE=?) > 0" % (context_sql,)
+                                params += context_params + (col,val)
+                        sql += ")"
                 else:
                     sql += " AND ("
                     valcount = 0
@@ -97,7 +121,10 @@ class api_call:
                         sql += " %s LIKE ? " % (col,)
                         params += (query,)
                         valcount += 1
-                        
+                    
+                    if self.udf_context:
+                        sql += " OR (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE %s and UDF_ID=UDF_DATA_UDF_ID and UDF_ENABLED=1 and UDF_DATA_VALUE=?) > 0" % (context_sql,)
+                        params += context_params + (query,)
                     sql += ")"
                     
         if len(self.order_cols) > 0:
@@ -115,7 +142,29 @@ class api_call:
                 row = calc_row_function(row)
             rows.append(row)
             row = db.next()
-    
+
+        if self.udf_context:
+            data["udf"] = {}
+            for r in rows:
+                rowid = r[self.udf_rowid]
+                udf_sql = """
+                SELECT * FROM UDF
+                LEFT OUTER JOIN UDF_DATA ON UDF_DATA_UDF_ID=UDF_ID AND UDF_DATA_ROWID=?
+                WHERE
+                UDF_CONTEXT=?
+                AND UDF_CONTEXT_ID=?
+                AND UDF_ENABLED=1
+                """
+                db.query(udf_sql, (rowid, self.udf_context, self.udf_context_id))
+                row = db.next()
+                while row:
+                    row = dict(row)
+                    if rowid not in data["udf"]:
+                        data["udf"][rowid] = {}
+                    data["udf"][rowid][row["UDF_NAME"]] = row["UDF_DATA_VALUE"]
+                    row = db.next()
+            
+            
         return output(success=1, data=data, rows=rows)
     
     def view_call(self, sql, params, data, calc_row_function=None):
@@ -160,16 +209,47 @@ class api_call:
         data["rowcount"] = db.rowcount
         if data["rowcount"] > 0:
             db.commit()
+            return output(success=1, data=data, message="CREATED")
+        else:
+            return output(success=0, data=data, message="NO ROWS CREATED")            
+        return None
+    
+    def delete_call(self, sql, params, data):
+        db.query(sql, params)
+        if db.error:
+            return output(success=0, data=data, message=db.error)
+        
+        data["rowcount"] = db.rowcount
+        if data["rowcount"] > 0:
+            db.commit()
             return output(success=1, data=data, message="DELETED")
         else:
             return output(success=0, data=data, message="NO ROWS DELETED")            
         return None
     
-    def delete_call(self, sql, params, data):
-        return None
-    
-    def save_call(self, sql, params, data, col, val):
+    def save_call(self, sql, params, data, col, val, rowid=None):
+        if not self.udf_context_id:
+            self.udf_context_id = -1
         if col not in self.cols:
+            if self.udf_context:
+                udf_sql = "SELECT * FROM UDF WHERE UDF_CONTEXT=? and UDF_CONTEXT_ID=? and UDF_NAME=?"
+                row = db.qaf(udf_sql, (self.udf_context, self.udf_context_id, col))
+                if not row:
+                    return output(success=0, data=data, message="INVALID COL: %s" % (col,))
+                print row
+                print valid_value(row["UDF_TYPE"], val)
+                if valid_value(row["UDF_TYPE"], val):
+                    udf_sql = "DELETE FROM UDF_DATA WHERE UDF_DATA_UDF_ID=? and UDF_DATA_ROWID=?"
+                    db.query(udf_sql, (row["UDF_ID"], rowid))
+                    udf_sql = "INSERT INTO UDF_DATA (UDF_DATA_UDF_ID, UDF_DATA_ROWID, UDF_DATA_VALUE) VALUES (?,?,?)"
+                    db.query(udf_sql, (row["UDF_ID"], rowid, val))
+                    if db.error:
+                        return output(success=0, data=data, message=db.error)
+                    data["rowcount"] = db.rowcount
+                    if data["rowcount"] > 0:
+                        db.commit()
+                        return output(success=1, data=data, message="SAVED")
+                    
             return output(success=0, data=data, message="INVALID COL: %s" % (col,))
         
         col_type = self.cols[col]

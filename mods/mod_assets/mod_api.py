@@ -37,7 +37,6 @@ def run():
         sql = """
         SELECT *
         FROM ASSETS
-        WHERE 1=1
         """
         params = ()
         return apis["ASSETS"].list_call(sql, params, data)
