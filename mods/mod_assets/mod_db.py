@@ -56,7 +56,7 @@ def init(app_db, app_config):
     
     indexes = []
     indexes.append(db.tables.index("ASSETS", ["ASSETS_NAME"], unique=True))
-    indexes.append(db.tables.index("ASSET_LINKS", ["ASSET_LINKS_ASSETS_ID"], unique=True))
+    indexes.append(db.tables.index("ASSET_LINKS", ["ASSET_LINKS_ASSETS_ID", "ASSET_LINKS_NAME"], unique=True))
     indexes.append(db.tables.index("ASSET_AUTHS", ["ASSET_AUTHS_ASSETS_ID", "ASSET_AUTHS_PEOPLE_ID"], unique=True))
 
     db.create(tables=tables, indexes=indexes)    
@@ -68,5 +68,3 @@ def run():
     db.query(sql, ("ASSET LOCATIONS",), squelch=True)
     db.commit()
     
-    db.query(sql, ("ASSET STATUSES",), squelch=True)
-    db.commit()    

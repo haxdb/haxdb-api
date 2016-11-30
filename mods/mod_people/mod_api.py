@@ -9,8 +9,6 @@ config = None
 tools = None
 apis = {}
 
-valid_types = ("STATIC","TEXT","TEXTAREA","CHECKBOX","FILE","SELECT","NUMERIC","INTEGER","FLOAT","DATE","LIST")
-
 def init(app_haxdb, app_db, app_config, app_tools):
     global haxdb, db, config, tools, apis
     haxdb = app_haxdb
@@ -35,14 +33,12 @@ def run():
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_people_list(category=None):
-        people_id = None
-        query = haxdb.data.var.get("query")
-        
+       
         data = {}
         data["input"] = {}
         data["input"]["api"] = "PEOPLE"
         data["input"]["action"] = "list"
-        data["input"]["query"] = query
+        data["input"]["category"] = category
 
         sql = """
         SELECT * FROM PEOPLE
@@ -50,7 +46,26 @@ def run():
         params = ()
         return apis["PEOPLE"].list_call(sql, params, data)
 
-
+    @haxdb.app.route("/PEOPLE/view", methods=["POST","GET"])
+    @haxdb.app.route("/PEOPLE/view/<int:rowid>", methods=["POST","GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    def mod_people_view(rowid=None):
+        rowid = rowid or haxdb.data.var.get("rowid")
+        
+        data = {}
+        data["input"] = {}
+        data["input"]["api"] = "PEOPLE"
+        data["input"]["action"] = "view"
+        data["input"]["rowid"] = rowid
+        
+        sql = """
+        SELECT * FROM PEOPLE
+        WHERE PEOPLE_ID=?
+        """
+        params = (rowid,)
+        return apis["PEOPLE"].view_call(sql, params, data)
+    
     @haxdb.app.route("/PEOPLE/save", methods=["GET","POST"])
     @haxdb.app.route("/PEOPLE/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
     @haxdb.require_auth

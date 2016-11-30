@@ -1,7 +1,7 @@
 apis = {}
 
 apis["ASSETS_RFID"] = {
-    "lists": [],
+    "lists": ["RFID ASSET STATUSES"],
     "cols": {
         "ASSETS_RFID_AUTO_LOG": "BOOL",
         "ASSETS_RFID_REQUIRE_AUTH": "BOOL",
@@ -21,10 +21,12 @@ apis["ASSETS_RFID"] = {
 apis["PEOPLE_RFID"] = {
     "lists": [],
     "cols": {
+        "PEOPLE_RFID_NAME": "STR",
         "PEOPLE_RFID_RFID": "STR",
+        "PEOPLE_RFID_ENABLED": "BOOL",
     },
     "required": [],
-    "query_cols": ["PEOPLE_RFID_PEOPLE_ID","PEOPLE_RFID_RFID"],
-    "search_cols": ["PEOPLE_LAST_NAME","PEOPLE_FIRST_NAME","PEOPLE_RFID_RFID"],
-    "order_cols": ["PEOPLE_LAST_NAME", "PEOPLE_FIRST_NAME"],
+    "query_cols": ["PEOPLE_RFID_NAME","PEOPLE_RFID_PEOPLE_ID","PEOPLE_RFID_RFID"],
+    "search_cols": ["PEOPLE_RFID_NAME","PEOPLE_RFID_RFID"],
+    "order_cols": ["PEOPLE_RFID_NAME"],
 }

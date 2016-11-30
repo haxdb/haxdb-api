@@ -74,22 +74,16 @@ def run():
             
         sql = """
         SELECT
-        P.PEOPLE_ID,
-        PFN.PEOPLE_COLUMN_VALUES_VALUE as PEOPLE_FIRST_NAME,
-        PLN.PEOPLE_COLUMN_VALUES_VALUE as PEOPLE_LAST_NAME,
+        PEOPLE_ID, PEOPLE_NAME_FIRST, PEOPLE_NAME_LAST
         A.ASSETS_NAME
         
-        FROM PEOPLE P
-        JOIN PEOPLE_COLUMNS PC 
-        JOIN PEOPLE_COLUMN_VALUES PCV ON PCV.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = PC.PEOPLE_COLUMNS_ID AND PCV.PEOPLE_COLUMN_VALUES_PEOPLE_ID = P.PEOPLE_ID
+        FROM PEOPLE
         JOIN ASSET_AUTHS AA ON AA.ASSET_AUTHS_PEOPLE_ID = P.PEOPLE_ID
         JOIN ASSETS A ON A.ASSETS_ID = AA.ASSET_AUTHS_ASSETS_ID
-        LEFT OUTER JOIN PEOPLE_COLUMN_VALUES PFN ON PFN.PEOPLE_COLUMN_VALUES_PEOPLE_ID = PEOPLE_ID AND PFN.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = (SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='FIRST_NAME')
-        LEFT OUTER JOIN PEOPLE_COLUMN_VALUES PLN ON PLN.PEOPLE_COLUMN_VALUES_PEOPLE_ID = PEOPLE_ID AND PLN.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = (SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='LAST_NAME')
-
+        JOIN PEOPLE_RFID ON PEOPLE_RFID_PEOPLE_ID=PEOPLE_ID AND PEOPLE_RFID_RFID != '' and PEOPLE_RFID_RFID IS NOT NULL
+        
         WHERE
-        PC.PEOPLE_COLUMNS_NAME='RFID'
-        AND PCV.PEOPLE_COLUMN_VALUES_VALUE = ?
+        PEOPLE_RFID_RFID = ?
         AND AA.ASSET_AUTHS_ASSETS_ID = ?
         """
         db.query(sql, (rfid,assets_id,))
@@ -109,7 +103,7 @@ def run():
                 sql = "UPDATE ASSETS_RFID SET ASSETS_RFID_AUTH_PEOPLE_ID=?, ASSETS_RFID_AUTH_START=?, ASSETS_RFID_AUTH_LAST=?  WHERE ASSETS_RFID_ASSETS_ID=?"
                 db.query(sql,(row["PEOPLE_ID"],auth_now,auth_now,assets_id))
                 if auto_log and int(auto_log) == 1:
-                    description = "%s %s %s on %s" % (row["PEOPLE_FIRST_NAME"], row["PEOPLE_LAST_NAME"], "RFID AUTH", row["ASSETS_NAME"])
+                    description = "%s %s %s on %s" % (row["PEOPLE_NAME_FIRST"], row["PEOPLE_NAME_LAST"], "RFID AUTH", row["ASSETS_NAME"])
                     tools.log(row["PEOPLE_ID"], "RFID AUTH", assets_id, description)
 
             return haxdb.data.output(success=1, data=data, message="SUCCESS")
@@ -117,31 +111,22 @@ def run():
         if auto_log and int(auto_log) == 1:
             sql = """
                 SELECT
-                P.PEOPLE_ID,
-                PFN.PEOPLE_COLUMN_VALUES_VALUE as PEOPLE_FIRST_NAME,
-                PLN.PEOPLE_COLUMN_VALUES_VALUE as PEOPLE_LAST_NAME,
-                A.ASSETS_NAME
-        
+                P.PEOPLE_ID, PEOPLE_NAME_FIRST, PEOPLE_NAME_LAST, A.ASSETS_NAME
                 FROM PEOPLE P
-                JOIN PEOPLE_COLUMNS PC 
-                JOIN PEOPLE_COLUMN_VALUES PCV ON PCV.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = PC.PEOPLE_COLUMNS_ID AND PCV.PEOPLE_COLUMN_VALUES_PEOPLE_ID = P.PEOPLE_ID
-                JOIN ASSETS A
-                LEFT OUTER JOIN PEOPLE_COLUMN_VALUES PFN ON PFN.PEOPLE_COLUMN_VALUES_PEOPLE_ID = PEOPLE_ID AND PFN.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = (SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='FIRST_NAME')
-                LEFT OUTER JOIN PEOPLE_COLUMN_VALUES PLN ON PLN.PEOPLE_COLUMN_VALUES_PEOPLE_ID = PEOPLE_ID AND PLN.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = (SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='LAST_NAME')
-        
+                JOIN ASSETS A 
+                JOIN PEOPLE_RFID ON PEOPLE_RFID_PEOPLE_ID=PEOPLE_ID AND PEOPLE_RFID_RFID != '' and PEOPLE_RFID_RFID IS NOT NULL
                 WHERE
-                PC.PEOPLE_COLUMNS_NAME='RFID'
-                AND PCV.PEOPLE_COLUMN_VALUES_VALUE = ?
+                AND PEOPLE_RFID_RFID = ?
                 AND A.ASSETS_ID = ?
                 """
             db.query(sql, (rfid, assets_id))
             row = db.next()
             if row:
-                description = "%s %s DENY ON %s" % (row["PEOPLE_FIRST_NAME"], row["PEOPLE_LAST_NAME"], row["ASSETS_NAME"])
+                description = "%s %s DENY ON %s" % (row["PEOPLE_NAME_FIRST"], row["PEOPLE_NAME_LAST"], row["ASSETS_NAME"])
                 tools.log(row["PEOPLE_ID"], "RFID DENY", assets_id, description)
             else:
                 description = "UNKNOWN USER ATTEMPT ON %s" % (assets_name,)
-                tools.log(None, "DENY", assets_id, description)
+                tools.log(None, "RFID DENY", assets_id, description)
 
         return haxdb.data.output(success=0, message="ASSET: %s\nPERMISSION DENIED" % (assets_name,), data=data)
 
@@ -218,14 +203,10 @@ def run():
 
         sql = """
         SELECT *, 
-        FNAME.PEOPLE_COLUMN_VALUES_VALUE AS PEOPLE_FIRST_NAME, 
-        LNAME.PEOPLE_COLUMN_VALUES_VALUE AS PEOPLE_LAST_NAME
-        
+        PEOPLE_NAME_FIRST, PEOPLE_NAME_LAST
         FROM ASSETS_RFID
         JOIN ASSETS ON ASSETS_ID = ASSETS_RFID_ASSETS_ID
-        LEFT OUTER JOIN PEOPLE ON ASSETS_RFID_STATUS_PEOPLE_ID=PEOPLE_ID
-        LEFT OUTER JOIN PEOPLE_COLUMN_VALUES FNAME ON FNAME.PEOPLE_COLUMN_VALUES_PEOPLE_ID=PEOPLE_ID AND FNAME.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID=(SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='FIRST_NAME')
-        LEFT OUTER JOIN PEOPLE_COLUMN_VALUES LNAME ON LNAME.PEOPLE_COLUMN_VALUES_PEOPLE_ID=PEOPLE_ID AND LNAME.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID=(SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='LAST_NAME')
+        LEFT OUTER JOIN PEOPLE ON ASSETS_RFID_AUTH_PEOPLE_ID=PEOPLE_ID
         """
         return apis["ASSETS_RFID"].list_call(sql, (), data)
     
@@ -249,12 +230,10 @@ def run():
         data["input"]["rowid"] = rowid
 
         sql = """SELECT ASSETS.*, ASSETS_RFID.*, 
-        PFN.PEOPLE_COLUMN_VALUES_VALUE as ASSETS_RFID_AUTH_FIRST_NAME,
-        PLN.PEOPLE_COLUMN_VALUES_VALUE as ASSETS_RFID_AUTH_LAST_NAME
+        PEOPLE_NAME_FIRST, PEOPLE_NAME_LAST
         FROM ASSETS        
         LEFT OUTER JOIN ASSETS_RFID ON ASSETS_ID = ASSETS_RFID_ASSETS_ID
-        LEFT OUTER JOIN PEOPLE_COLUMN_VALUES PFN ON PFN.PEOPLE_COLUMN_VALUES_PEOPLE_ID = ASSETS_RFID_AUTH_PEOPLE_ID AND PFN.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = (SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='FIRST_NAME')
-        LEFT OUTER JOIN PEOPLE_COLUMN_VALUES PLN ON PLN.PEOPLE_COLUMN_VALUES_PEOPLE_ID = ASSETS_RFID_AUTH_PEOPLE_ID AND PLN.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = (SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='LAST_NAME')
+        LEFT OUTER JOIN PEOPLE ON ASSETS_RFID_AUTH_PEOPLE_ID=PEOPLE_ID
         WHERE
         ASSETS_ID=?
         """
@@ -274,11 +253,11 @@ def run():
         data = {}
         data["input"] = {}
         data["input"]["api"] = "ASSETS_RFID"
-        data["input"]["action"] = "view"
+        data["input"]["action"] = "save"
         data["input"]["rowid"] = rowid
         
         sql = "INSERT INTO ASSETS_RFID(ASSETS_RFID_ASSETS_ID) VALUES (?)"
-        db.query(sql,(rowid,))
+        db.query(sql,(rowid,), squelch=True)
         db.commit()
 
         sql = """
@@ -286,26 +265,92 @@ def run():
         """
         params = (val, rowid,)
         
-        return apis["ASSSETS_RFID"].save_call(sql,params,data,col,val)
+        return apis["ASSETS_RFID"].save_call(sql,params,data,col,val)
     
     @haxdb.app.route("/PEOPLE_RFID/list", methods=["POST","GET"])
-    @haxdb.app.route("/PEOPLE_RFID/list/<path:query>", methods=["POST","GET"])
+    @haxdb.app.route("/PEOPLE_RFID/list/<int:people_id>", methods=["POST","GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_PEOPLE_RFID_list (people_id=None):
+        people_id = people_id or haxdb.data.var.get("people_id")
+        
         data = {}
         data["input"] = {}
         data["input"]["api"] = "PEOPLE_RFID"
         data["input"]["action"] = "list"
-        data["input"]["query"] = "query"
+        data["input"]["people_id"] = people_id
+
+        sql = "SELECT * FROM PEOPLE WHERE PEOPLE_ID=?"
+        row = db.qaf(sql,(people_id,))
+        data["verbose"] = dict(row)
         
         sql = """
         SELECT *,
-        FNAME.PEOPLE_COLUMN_VALUES_VALUE AS PEOPLE_FIRST_NAME, 
-        LNAME.PEOPLE_COLUMN_VALUES_VALUE AS PEOPLE_LAST_NAME
+        PEOPLE_NAME_FIRST, PEOPLE_NAME_LAST
         FROM PEOPLE_RFID
-        LEFT OUTER JOIN PEOPLE ON ASSETS_RFID_STATUS_PEOPLE_ID=PEOPLE_ID
-        LEFT OUTER JOIN PEOPLE_COLUMN_VALUES FNAME ON FNAME.PEOPLE_COLUMN_VALUES_PEOPLE_ID=PEOPLE_ID AND FNAME.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID=(SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='FIRST_NAME')
-        LEFT OUTER JOIN PEOPLE_COLUMN_VALUES LNAME ON LNAME.PEOPLE_COLUMN_VALUES_PEOPLE_ID=PEOPLE_ID AND LNAME.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID=(SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='LAST_NAME')
+        JOIN PEOPLE ON PEOPLE_RFID_PEOPLE_ID=PEOPLE_ID AND PEOPLE_ID=?
         """
-        return apis["PEOPLE_RFID"].list_call(sql, (), data)
+        params = (people_id,)
+        return apis["PEOPLE_RFID"].list_call(sql, params, data)
+    
+    @haxdb.app.route("/PEOPLE_RFID/new", methods=["POST", "GET"])
+    @haxdb.app.route("/PEOPLE_RFID/new/<int:people_id>/<name>", methods=["POST", "GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_PEOPLE_RFID_new(people_id=None, name=None):
+        people_id = people_id or haxdb.data.var.get("people_id")
+        name = name or haxdb.data.var.get("name")
+        
+        data = {}
+        data["input"] = {}
+        data["input"]["api"] = "PEOPLE_RFID"
+        data["input"]["action"] = "new"
+        data["input"]["people_id"] = people_id
+        data["input"]["name"] = name
+        
+        sql = "INSERT INTO PEOPLE_RFID (PEOPLE_RFID_PEOPLE_ID, PEOPLE_RFID_NAME, PEOPLE_RFID_ENABLED) "
+        sql += "VALUES (?, ?, 0)"
+        params = (people_id, name,)
+        return apis["PEOPLE_RFID"].new_call(sql, params, data)
+    
+    @haxdb.app.route("/PEOPLE_RFID/save", methods=["GET","POST"])
+    @haxdb.app.route("/PEOPLE_RFID/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_PEOPLE_RFID_save (rowid=None, col=None, val=None):
+        rowid = rowid or haxdb.data.var.get("rowid")
+        col = col or haxdb.data.var.get("col")
+        val = val or haxdb.data.var.get("val")
+        
+        data = {}
+        data["input"] = {}
+        data["input"]["api"] = "PEOPLE_RFID"
+        data["input"]["action"] = "save"
+        data["input"]["rowid"] = rowid
+        data["input"]["col"] = col
+        data["input"]["val"] = val
+        data["oid"] = "PEOPLE_RFID-%s-%s" % (rowid, col,)
+        
+        sql = "UPDATE PEOPLE_RFID SET %s=? WHERE PEOPLE_RFID_ID=?" 
+        params = (val,rowid,)
+        return apis["PEOPLE_RFID"].save_call(sql, params, data, col, val, rowid)
+    
+    @haxdb.app.route("/PEOPLE_RFID/delete", methods=["GET","POST"])
+    @haxdb.app.route("/PEOPLE_RFID/delete/<int:rowid>", methods=["GET","POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_PEOPLE_RFID_delete(rowid=None):
+        rowid = rowid or haxdb.data.var.get("rowid")
+
+        data = {}
+        data["input"] = {}
+        data["input"]["api"] = "PEOPLE_RFID"
+        data["input"]["action"] = "delete"
+        data["input"]["rowid"] = rowid
+        
+        sql = "DELETE FROM PEOPLE_RFID WHERE PEOPLE_RFID_ID=?"
+        params = (rowid,)
+        return apis["PEOPLE_RFID"].delete_call(sql, params, data)    

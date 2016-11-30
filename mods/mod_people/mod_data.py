@@ -11,7 +11,7 @@ apis["PEOPLE"] = {
     "udf_context": "PEOPLE",
     "udf_context_id": None,
     "udf_rowid": "PEOPLE_ID",
-    "query_cols": ["PEOPLE_NAME_FIRST", "PEOPLE_NAME_LAST", "PEOPLE_EMAIL", "PEOPLE_DBA"],
+    "query_cols": ["PEOPLE_ID","PEOPLE_NAME_FIRST", "PEOPLE_NAME_LAST", "PEOPLE_EMAIL", "PEOPLE_DBA"],
     "search_cols": ["PEOPLE_NAME_FIRST", "PEOPLE_NAME_LAST", "PEOPLE_EMAIL"],
     "order_cols": ["PEOPLE_NAME_LAST", "PEOPLE_NAME_FIRST"]
 }

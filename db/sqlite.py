@@ -132,6 +132,7 @@ class db:
             if not squelch:  
                 print "\n########################################\n"
                 print "SQL ERROR: %s" % self.error
+                print data
                 print "-----------------------------------"
                 print sql
                 print "\n########################################\n"
