@@ -49,10 +49,10 @@ def run():
         db.commit()
 
     sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (?,1)"
-    db.query(sql, ("RFID ASSET STATUSES",), squelch=True)
+    db.query(sql, ("ASSET STATUSES",), squelch=True)
     db.commit()        
     
-    sql = "SELECT * FROM LISTS WHERE LISTS_NAME = 'RFID ASSET STATUSES'"
+    sql = "SELECT * FROM LISTS WHERE LISTS_NAME = 'ASSET STATUSES'"
     db.query(sql)
     row = db.next()
     lists_id = row["LISTS_ID"]

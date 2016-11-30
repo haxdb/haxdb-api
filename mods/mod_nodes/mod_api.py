@@ -1,3 +1,4 @@
+import mod_data
 import os, base64, json, time
 from flask import request, session
 
@@ -5,6 +6,7 @@ haxdb = None
 db = None
 config = None
 tools = None
+apis = {}
 
 def init(app_haxdb, app_db, app_config, mod_tools):
     global haxdb, db, config, tools
@@ -12,6 +14,14 @@ def init(app_haxdb, app_db, app_config, mod_tools):
     db = app_db
     config = app_config
     tools = mod_tools
+    
+    for api_name in mod_data.apis:
+        apis[api_name] = haxdb.api.api_call()
+        apis[api_name].lists = mod_data.apis[api_name]["lists"]
+        apis[api_name].cols = mod_data.apis[api_name]["cols"]
+        apis[api_name].query_cols = mod_data.apis[api_name]["query_cols"]
+        apis[api_name].search_cols = mod_data.apis[api_name]["search_cols"]
+        apis[api_name].order_cols = mod_data.apis[api_name]["order_cols"]    
 
 
 def run():
@@ -49,72 +59,23 @@ def run():
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_api_keys_list():
-        people_id = haxdb.data.var.get("people_id")
-        assets_id = haxdb.data.var.get("assets_id")
-        query = haxdb.data.var.get("query")
-        status = haxdb.data.var.get("status")
-        dba = haxdb.data.var.get("dba")
-        readonly = haxdb.data.var.get("readonly")
-
         data = {}
         data["input"] = {}
         data["input"]["api"] = "NODES"
         data["input"]["action"] = "list"
-        data["input"]["query"] = query
-        data["input"]["people_id"] = people_id
-        data["input"]["assets_id"] = assets_id
-        data["input"]["status"] = status
-        data["input"]["dba"] = dba
-        data["input"]["readonly"] = readonly
-        
         
         sql = """
-        SELECT PEOPLE_EMAIL, ASSETS_NAME, NODES.*
+        SELECT 
+        NODES.*,
+        PEOPLE_NAME_LAST, PEOPLE_NAME_FIRST
+        ASSETS_NAME
         FROM NODES
         LEFT OUTER JOIN PEOPLE ON NODES_PEOPLE_ID=PEOPLE_ID
         LEFT OUTER JOIN ASSETS ON NODES_ASSETS_ID=ASSETS_ID
-        WHERE
-        NODES_STATUS = ?
         """
-        params = (status,)
-        
-        if query: 
-            query = "%" + query + "%"
-            sql += """
-            AND (
-            PEOPLE_EMAIL LIKE ?
-            OR NODES_API_KEY LIKE ?
-            OR NODES_IP LIKE ?
-            OR NODES_NAME LIKE ?
-            OR NODES_DESCRIPTION LIKE ?
-            )
-            """
-            params += (query, query, query, query, query,)
-            
-        if dba:
-            sql += " AND NODES_DBA=?"
-            params += (dba,)
-            
-        if readonly:
-            sql += " AND NODES_READONLY=?"
-            params += (readonly,)
-            
-        if people_id:
-            sql += " AND NODES_PEOPLE_ID=?"
-            params += (people_id, )
-            
-        if assets_id:
-            sql += " AND NODES_ASSETS_ID=?"
-            params += (assets_id, )
-                
-        db.query(sql,params)
-        rows = []
-        row = db.next()
-        while row:
-            rows.append(dict(row))
-            row = db.next()
+        params = ()
 
-        return haxdb.data.output(success=1, rows=rows, data=data)
+        return apis["NODES"].list_call(sql, params, data)
 
     @haxdb.app.route("/NODES/new", methods=["POST", "GET"])
     @haxdb.require_auth

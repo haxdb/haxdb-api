@@ -25,6 +25,95 @@ def init(app_haxdb, app_db, app_config, mod_tools):
 
 
 def run():
+    @haxdb.app.route("/ASSETS_RFID/pulse", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS_RFID/pulse/<rfid>", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS_RFID/pulse/<rfid>/<status>", methods=["POST", "GET"])
+    def mod_rfid_asset_pulse(rfid=None, status=None):
+        api_key = haxdb.data.session.get("api_key")
+        rfid = rfid or haxdb.data.var.get("rfid")
+        status = status or haxdb.data.var.get("status")
+        
+        data = {}
+        data["input"] = {}
+        data["input"]["api"] = "ASSETS_RFID"
+        data["input"]["action"] = "pulse"
+        data["input"]["rfid"] = rfid
+        data["input"]["status"] = status
+        
+        sql = """
+        SELECT * FROM NODES 
+        LEFT OUTER JOIN RFID_PEOPLE ON RFID_PEOPLE_RFID=? AND RFID_PEOPLE_ENABLED=1 AND RFID_PEOPLE_RFID IS NOT NULL AND RFID_PEOPLE_RFID != ''
+        LEFT OUTER JOIN PEOPLE ON RFID_PEOPLE_PEOPLE_ID=PEOPLE_ID
+        LEFT OUTER JOIN ASSETS ON NODES_ASSETS_ID=ASSETS_ID
+        LEFT OUTER JOIN ASSET_AUTHS ON ASSET_AUTHS_ASSETS_ID=ASSETS_ID
+        LEFT OUTER JOIN ASSET_RFID ON ASSETS_RFID_ASSETS_ID=ASSETS_ID
+        WHERE
+        NODES_API_KEY=?
+        AND NODES_API_KEY IS NOT NULL
+        AND NODES_API_KEY != ''
+        """
+        params = (rfid,api_key)
+        node = db.qaf(sql, params)
+        
+        if not node:
+            # No matching node. Does RFID match a DBA?
+            sql = """
+            SELECT * FROM PEOPLE
+            JOIN RFID_PEOPLE ON RFID_PEOPLE_ENABLED=1 AND RFID_PEOPLE_RFID IS NOT NULL AND RFID_PEOPLE_RFID != ''
+            WHERE
+            PEOPLE_DBA=1
+            AND RFID_PEOPLE_RFID=?
+            """
+            params = (rfid,)
+            person = db.qaf(sql, params)
+            if person:
+                # RFID matches a DBA.  Attempt to register node.
+                sql = """
+                    INSERT INTO NODES (NODES_API_KEY, NODES_PEOPLE_ID, NODES_NAME, NODES_READONLY, NODES_DBA, NODES_IP, NODES_ENABLED, NODES_STATUS)
+                    VALUES (?,?,?,'1','0',?,'0','0')
+                    """
+                api_key = tools.create_api_key()
+                node_name = "%s %s REGISTERED (RFID)" % (people["PEOPLE_FIRST_NAME"],people["PEOPLE_LAST_NAME"])
+                ip = str(request.environ['REMOTE_ADDR'])
+                db.query(sql, (api_key,people["PEOPLE_ID"],node_name,ip,))
+                if db.error:
+                    return haxdb.data.output(success=0, data=data, message=db.error)
+                if db.rowcount > 0:
+                    data["value"] = api_key
+                    return haxdb.data.output(success=1, data=data, message="NODE REGISTERED.\nACTIVATION NEEDED.")
+                return haxdb.data.output(success=0, data=data, message="I DON'T KNOW WHAT HAPPENED.")
+            
+            return haxdb.data.output(success=0, data=data, message="NODE MUST BE REGISTERED BY DBA.")
+
+        if int(node["NODES_STATUS"]) != 1:
+            return haxdb.data.output(success=0, data=data, message="NODE REGISTERED BUT NOT ACTIVATED.")
+        
+        if int(node["NODES_ENABLED"]) != 1:
+            return haxdb.data.output(success=0, data=data, message="NODE REGISTERED BUT NOT ENABLED.")
+            
+        if not node["NODES_ASSETS_ID"]:
+            return haxdb.data.output(success=0, data=data, message="NODE REGISTERED BUT NOT ASSOCIATED WITH ASSET.")
+        
+        if not rfid:
+            # DEAUTH ASSET
+            message ="%s\nREADY" % node["ASSETS_NAME"]
+            return haxdb.data.output(success=0, data=data, message=message)
+        
+        if not node["PEOPLE_ID"]:
+            # DEAUTH ASSET
+            return haxdb.data.output(success=0, data=data, message="RFID NOT RECOGNIZED.")
+            
+        if not node["ASSET_AUTHS_ID"]:
+            # DEAUTH ASSET
+            message = "%s\n%s %s\nNOT AUTHORIZED" % (node["ASSETS_NAME"], node["PEOPLE_NAME_FIRST"], node["PEOPLE_NAME_LAST"])
+            return haxdb.data.output(success=0, data=data, message=message)
+        
+        # AUTH ASSET
+        message = "%s\n%s %s\nAUTHORIZED" % (node["ASSETS_NAME"], node["PEOPLE_NAME_FIRST"], node["PEOPLE_NAME_LAST"])
+        return haxdb.data.output(success=1, data=data, message=message)
+        
+            
+        
     @haxdb.app.route("/RFID/asset/auth", methods=["POST", "GET"])
     @haxdb.app.route("/RFID/asset/auth/<rfid>", methods=["POST", "GET"])
     @haxdb.app.route("/ASSETS_RFID/auth", methods=["POST", "GET"])
@@ -32,7 +121,7 @@ def run():
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_rfid_asset_auth(rfid=None):
-        api_key = haxdb.session.get("api_key")
+        api_key = haxdb.data.session.get("api_key")
         rfid = rfid or haxdb.data.var.get("rfid")
         
         data = {}
@@ -131,10 +220,6 @@ def run():
         return haxdb.data.output(success=0, message="ASSET: %s\nPERMISSION DENIED" % (assets_name,), data=data)
 
 
-    @haxdb.app.route("/ASSETS_RFID/deauth", methods=["POST", "GET"])
-    def mod_rfid_asset_deauth():
-        api_key = haxdb.session.get("api_key")
-        
     @haxdb.app.route("/RFID/asset/register", methods=["POST", "GET"])
     @haxdb.app.route("/RFID/asset/register/<rfid>", methods=["POST", "GET"])
     @haxdb.app.route("/ASSETS_RFID/register", methods=["POST", "GET"])
@@ -150,16 +235,11 @@ def run():
         
         sql = """
         SELECT 
-        PEOPLE_ID, 
-        PFN.PEOPLE_COLUMN_VALUES_VALUE as PEOPLE_FIRST_NAME,
-        PLN.PEOPLE_COLUMN_VALUES_VALUE as PEOPLE_LAST_NAME
+        PEOPLE_ID, PEOPLE_NAME_LAST, PEOPLE_NAME_FIRST
         FROM PEOPLE
-        JOIN PEOPLE_COLUMNS PC ON PC.PEOPLE_COLUMNS_NAME='RFID'
-        JOIN PEOPLE_COLUMN_VALUES PCV ON PCV.PEOPLE_COLUMN_VALUES_PEOPLE_ID=PEOPLE_ID AND PCV.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = PC.PEOPLE_COLUMNS_ID
-        LEFT OUTER JOIN PEOPLE_COLUMN_VALUES PFN ON PFN.PEOPLE_COLUMN_VALUES_PEOPLE_ID = PEOPLE_ID AND PFN.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = (SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='FIRST_NAME')
-        LEFT OUTER JOIN PEOPLE_COLUMN_VALUES PLN ON PLN.PEOPLE_COLUMN_VALUES_PEOPLE_ID = PEOPLE_ID AND PLN.PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = (SELECT PEOPLE_COLUMNS_ID FROM PEOPLE_COLUMNS WHERE PEOPLE_COLUMNS_NAME='LAST_NAME')
+        JOIN PEOPLE_RFID ON PEOPLE_RFID_PEOPLE_ID=PEOPLE_ID AND PEOPLE_RFID_ENABLED=1
         WHERE
-        PCV.PEOPLE_COLUMN_VALUES_VALUE=? 
+        PEOPLE_RFID_RFID=?
         AND PEOPLE_DBA='1'
         """
         db.query(sql, (rfid,))

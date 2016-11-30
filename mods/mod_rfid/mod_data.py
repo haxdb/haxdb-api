@@ -1,7 +1,7 @@
 apis = {}
 
 apis["ASSETS_RFID"] = {
-    "lists": ["RFID ASSET STATUSES"],
+    "lists": ["ASSET STATUSES"],
     "cols": {
         "ASSETS_RFID_AUTO_LOG": "BOOL",
         "ASSETS_RFID_REQUIRE_AUTH": "BOOL",

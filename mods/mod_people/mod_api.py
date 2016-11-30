@@ -41,6 +41,23 @@ def run():
         data["input"]["category"] = category
 
         sql = """
+        SELECT * FROM LISTS
+        JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID=LISTS_ID
+        WHERE 
+        LIST_ITEMS_ENABLED=1
+        and LISTS_ID IN (SELECT UDF_LISTS_ID FROM UDF WHERE UDF_CONTEXT='PEOPLE' and UDF_CONTEXT_ID IS NULL)
+        ORDER BY LIST_ITEMS_ORDER
+        """
+        data["lists"] = {}
+        db.query(sql)
+        row = db.next()
+        while row:
+            if row["LISTS_NAME"] not in data["lists"]:
+                data["lists"][row["LISTS_NAME"]] = []
+            data["lists"][row["LISTS_NAME"]].append(dict(row))
+            row = db.next()
+        
+        sql = """
         SELECT * FROM PEOPLE
         """
         params = ()
