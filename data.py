@@ -32,20 +32,20 @@ def output(success=0, message=None, data=None, rows=None, authenticated=True):
 
 class get_class:
     def get(self, key):
-        return request.args.get(key) or self.getlist(key) or None
+        return request.args.get(key) or None
 
     def getlist(self, key):
-        return request.args.getlist(key) or request.args.getlist(key+"[]")
+        return request.args.getlist(key) or request.args.getlist(key+"[]") or None
 
     def __getitem__(self, key):
         return self.get(key)
     
 class post_class:
     def get(self, key):
-        return request.form.get(key) or self.getlist(key) or None
+        return request.form.get(key) or None
 
     def getlist(self, key):
-        return request.form.getlist(key) or request.form.getlist(key+"[]")
+        return request.form.getlist(key) or request.form.getlist(key+"[]") or None
     
     def __getitem__(self, key):
         return self.get(key)

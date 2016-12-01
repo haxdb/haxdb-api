@@ -12,6 +12,7 @@ def init(app_db, app_config):
     t = db.tables.table('ASSETS_RFID')
     t.add("ASSETS_RFID_ASSETS_ID", "INT", col_required=True, fk_table="ASSETS", fk_col="ASSETS_ID")
     t.add("ASSETS_RFID_AUTO_LOG", "INT", col_size=1)
+    t.add("ASSETS_RFID_REQUIRE_RFID", "INT", col_size=1)
     t.add("ASSETS_RFID_REQUIRE_AUTH", "INT", col_size=1)
     t.add("ASSETS_RFID_AUTH_TIMEOUT", "INT")
     t.add("ASSETS_RFID_AUTH_PEOPLE_ID", "INT", fk_table="PEOPLE", fk_col="PEOPLE_ID")

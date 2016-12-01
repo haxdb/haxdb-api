@@ -45,7 +45,7 @@ class api_call:
             self.udf_context_id=0
             
         if self.udf_context:
-            context_sql = "UDF_CONTEXT=? AND UDF_CONTEXT_ID=? UDF_DATA_ROWID=%s AND UDF_ENABLED=1" % (self.udf_rowid,)
+            context_sql = "UDF_CONTEXT=? AND UDF_CONTEXT_ID=? AND UDF_DATA_ROWID=%s AND UDF_ENABLED=1" % (self.udf_rowid,)
             context_params = (self.udf_context,self.udf_context_id)
 
         query = var.get("query")

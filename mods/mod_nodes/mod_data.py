@@ -4,6 +4,7 @@ apis["NODES"] = {
     "lists": [],
     "cols": {
         "NODES_PEOPLE_ID": "INT",
+        "NODES_ASSETS_ID": "INT",
         "NODES_NAME": "STR",
         "NODES_DESCRIPTION": "STR",
         "NODES_IP": "STR",

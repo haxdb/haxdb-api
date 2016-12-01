@@ -3,21 +3,17 @@
 import requests, json
 from config import config
 
+url = "%s/ASSETS_RFID/pulse" % config["SCRIPT"]["HOST"]
 data = { "api_key": config["SCRIPT"]["KEY"] }
 
-print ""
-rfid = raw_input("RFID: ")
+while True:
+    data["rfid"] = raw_input("RFID: ")
+    r = json.loads(requests.get(url, data=data).text)
 
-data["rfid"] = rfid
-url = "%s/ASSETS_RFID/auth" % config["SCRIPT"]["HOST"]
-r = json.loads(requests.get(url, data=data).text)
-
-print
-print r["message"]
-
-if int(r["success"]) == 1:
-    print r["row"]["ASSETS_NAME"]
-    print "%s %s" % (r["row"]["PEOPLE_FIRST_NAME"], r["row"]["PEOPLE_LAST_NAME"])
+    print "###################################"
+    print r["success"]
+    print r["message"]
+    print "###################################"
 
 
 

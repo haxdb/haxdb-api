@@ -8,11 +8,12 @@ data = { }
 rfid = raw_input("RFID: ")
 data["rfid"] = rfid
 
-url = "%s/RFID/asset/register" % config["SCRIPT"]["HOST"]
+url = "%s/ASSETS_RFID/pulse" % config["SCRIPT"]["HOST"]
 r = json.loads(requests.get(url, data=data).text)
 
 print
-print r
+print r["success"]
+print r["message"]
 
 
 
