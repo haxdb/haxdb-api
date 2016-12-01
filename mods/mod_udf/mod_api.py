@@ -34,7 +34,7 @@ def run():
     @haxdb.require_dba
     def mod_udf_def_list(context=None, context_id=None):
         context = context or haxdb.data.var.get("context")
-        context_id = context_id or haxdb.data.var.get("context_id") or None
+        context_id = context_id or haxdb.data.var.get("context_id") or 0
         
         data = {}
         data["input"] = {}
@@ -46,15 +46,9 @@ def run():
         sql = """
         SELECT *
         FROM UDF
-        JOIN UDF UDF2 ON UDF2.UDF_ID=UDF.UDF_ID AND UDF.UDF_CONTEXT=?
+        JOIN UDF UDF2 ON UDF2.UDF_ID=UDF.UDF_ID AND UDF.UDF_CONTEXT=? AND UDF.UDF_CONTEXT_ID=?
         """
-        params = (context,)
-        
-        if context_id:
-            sql += " and UDF.UDF_CONTEXT_ID=?"
-            params += (int(context_id),)
-        else:
-            sql += " and UDF.UDF_CONTEXT_ID IS NULL"
+        params = (context, context_id,)
 
         return apis["UDF"].list_call(sql, params, data)
 
@@ -66,7 +60,7 @@ def run():
     @haxdb.require_dba
     def mod_udf_def_categories(context=None, context_id=None):
         context = context or haxdb.data.var.get("context")
-        context_id = context_id or haxdb.data.var.get("context_id") or None
+        context_id = context_id or haxdb.data.var.get("context_id") or 0
         
         data = {}
         data["input"] = {}
@@ -75,30 +69,17 @@ def run():
         data["input"]["context"] = context
         data["input"]["context_id"] = context_id
 
-        if context_id:
-            sql = """
-                    SELECT UDF.UDF_CATEGORY, UDF.UDF_NAME, UDF.UDF_TYPE, UDF.UDF_LISTS_ID
-                    FROM UDF
-                    JOIN (SELECT MUDF.UDF_CATEGORY, MIN(MUDF.UDF_ORDER) UDF_ORDER FROM UDF MUDF WHERE MUDF.UDF_ID=UDF_ID GROUP BY MUDF.UDF_CATEGORY) MUDF
-                    WHERE
-                    UDF.UDF_CONTEXT=? and UDF.UDF_CONTEXT_ID=?
-                    AND UDF_ENABLED=1
-                    GROUP BY UDF.UDF_ID, UDF.UDF_CATEGORY, UDF.UDF_NAME, UDF.UDF_TYPE, UDF.UDF_LISTS_ID, UDF.UDF_ORDER
-                    ORDER BY MUDF.UDF_ORDER, UDF.UDF_CATEGORY
-                    """ 
-            params = (context, context_id)
-        else:
-            sql = """
-                    SELECT UDF.UDF_CATEGORY, UDF.UDF_NAME, UDF.UDF_TYPE, UDF.UDF_LISTS_ID
-                    FROM UDF
-                    JOIN (SELECT MUDF.UDF_CATEGORY, MIN(MUDF.UDF_ORDER) UDF_ORDER FROM UDF MUDF WHERE MUDF.UDF_ID=UDF_ID GROUP BY MUDF.UDF_CATEGORY) MUDF
-                    WHERE
-                    UDF.UDF_CONTEXT=? and UDF.UDF_CONTEXT_ID IS NULL
-                    AND UDF_ENABLED=1
-                    GROUP BY UDF.UDF_ID, UDF.UDF_CATEGORY, UDF.UDF_NAME, UDF.UDF_TYPE, UDF.UDF_LISTS_ID, UDF.UDF_ORDER
-                    ORDER BY MUDF.UDF_ORDER, UDF.UDF_CATEGORY
-                    """ 
-            params = (context, )
+        sql = """
+                SELECT UDF.UDF_CATEGORY, UDF.UDF_NAME, UDF.UDF_TYPE, UDF.UDF_LISTS_ID
+                FROM UDF
+                JOIN (SELECT MUDF.UDF_CATEGORY, MIN(MUDF.UDF_ORDER) UDF_ORDER FROM UDF MUDF WHERE MUDF.UDF_ID=UDF_ID GROUP BY MUDF.UDF_CATEGORY) MUDF
+                WHERE
+                UDF.UDF_CONTEXT=? and UDF.UDF_CONTEXT_ID=?
+                AND UDF_ENABLED=1
+                GROUP BY UDF.UDF_ID, UDF.UDF_CATEGORY, UDF.UDF_NAME, UDF.UDF_TYPE, UDF.UDF_LISTS_ID, UDF.UDF_ORDER
+                ORDER BY MUDF.UDF_ORDER, UDF.UDF_CATEGORY
+                """ 
+        params = (context, context_id)
             
         
         db.query(sql,params)
@@ -179,7 +160,10 @@ def run():
         data["input"]["val"] = val
         data["oid"] = "UDF-%s-%s" % (rowid,col,)
 
-        sql = "UPDATE UDF SET %s=? WHERE UDF_ID=? and UDF_INTERNAL!=1"
+        if col in ("UDF_ORDER","UDF_CATEGORY","UDF_ENABLED"):
+            sql = "UPDATE UDF SET %s=? WHERE UDF_ID=?"
+        else:
+            sql = "UPDATE UDF SET %s=? WHERE UDF_ID=? and UDF_INTERNAL!=1"
         params = (val,rowid,)
         return apis["UDF"].save_call(sql, params, data, col, val)
         

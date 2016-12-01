@@ -23,15 +23,17 @@ def init(app_db, app_config):
     
     
 def run():
-    
-    
-    """
-    find_sql = "select LISTS_ID FROM LISTS WHERE LISTS_NAME=?"
-    insert_sql = "INSERT INTO PEOPLE_COLUMNS (PEOPLE_COLUMNS_NAME, PEOPLE_COLUMNS_ENABLED, PEOPLE_COLUMNS_ORDER, PEOPLE_COLUMNS_TYPE, PEOPLE_COLUMNS_KEY, PEOPLE_COLUMNS_CATEGORY, PEOPLE_COLUMNS_INTERNAL, PEOPLE_COLUMNS_LISTS_ID, PEOPLE_COLUMNS_GUI, PEOPLE_COLUMNS_QUICKEDIT) VALUES (?,1,?,?,?,?,?,?,1,1)"
-        
-    db.query(find_sql, ("MEMBERSHIP TYPES",))
-    row = db.next()
+
+    insert_list = "INSERT INTO LISTS (LISTS_NAME, LISTS_INTERNAL) VALUES (?, 1)"
+    insert_list_item = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_INTERNAL, LIST_ITEMS_ORDER) VALUES (?, ?, ?, 1, 1, 999)"
+    find_list = "select LISTS_ID FROM LISTS WHERE LISTS_NAME=?"
+    insert_udf = "INSERT INTO UDF (UDF_CONTEXT, UDF_CONTEXT_ID, UDF_CATEGORY, UDF_NAME, UDF_TYPE, UDF_LISTS_ID, UDF_ORDER, UDF_ENABLED, UDF_INTERNAL) VALUES ('PEOPLE',0,?,?,?,?,999,1,1)"
+
+    db.query(insert_list, ("MEMBERSHIPS",), squelch=True)
+
+    row = db.qaf(find_list, ("MEMBERSHIPS",))
     if row:
-        db.query(insert_sql, ("MEMBERSHIP",4,"LIST",1,"PRIMARY",1, row["LISTS_ID"]), squelch=True)
+        db.query(insert_list_item, (row["LISTS_ID"], "TRIAL", "TRIAL",), squelch=True)
+        db.query(insert_list_item, (row["LISTS_ID"], "MEMBER", "MEMBER",), squelch=True)
+        db.query(insert_udf, ("PRIMARY","MEMBERSHIP","LIST",row["LISTS_ID"]), squelch=True)
         db.commit()
-"""    

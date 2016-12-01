@@ -41,14 +41,12 @@ class api_call:
     udf_rowid = None
 
     def list_call(self, sql, params, data, calc_row_function=None):
+        if not self.udf_context_id:
+            self.udf_context_id=0
+            
         if self.udf_context:
-            context_sql = "UDF_CONTEXT=? and UDF_DATA_ROWID=%s AND UDF_ENABLED=1" % (self.udf_rowid,)
-            context_params = (self.udf_context,)
-            if self.udf_context_id:
-                context_sql += " AND UDF_CONTEXT_ID=?"
-                context_params += (self.udf_context_id,)
-            else:
-                context_sql += " AND UDF_CONTEXT_ID IS NULL"
+            context_sql = "UDF_CONTEXT=? AND UDF_CONTEXT_ID=? UDF_DATA_ROWID=%s AND UDF_ENABLED=1" % (self.udf_rowid,)
+            context_params = (self.udf_context,self.udf_context_id)
 
         query = var.get("query")
         lists = var.get("lists")
@@ -164,14 +162,10 @@ class api_call:
                 LEFT OUTER JOIN UDF_DATA ON UDF_DATA_UDF_ID=UDF_ID AND UDF_DATA_ROWID=?
                 WHERE
                 UDF_CONTEXT=?
+                AND UDF_CONTEXT_ID=?
                 AND UDF_ENABLED=1
                 """
-                udf_params = (rowid, self.udf_context,)
-                if self.udf_context_id:
-                    udf_sql += " AND UDF_CONTEXT_ID=?"
-                    udf_params += (self.udf_context_id,)
-                else:
-                    udf_sql += " AND  UDF_CONTEXT_ID IS NULL"
+                udf_params = (rowid, self.udf_context, self.udf_context_id)
                     
                 db.query(udf_sql, udf_params)
                 row = db.next()
@@ -245,12 +239,8 @@ class api_call:
     def save_call(self, sql, params, data, col, val, rowid=None):
         if col not in self.cols:
             if self.udf_context:
-                if self.udf_context_id:
-                    udf_sql = "SELECT * FROM UDF WHERE UDF_CONTEXT=? and UDF_NAME=? and UDF_CONTEXT_ID=?"
-                    udf_params = (self.udf_context, col, self.udf_context_id)
-                else:
-                    udf_sql = "SELECT * FROM UDF WHERE UDF_CONTEXT=? and UDF_NAME=? and UDF_CONTEXT_ID IS NULL"
-                    udf_params = (self.udf_context, col)
+                udf_sql = "SELECT * FROM UDF WHERE UDF_CONTEXT=? and UDF_NAME=? and UDF_CONTEXT_ID=?"
+                udf_params = (self.udf_context, col, self.udf_context_id)
                 row = db.qaf(udf_sql, udf_params)
                 if not row:
                     return output(success=0, data=data, message="INVALID COL: %s" % (col,))

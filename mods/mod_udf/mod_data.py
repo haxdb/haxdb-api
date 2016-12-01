@@ -9,7 +9,6 @@ apis["UDF"] = {
     "UDF_ORDER": "FLOAT",
     "UDF_CATEGORY": "STR",
     "UDF_ENABLED": "BOOL",
-    "UDF_KEY": "BOOL",
     },
     "query_cols": ["UDF_NAME","UDF_TYPE","UDF_ORDER","UDF_CATEGORY","UDF_ENABLED","UDF_KEY"],
     "search_cols": ["UDF_NAME", "UDF_TYPE"],

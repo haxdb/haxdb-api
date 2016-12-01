@@ -45,7 +45,7 @@ def run():
         JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID=LISTS_ID
         WHERE 
         LIST_ITEMS_ENABLED=1
-        and LISTS_ID IN (SELECT UDF_LISTS_ID FROM UDF WHERE UDF_CONTEXT='PEOPLE' and UDF_CONTEXT_ID IS NULL)
+        and LISTS_ID IN (SELECT UDF_LISTS_ID FROM UDF WHERE UDF_CONTEXT='PEOPLE' and UDF_CONTEXT_ID = 0)
         ORDER BY LIST_ITEMS_ORDER
         """
         data["lists"] = {}
@@ -106,29 +106,6 @@ def run():
         params = (val, rowid)
         return apis["PEOPLE"].save_call(sql, params, data, col, val, rowid)
 
-    @haxdb.app.route("/PEOPLE/download", methods=["GET","POST"])
-    @haxdb.app.route("/PEOPLE/download/<int:rowid>/<col>", methods=["GET","POST"])
-    @haxdb.require_auth
-    @haxdb.require_dba
-    @haxdb.no_readonly
-    def mod_people_download(rowid=None,col=None):
-        rowid = rowid or haxdb.data.var.get("rowid")
-        column = col or haxdb.data.var.get("col")
-        
-        sql = """SELECT * FROM PEOPLE
-        JOIN PEOPLE_COLUMNS ON PEOPLE_COLUMNS_NAME=?
-        JOIN PEOPLE_COLUMN_VALUES ON PEOPLE_COLUMN_VALUES_PEOPLE_COLUMNS_ID = PEOPLE_COLUMNS_ID and PEOPLE_COLUMN_VALUES_PEOPLE_ID=PEOPLE_ID
-        WHERE PEOPLE_ID=?
-        """
-        db.query(sql,(column,rowid,))
-        row = db.next()
-        
-        print rowid, column, row
-        
-        if row:
-            f = row["PEOPLE_COLUMN_VALUES_VALUE"]
-            return send_from_directory(directory=config["API"]["UPLOADS"], filename=f, as_attachment=True)
-        return False
     
     @haxdb.app.route("/PEOPLE/new", methods=["GET","POST"])
     @haxdb.app.route("/PEOPLE/new/<email>", methods=["GET","POST"])

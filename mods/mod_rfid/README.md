@@ -11,9 +11,6 @@ Once a node is created it can be assigned an asset.  The auth call can use the R
 Database
 --------
 
-Creates the following entries in *PEOPLE_COLUMNS*: 
-- **RFID**
-
 Creates the following *LIST_ITEMS* for the *LISTS* entry *LOG ACTIONS*: 
 - **AUTHENTICATE**
 - **DENY**

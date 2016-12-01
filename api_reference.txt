@@ -93,26 +93,6 @@
 
 
 
-/PEOPLE_COLUMNS
-
-    /list
-        * [query]
-
-    /categories
-        
-    /save/<rowid>/<col>/<val>
-        * <rowid>
-        * <col>
-        * <val>
-
-    /new/<name>
-        * <name>
-
-    /delete/<rowid>
-        * <rowid>
-    
-
-
 
 /ASSETS
 
