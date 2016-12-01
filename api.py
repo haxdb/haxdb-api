@@ -41,15 +41,14 @@ class api_call:
     udf_rowid = None
 
     def list_call(self, sql, params, data, calc_row_function=None):
-        if not self.udf_context_id:
-            self.udf_context_id = None
-            
         if self.udf_context:
             context_sql = "UDF_CONTEXT=? and UDF_DATA_ROWID=%s AND UDF_ENABLED=1" % (self.udf_rowid,)
             context_params = (self.udf_context,)
             if self.udf_context_id:
                 context_sql += " AND UDF_CONTEXT_ID=?"
                 context_params += (self.udf_context_id,)
+            else:
+                context_sql += " AND UDF_CONTEXT_ID IS NULL"
 
         query = var.get("query")
         lists = var.get("lists")
@@ -169,8 +168,11 @@ class api_call:
                 """
                 udf_params = (rowid, self.udf_context,)
                 if self.udf_context_id:
-                    udf_sql = " AND UDF_CONTEXT_ID=?"
+                    udf_sql += " AND UDF_CONTEXT_ID=?"
                     udf_params += (self.udf_context_id,)
+                else:
+                    udf_sql += " AND  UDF_CONTEXT_ID IS NULL"
+                    
                 db.query(udf_sql, udf_params)
                 row = db.next()
                 while row:

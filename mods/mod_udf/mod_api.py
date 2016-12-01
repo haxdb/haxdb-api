@@ -53,6 +53,8 @@ def run():
         if context_id:
             sql += " and UDF.UDF_CONTEXT_ID=?"
             params += (int(context_id),)
+        else:
+            sql += " and UDF.UDF_CONTEXT_ID IS NULL"
 
         return apis["UDF"].list_call(sql, params, data)
 
