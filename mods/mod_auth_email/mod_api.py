@@ -81,7 +81,7 @@ def run():
         token = base64.urlsafe_b64encode(os.urandom(500))[5:260]
         expire = int(time.time()) + int(config["AUTH"]["TOKEN_EXPIRE"])
         sql = "INSERT INTO AUTH_TOKEN (AUTH_TOKEN_TOKEN, AUTH_TOKEN_PEOPLE_ID, AUTH_TOKEN_EXPIRE) VALUES (?,?,?)"
-        db.sql(sql, (token,people["PEOPLE_ID"],expire))
+        db.query(sql, (token,people["PEOPLE_ID"],expire))
         if db.error: return haxdb.data.output(success=0, message=db.error, meta=meta)
         db.commit()
         
