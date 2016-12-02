@@ -27,8 +27,6 @@ def init(app_db, app_config):
     
     indexes = []
     indexes.append(db.tables.index("NODES", ["NODES_API_KEY"], unique=True))
-    indexes.append(db.tables.index("NODES", ["NODES_IP"], unique=True))
-    indexes.append(db.tables.index("NODES", ["NODES_QUEUED"]))
     
     db.create(tables=tables, indexes=indexes)
     

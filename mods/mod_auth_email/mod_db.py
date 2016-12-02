@@ -17,7 +17,6 @@ def init(app_db, app_config):
     
     indexes = []
     indexes.append(db.tables.index("AUTH_TOKEN", ["AUTH_TOKEN_TOKEN"], unique=True))
-    indexes.append(db.tables.index("AUTH_TOKEN", ["AUTH_TOKEN_PEOPLE_ID"], unique=True))
     db.create(tables=tables, indexes=indexes)
     
 
