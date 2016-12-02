@@ -2,32 +2,27 @@ from flask import session as sess, jsonify, json, request
 import msgpack
 import time
 
-def output(success=0, message=None, data=None, rows=None, authenticated=True):
+def output(success=0, message=None, value=None, data=None, meta=None, authenticated=True):
     output_format = var.get("format")
-        
-    if output_format and output_format in ("min", "minjson"):
-        out = {}
-        out["success"] = success
-        out["value"] = None
-        if "value" in data and data["value"]: out["value"] = data["value"]
-        out["message"] = message
-        return json.dumps(out)
-
+    include_meta = var.get("meta")
+    
     out = {}
+    if include_meta: out["meta"] = meta
     out["success"] = success
+    out["value"] = value
     out["message"] = message
-    out["timestamp"] = time.time()
-    out["authenticated"] = 1 if authenticated else 0
-    if data: 
-        data.update(out)
-        out = data
-    if rows:
-        out["rows"] = rows
+
+    if output_format and output_format in ("min"):
+        return json.dumps(out)
 
     if output_format and output_format == "msgpack":
         return msgpack.packb(out)
 
-    return json.dumps(out) #jsonify(out)
+    out["timestamp"] = time.time()
+    out["authenticated"] = 1 if authenticated else 0
+    out["data"] = None if not data else data
+
+    return json.dumps(out)
 
 
 class get_class:

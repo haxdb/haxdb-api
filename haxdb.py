@@ -3,7 +3,7 @@ from flask import Flask, session
 import os, time, shlex
 from datetime import timedelta
 from flask_cors import CORS
-import data as data
+import data
 import api
 
 app = Flask("hdbapi")

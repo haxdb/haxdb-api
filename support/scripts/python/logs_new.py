@@ -47,6 +47,6 @@ data["assets_id"] = assets_id
 data["actions_id"] = actions_id
 data["people_id"] = people_id
 data["description"] = raw_input("Description: ")
-r = json.loads(requests.get(url, data=data).text)
+r = json.loads(requests.get(url, meta=meta).text)
 
 print r

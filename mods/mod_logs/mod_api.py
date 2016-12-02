@@ -20,11 +20,11 @@ def run():
     def mod_logs_list():
         query = haxdb.data.var.get("query")
     
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "LOGS"
-        data["input"]["action"] = "list"
-        data["input"]["query"] = query
+        
+        meta = {}
+        meta["api"] = "LOGS"
+        meta["action"] = "list"
+        meta["query"] = query
         
         sql = """
         SELECT LOGS.*, ASSETS.*, 
@@ -47,9 +47,7 @@ def run():
             db.query(sql)
     
         if db.error:
-            return haxdb.data.output(success=0, message=db.error, data=data)
-        
-        data["sql"]=sql
+            return haxdb.data.output(success=0, message=db.error, meta=meta)
         
         row = db.next()
         rows = []
@@ -57,7 +55,7 @@ def run():
             rows.append(dict(row))
             row = db.next()
     
-        return haxdb.data.output(success=1, rows=rows, data=data)
+        return haxdb.data.output(success=1, rows=rows, meta=meta)
 
     @haxdb.app.route("/LOGS/new", methods=["POST", "GET"])
     @haxdb.require_auth
@@ -74,23 +72,23 @@ def run():
         log_people_id = haxdb.session.get("api_people_id")
         log_nodes_id = haxdb.session.get("nodes_id")
         
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "LOGS"
-        data["input"]["action"] = "new"
-        data["input"]["assets_id"] = assets_id
-        data["input"]["assets_name"] = assets_name
-        data["input"]["actions_id"] = actions_id
-        data["input"]["actions_name"] = actions_name
-        data["input"]["people_id"] = people_id
-        data["input"]["description"] = description
+        
+        meta = {}
+        meta["api"] = "LOGS"
+        meta["action"] = "new"
+        meta["assets_id"] = assets_id
+        meta["assets_name"] = assets_name
+        meta["actions_id"] = actions_id
+        meta["actions_name"] = actions_name
+        meta["people_id"] = people_id
+        meta["description"] = description
         
         if assets_name and not assets_id:
             sql = "SELECT * FROM ASSETS WHERE ASSET_NAME = ?"
             db.query(sql, (assets_name,))
             row = db.next()
             if not row or not row["ASSETS_ID"]:
-                return haxdb.data.output(success=0, data=data, message="INVALID VALUE: assets_name")
+                return haxdb.data.output(success=0, meta=meta, message="INVALID VALUE: assets_name")
             assets_id = row["ASSETS_ID"]
             
         if actions_name and not actions_id:
@@ -98,7 +96,7 @@ def run():
             db.query(sql, (actions_name,))
             row = db.next()
             if not row or not row["LIST_ITEMS_ID"]:
-                return haxdb.data.output(success=0, data=data, message="INVALID VALUE: actions_name")
+                return haxdb.data.output(success=0, meta=meta, message="INVALID VALUE: actions_name")
             actionid = row["LIST_ITEMS_ID"]
 
         sql = "INSERT INTO LOGS (LOGS_ASSETS_ID, LOGS_ACTION_ID, LOGS_ACTION_PEOPLE_ID, LOGS_DESCRIPTION, LOGS_LOG_PEOPLE_ID, LOGS_NODES_ID) "
@@ -106,10 +104,10 @@ def run():
         db.query(sql, (assets_id, actions_id, people_id, description, log_people_id, log_nodes_id,))
         if db.rowcount > 0:
             db.commit()
-            data["rowid"] = db.lastrowid
-            return haxdb.data.output(success=1, data=data)
+            meta["rowid"] = db.lastrowid
+            return haxdb.data.output(success=1, meta=meta)
         
         if db.error:
-            return haxdb.data.output(success=0, message=db.error, data=data)
+            return haxdb.data.output(success=0, message=db.error, meta=meta)
         
-        return haxdb.data.output(success=0, message="UNKNOWN ERROR", data=data)
+        return haxdb.data.output(success=0, message="UNKNOWN ERROR", meta=meta)

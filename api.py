@@ -40,7 +40,7 @@ class api_call:
     udf_context_id = None
     udf_rowid = None
 
-    def list_call(self, sql, params, data, calc_row_function=None):
+    def list_call(self, sql, params, meta, calc_row_function=None):
         if not self.udf_context_id:
             self.udf_context_id=0
             
@@ -49,14 +49,13 @@ class api_call:
             context_params = (self.udf_context,self.udf_context_id)
 
         query = var.get("query")
-        lists = var.get("lists")
-        data["input"]["query"] = query
-        data["input"]["lists"] = lists
-        if lists and self.lists:
-            data["lists"] = {}
+        meta["query"] = query
+        
+        if self.lists:
+            meta["lists"] = {}
             
             for list_name in self.lists:
-                data["lists"][list_name] = []
+                meta["lists"][list_name] = []
                 list_sql = """
                 SELECT * FROM LIST_ITEMS 
                 JOIN LISTS ON LISTS_ID = LIST_ITEMS_LISTS_ID AND LISTS_NAME=?
@@ -70,7 +69,7 @@ class api_call:
                     print list_sql
                 row = db.next()
                 while row:
-                    data["lists"][list_name].append(dict(row))
+                    meta["lists"][list_name].append(dict(row))
                     row = db.next()
 
         sql += " WHERE 1=1"
@@ -144,13 +143,13 @@ class api_call:
         
         db.query(sql,params)
         if db.error:
-            return output(success=0, data=data, message=db.error)
+            return output(success=0, meta=meta, message=db.error)
         row = db.next()
         rows = []
         while row:
             row = dict(row)
             if calc_row_function:
-                row = calc_row_function(row)
+                row = calc_row_function(dict(row))
             rows.append(row)
             row = db.next()
 
@@ -173,17 +172,17 @@ class api_call:
                     row = dict(row)
                     r[row["UDF_NAME"]] = row["UDF_DATA_VALUE"]
                     row = db.next()
-                    
-        return output(success=1, data=data, rows=rows)
+
+        return output(success=1, data=rows, meta=meta)
     
-    def view_call(self, sql, params, data, calc_row_function=None):
-        lists = var.get("lists")
-        data["input"]["lists"] = lists
-        if lists and self.lists:
-            data["lists"] = {}
+    def view_call(self, sql, params, meta, calc_row_function=None):
+        data = {}
+
+        if self.lists:
+            meta["lists"] = {}
             
             for list_name in self.lists:
-                data["lists"][list_name] = []
+                meta["lists"][list_name] = []
                 list_sql = """
                 SELECT * FROM LIST_ITEMS 
                 JOIN LISTS ON LISTS_ID = LIST_ITEMS_LISTS_ID AND LISTS_NAME=?
@@ -194,85 +193,83 @@ class api_call:
                 db.query(list_sql, (list_name,))
                 row = db.next()
                 while row:
-                    data["lists"][list_name].append(dict(row))
+                    meta["lists"][list_name].append(dict(row))
                     row = db.next()
                     
                     
         row = db.qaf(sql, params)
         if db.error:
-            return output(success=0, data=data, message=db.error)
+            return output(success=0, meta=meta, message=db.error)
         
         if not row:
-            return output(success=0, data=data, message="NO DATA")
+            return output(success=0, meta=meta, message="NO DATA")
         
-        data["row"] = dict(row)
-        if calc_row_function: 
-            data["row"] = calc_row_function(data["row"])
-        return output(success=1, data=data)    
+        if calc_row_function: row = calc_row_function(dict(row))
+        return output(success=1, meta=meta, data=dict(row))
 
-    def new_call(self, sql, params, data):
+    def new_call(self, sql, params, meta):
         db.query(sql, params)
         if db.error:
-            return output(success=0, data=data, message=db.error)
+            return output(success=0, meta=meta, message=db.error)
         
-        data["rowcount"] = db.rowcount
-        if data["rowcount"] > 0:
+        meta["rowcount"] = db.rowcount
+        if meta["rowcount"] > 0:
             db.commit()
-            return output(success=1, data=data, message="CREATED")
+            return output(success=1, meta=meta, message="CREATED")
         else:
-            return output(success=0, data=data, message="NO ROWS CREATED")            
+            return output(success=0, meta=meta, message="NO ROWS CREATED")            
         return None
     
-    def delete_call(self, sql, params, data):
+    def delete_call(self, sql, params, meta):
         db.query(sql, params)
         if db.error:
-            return output(success=0, data=data, message=db.error)
+            return output(success=0, meta=meta, message=db.error)
         
-        data["rowcount"] = db.rowcount
-        if data["rowcount"] > 0:
+        meta["rowcount"] = db.rowcount
+        if meta["rowcount"] > 0:
             db.commit()
-            return output(success=1, data=data, message="DELETED")
+            return output(success=1, meta=meta, message="DELETED")
         else:
-            return output(success=0, data=data, message="NO ROWS DELETED")            
+            return output(success=0, meta=meta, message="NO ROWS DELETED")            
         return None
     
-    def save_call(self, sql, params, data, col, val, rowid=None):
+    def save_call(self, sql, params, meta, col, val, rowid=None):
         if col not in self.cols:
             if self.udf_context:
                 udf_sql = "SELECT * FROM UDF WHERE UDF_CONTEXT=? and UDF_NAME=? and UDF_CONTEXT_ID=?"
                 udf_params = (self.udf_context, col, self.udf_context_id)
                 row = db.qaf(udf_sql, udf_params)
                 if not row:
-                    return output(success=0, data=data, message="INVALID COL: %s" % (col,))
+                    return output(success=0, meta=meta, message="INVALID COL: %s" % (col,))
                 if valid_value(row["UDF_TYPE"], val):
                     udf_sql = "DELETE FROM UDF_DATA WHERE UDF_DATA_UDF_ID=? and UDF_DATA_ROWID=?"
                     db.query(udf_sql, (row["UDF_ID"], rowid))
                     udf_sql = "INSERT INTO UDF_DATA (UDF_DATA_UDF_ID, UDF_DATA_ROWID, UDF_DATA_VALUE) VALUES (?,?,?)"
                     db.query(udf_sql, (row["UDF_ID"], rowid, val))
                     if db.error:
-                        return output(success=0, data=data, message=db.error)
-                    data["rowcount"] = db.rowcount
-                    if data["rowcount"] > 0:
+                        return output(success=0, meta=meta, message=db.error)
+                    meta["rowcount"] = db.rowcount
+                    if meta["rowcount"] > 0:
                         db.commit()
-                        return output(success=1, data=data, message="SAVED")
+                        return output(success=1, meta=meta, message="SAVED")
                 else:
-                    return output(success=0, data=data, message="INVALID %s VALUE FOR COL (%s): %s" % (row["UDF_TYPE"], col, val))
+                    return output(success=0, meta=meta, message="INVALID %s VALUE FOR COL (%s): %s" % (row["UDF_TYPE"], col, val))
                     
-            return output(success=0, data=data, message="INVALID COL: %s" % (col,))
+            return output(success=0, meta=meta, message="INVALID COL: %s" % (col,))
         
         col_type = self.cols[col]
         if not valid_value(col_type, val):
-            return output(success=0, data=data, message="INVALID %s VALUE FOR COL (%s): %s" % (col_type, col, val))
+            return output(success=0, meta=meta, message="INVALID %s VALUE FOR COL (%s): %s" % (col_type, col, val))
         
         sql = sql % (col,)
         db.query(sql, params)
         
         if db.error:
-            return output(success=0, data=data, message=db.error)
+            return output(success=0, meta=meta, message=db.error)
         
-        data["rowcount"] = db.rowcount
-        if data["rowcount"] > 0:
+        meta["rowcount"] = db.rowcount
+        if meta["rowcount"] > 0:
             db.commit()
-            return output(success=1, data=data, message="SAVED")
+            return output(success=1, meta=meta, message="SAVED")
         else:
-            return output(success=0, data=data, message="NO ROWS SAVED")    
+            return output(success=0, meta=meta, message="NO ROWS SAVED")    

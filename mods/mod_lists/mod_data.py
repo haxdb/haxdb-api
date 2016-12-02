@@ -21,6 +21,6 @@ apis["LIST_ITEMS"] = {
     },
     "required": [],
     "query_cols": ["LIST_ITEMS_VALUE","LIST_ITEMS_DESCRIPTION","LIST_ITEMS_ENABLED","LIST_ITEMS_ORDER"],
-    "search_cols": ["LIST_ITEMS_VALUE""LIST_ITEMS_DESCRIPTION"],
+    "search_cols": ["LIST_ITEMS_VALUE","LIST_ITEMS_DESCRIPTION"],
     "order_cols": ["LIST_ITEMS_ORDER","LIST_ITEMS_VALUE"],
 }

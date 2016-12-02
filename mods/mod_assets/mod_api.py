@@ -29,17 +29,16 @@ def run():
     @haxdb.app.route("/ASSETS/list", methods=["POST","GET"])
     @haxdb.app.route("/ASSETS/list/<path:query>", methods=["POST","GET"])
     def mod_assets_list(query=None):
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "ASSETS"
-        data["input"]["action"] = "list"
+        meta = {}
+        meta["api"] = "ASSETS"
+        meta["action"] = "list"
             
         sql = """
         SELECT *
         FROM ASSETS
         """
         params = ()
-        return apis["ASSETS"].list_call(sql, params, data)
+        return apis["ASSETS"].list_call(sql, params, meta)
     
     
     @haxdb.app.route("/ASSETS/view", methods=["POST","GET"])
@@ -47,11 +46,10 @@ def run():
     def mod_assets_view(rowid=None):
         rowid = rowid or haxdb.data.var.get("rowid")
         
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "ASSETS"
-        data["input"]["action"] = "view"
-        data["input"]["rowid"] = rowid
+        meta = {}
+        meta["api"] = "ASSETS"
+        meta["action"] = "view"
+        meta["rowid"] = rowid
            
         sql = """
         SELECT *
@@ -59,7 +57,7 @@ def run():
         WHERE ASSETS_ID=?
         """
         params = (rowid,)
-        return apis["ASSETS"].view_call(sql, params, data)
+        return apis["ASSETS"].view_call(sql, params, meta)
 
     
     @haxdb.app.route("/ASSETS/new", methods=["POST", "GET"])
@@ -70,17 +68,15 @@ def run():
     def mod_assets_new(name=None):
         name = name or haxdb.data.var.get("name")
         
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "ASSETS"
-        data["input"]["action"] = "new"
-        data["input"]["name"] = name
-        data["input"]["qty"] = qty
+        meta = {}
+        meta["api"] = "ASSETS"
+        meta["action"] = "new"
+        meta["name"] = name
         
         sql = "INSERT INTO ASSETS (ASSETS_NAME, ASSETS_QUANTITY, ASSETS_INTERNAL) VALUES (?, 1, 0)"
         params = (name, )
         
-        return apis["ASSETS"].new_call(sql, params, data)
+        return apis["ASSETS"].new_call(sql, params, meta)
 
     @haxdb.app.route("/ASSETS/delete", methods=["GET","POST"])
     @haxdb.app.route("/ASSETS/delete/<int:rowid>", methods=["GET","POST"])
@@ -90,16 +86,15 @@ def run():
     def mod_assets_delete(rowid=None):
         rowid = rowid or haxdb.data.var.get("rowid")
 
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "ASSETS"
-        data["input"]["action"] = "delete"
-        data["input"]["rowid"] = rowid
+        meta = {}
+        meta["api"] = "ASSETS"
+        meta["action"] = "delete"
+        meta["rowid"] = rowid
         
         sql = "DELETE FROM ASSETS WHERE ASSETS_ID=? and ASSETS_INTERNAL!=1"
         params = (rowid,)
         
-        return apis["ASSETS"].delete_call(sql, params, data)
+        return apis["ASSETS"].delete_call(sql, params, meta)
         
     @haxdb.app.route("/ASSETS/save", methods=["GET","POST"])
     @haxdb.app.route("/ASSETS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
@@ -111,18 +106,17 @@ def run():
         col = col or haxdb.data.var.get("col")
         val = val or haxdb.data.var.get("val")
         
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "ASSETS"
-        data["input"]["action"] = "save"
-        data["input"]["column"] = col
-        data["input"]["rowid"] = rowid
-        data["input"]["val"] = val
-        data["oid"] = "ASSETS-%s-%s" % (rowid,col,)
+        meta = {}
+        meta["api"] = "ASSETS"
+        meta["action"] = "save"
+        meta["column"] = col
+        meta["rowid"] = rowid
+        meta["val"] = val
+        meta["oid"] = "ASSETS-%s-%s" % (rowid,col,)
 
         sql = "UPDATE ASSETS SET %s=? WHERE ASSETS_ID=? and ASSETS_INTERNAL!=1"
         params = (val,rowid,)
-        return apis["ASSETS"].save_call(sql, params, data, col, val, rowid)
+        return apis["ASSETS"].save_call(sql, params, meta, col, val, rowid)
         
 
     @haxdb.app.route("/ASSET_LINKS/list", methods=["POST","GET"])
@@ -130,16 +124,15 @@ def run():
     def mod_asset_links_asset(assets_id=None):
         assets_id = assets_id or haxdb.data.var.get("assets_id")
 
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "ASSET_LINKS"
-        data["input"]["action"] = "list"
-        data["input"]["assets_id"] = assets_id
+        meta = {}
+        meta["api"] = "ASSET_LINKS"
+        meta["action"] = "list"
+        meta["assets_id"] = assets_id
 
         sql = "SELECT * FROM ASSETS WHERE ASSETS_ID=?"
         db.query(sql,(assets_id,))
         row = db.next()
-        data["name"] = row["ASSETS_NAME"]
+        meta["assets_name"] = row["ASSETS_NAME"]
 
         sql = """
         SELECT ASSET_LINKS.*
@@ -148,7 +141,7 @@ def run():
         """
         params = (assets_id,)
 
-        return apis["ASSET_LINKS"].list_call(sql, params, data)
+        return apis["ASSET_LINKS"].list_call(sql, params, meta)
 
     @haxdb.app.route("/ASSET_LINKS/new", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_LINKS/new/<int:assets_id>/<name>", methods=["POST", "GET"])
@@ -160,17 +153,16 @@ def run():
         assets_id = assets_id or haxdb.data.var.get("assets_id")
         name = name or haxdb.data.var.get("name")
         
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "ASSET_LINKS"
-        data["input"]["action"] = "new"
-        data["input"]["assets_id"] = assets_id
-        data["input"]["name"] = name
+        meta = {}
+        meta["api"] = "ASSET_LINKS"
+        meta["action"] = "new"
+        meta["assets_id"] = assets_id
+        meta["name"] = name
         
         sql = "INSERT INTO ASSET_LINKS (ASSET_LINKS_ASSETS_ID, ASSET_LINKS_NAME, ASSET_LINKS_ORDER) "
         sql += "VALUES (?, ?, 999)"
         params = (assets_id, name,)
-        return apis["ASSET_LINKS"].new_call(sql, params, data)
+        return apis["ASSET_LINKS"].new_call(sql, params, meta)
     
     @haxdb.app.route("/ASSET_LINKS/save", methods=["GET","POST"])
     @haxdb.app.route("/ASSET_LINKS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
@@ -182,18 +174,17 @@ def run():
         col = col or haxdb.data.var.get("col")
         val = val or haxdb.data.var.get("val")
         
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "ASSET_LINKS"
-        data["input"]["action"] = "save"
-        data["input"]["rowid"] = rowid
-        data["input"]["col"] = col
-        data["input"]["val"] = val
-        data["oid"] = "ASSET_LINKS-%s-%s" % (rowid, col,)
+        meta = {}
+        meta["api"] = "ASSET_LINKS"
+        meta["action"] = "save"
+        meta["rowid"] = rowid
+        meta["col"] = col
+        meta["val"] = val
+        meta["oid"] = "ASSET_LINKS-%s-%s" % (rowid, col,)
         
         sql = "UPDATE ASSET_LINKS SET %s=? WHERE ASSET_LINKS_ID=?" 
         params = (val,rowid,)
-        return apis["ASSET_LINKS"].save_call(sql, params, data, col, val, rowid)
+        return apis["ASSET_LINKS"].save_call(sql, params, meta, col, val, rowid)
     
     @haxdb.app.route("/ASSET_LINKS/delete", methods=["GET","POST"])
     @haxdb.app.route("/ASSET_LINKS/delete/<int:rowid>", methods=["GET","POST"])
@@ -203,31 +194,29 @@ def run():
     def mod_asset_links_delete(rowid=None):
         rowid = rowid or haxdb.data.var.get("rowid")
 
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "ASSET_LINKS"
-        data["input"]["action"] = "delete"
-        data["input"]["rowid"] = rowid
+        meta = {}
+        meta["api"] = "ASSET_LINKS"
+        meta["action"] = "delete"
+        meta["rowid"] = rowid
         
         sql = "DELETE FROM ASSET_LINKS WHERE ASSET_LINKS_ID=?"
         params = (rowid,)
-        return apis["ASSET_LINKS"].delete_call(sql, params, data)
+        return apis["ASSET_LINKS"].delete_call(sql, params, meta)
     
     @haxdb.app.route("/ASSET_AUTHS/list", methods=["POST","GET"])
     @haxdb.app.route("/ASSET_AUTHS/list/<int:assets_id>", methods=["POST","GET"])
     def mod_ASSET_AUTHS_asset(assets_id=None):
         assets_id = assets_id or haxdb.data.var.get("assets_id")
 
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "ASSET_AUTHS"
-        data["input"]["action"] = "list"
-        data["input"]["assets_id"] = assets_id
+        meta = {}
+        meta["api"] = "ASSET_AUTHS"
+        meta["action"] = "list"
+        meta["assets_id"] = assets_id
 
         sql = "SELECT * FROM ASSETS WHERE ASSETS_ID=?"
         db.query(sql,(assets_id,))
         row = db.next()
-        data["name"] = row["ASSETS_NAME"]
+        meta["assets_name"] = row["ASSETS_NAME"]
         
         sql = """
         SELECT 
@@ -237,7 +226,7 @@ def run():
         JOIN PEOPLE ON ASSET_AUTHS_PEOPLE_ID = PEOPLE_ID and ASSET_AUTHS_ASSETS_ID=?
         """
         params = (assets_id,)
-        return apis["ASSET_AUTHS"].list_call(sql, params, data)
+        return apis["ASSET_AUTHS"].list_call(sql, params, meta)
 
     @haxdb.app.route("/ASSET_AUTHS/new", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_AUTHS/new/<int:assets_id>/<int:people_id>", methods=["POST", "GET"])
@@ -248,17 +237,16 @@ def run():
         assets_id = assets_id or haxdb.data.var.get("assets_id")
         people_id = people_id or haxdb.data.var.get("people_id")
         
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "ASSET_AUTHS"
-        data["input"]["action"] = "new"
-        data["input"]["assets_id"] = assets_id
-        data["input"]["people_id"] = people_id
+        meta = {}
+        meta["api"] = "ASSET_AUTHS"
+        meta["action"] = "new"
+        meta["assets_id"] = assets_id
+        meta["people_id"] = people_id
         
         sql = "INSERT INTO ASSET_AUTHS (ASSET_AUTHS_ASSETS_ID, ASSET_AUTHS_PEOPLE_ID) "
         sql += "VALUES (?, ?)"
         params = (assets_id, people_id,)
-        return apis["ASSET_AUTHS"].new_call(sql, params, data)
+        return apis["ASSET_AUTHS"].new_call(sql, params, meta)
     
     @haxdb.app.route("/ASSET_AUTHS/delete", methods=["GET","POST"])
     @haxdb.app.route("/ASSET_AUTHS/delete/<int:rowid>", methods=["GET","POST"])
@@ -271,13 +259,12 @@ def run():
         assets_id = assets_id or haxdb.data.var.get("assets_id")
         people_id = people_id or haxdb.data.var.get("people_id")
 
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "ASSET_AUTHS"
-        data["input"]["action"] = "delete"
-        data["input"]["rowid"] = rowid
-        data["input"]["assets_id"] = assets_id
-        data["input"]["people_id"] = people_id
+        meta = {}
+        meta["api"] = "ASSET_AUTHS"
+        meta["action"] = "delete"
+        meta["rowid"] = rowid
+        meta["assets_id"] = assets_id
+        meta["people_id"] = people_id
         
         if rowid:
             sql = "DELETE FROM ASSET_AUTHS WHERE ASSET_AUTHS_ID=?"
@@ -288,6 +275,6 @@ def run():
             params = (assets_id, people_id,)
             
         else:
-            return haxdb.data.output(success=0, message="MISSING VALUES: rowid (or assets_id and people_id)")
+            return haxdb.data.output(success=0, message="MISSING VALUES: rowid (or assets_id and people_id)", meta=meta)
         
-        return apis["ASSET_AUTHS"].delete_call(sql, params, data)
+        return apis["ASSET_AUTHS"].delete_call(sql, params, meta)

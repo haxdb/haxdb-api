@@ -36,12 +36,12 @@ def run():
         context = context or haxdb.data.var.get("context")
         context_id = context_id or haxdb.data.var.get("context_id") or 0
         
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "UDF"
-        data["input"]["action"] = "list"
-        data["input"]["context"] = context
-        data["input"]["context_id"] = context_id
+        
+        meta = {}
+        meta["api"] = "UDF"
+        meta["action"] = "list"
+        meta["context"] = context
+        meta["context_id"] = context_id
             
         sql = """
         SELECT *
@@ -50,7 +50,7 @@ def run():
         """
         params = (context, context_id,)
 
-        return apis["UDF"].list_call(sql, params, data)
+        return apis["UDF"].list_call(sql, params, meta)
 
     @haxdb.app.route("/UDF/categories", methods=["POST","GET"])
     @haxdb.app.route("/UDF/categories/<context>", methods=["POST","GET"])
@@ -62,12 +62,12 @@ def run():
         context = context or haxdb.data.var.get("context")
         context_id = context_id or haxdb.data.var.get("context_id") or 0
         
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "UDF"
-        data["input"]["action"] = "categories"
-        data["input"]["context"] = context
-        data["input"]["context_id"] = context_id
+        
+        meta = {}
+        meta["api"] = "UDF"
+        meta["action"] = "categories"
+        meta["context"] = context
+        meta["context_id"] = context_id
 
         sql = """
                 SELECT UDF.UDF_CATEGORY, UDF.UDF_NAME, UDF.UDF_TYPE, UDF.UDF_LISTS_ID
@@ -84,18 +84,18 @@ def run():
         
         db.query(sql,params)
         if db.error:
-            return haxdb.data.output(success=0, data=data, message=db.error)
+            return haxdb.data.output(success=0, meta=meta, message=db.error)
         
-        data["rows"] = {}
+        rows = {}
         row = db.next()
         while row:
             c = row["UDF_CATEGORY"]
-            if c not in data["rows"]:
-                data["rows"][c] = []
-            data["rows"][c].append(dict(row))
+            if c not in rows:
+                rows[c] = []
+            rows[c].append(dict(row))
             row = db.next()
             
-        return haxdb.data.output(success=1, data=data)
+        return haxdb.data.output(success=1, meta=meta, data=rows)
     
     @haxdb.app.route("/UDF/new", methods=["POST", "GET"])
     @haxdb.app.route("/UDF/new/<name>", methods=["POST", "GET"])
@@ -105,22 +105,22 @@ def run():
     def mod_udf_def_new(name=None):
         name = name or haxdb.data.var.get("name")
         context = haxdb.data.var.get("context")
-        context_id = haxdb.data.var.get("context_id") or None
+        context_id = haxdb.data.var.get("context_id") or 0
         
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "UDF"
-        data["input"]["action"] = "new"
-        data["input"]["name"] = name
-        data["input"]["context"] = context
-        data["input"]["context_id"] = context_id
+        
+        meta = {}
+        meta["api"] = "UDF"
+        meta["action"] = "new"
+        meta["name"] = name
+        meta["context"] = context
+        meta["context_id"] = context_id
         
         sql = """
         INSERT INTO UDF (UDF_CONTEXT, UDF_CONTEXT_ID, UDF_CATEGORY, UDF_NAME, UDF_TYPE, UDF_ORDER, UDF_KEY, UDF_ENABLED, UDF_INTERNAL) 
         VALUES (?, ?, "NEW CATEGORY", ?, "TEXT", 999, 0, 0, 0)
         """
         params = (context, context_id, name,)
-        return apis["UDF"].new_call(sql, params, data)
+        return apis["UDF"].new_call(sql, params, meta)
     
 
     @haxdb.app.route("/UDF/delete", methods=["GET","POST"])
@@ -131,11 +131,11 @@ def run():
     def mod_udf_def_delete(rowid=None):
         rowid = rowid or haxdb.data.var.get("rowid")
 
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "UDF"
-        data["input"]["action"] = "delete"
-        data["input"]["rowid"] = rowid
+        
+        meta = {}
+        meta["api"] = "UDF"
+        meta["action"] = "delete"
+        meta["rowid"] = rowid
         
         sql = "DELETE FROM UDF WHERE UDF_ID=? and UDF_INTERNAL!=1"
         params = (rowid,)
@@ -151,19 +151,19 @@ def run():
         col = col or haxdb.data.var.get("col")
         val = val or haxdb.data.var.get("val")
         
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "UDF"
-        data["input"]["action"] = "save"
-        data["input"]["column"] = col
-        data["input"]["rowid"] = rowid
-        data["input"]["val"] = val
-        data["oid"] = "UDF-%s-%s" % (rowid,col,)
+        
+        meta = {}
+        meta["api"] = "UDF"
+        meta["action"] = "save"
+        meta["column"] = col
+        meta["rowid"] = rowid
+        meta["val"] = val
+        meta["oid"] = "UDF-%s-%s" % (rowid,col,)
 
         if col in ("UDF_ORDER","UDF_CATEGORY","UDF_ENABLED"):
             sql = "UPDATE UDF SET %s=? WHERE UDF_ID=?"
         else:
             sql = "UPDATE UDF SET %s=? WHERE UDF_ID=? and UDF_INTERNAL!=1"
         params = (val,rowid,)
-        return apis["UDF"].save_call(sql, params, data, col, val)
+        return apis["UDF"].save_call(sql, params, meta, col, val)
         

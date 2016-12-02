@@ -37,10 +37,6 @@ class db:
                 create_table_sql += ", %s_INSERTED TIMESTAMP NOT NULL DEFAULT current_timestamp" % table.name
                 create_table_sql += ", %s_UPDATED TIMESTAMP NOT NULL DEFAULT current_timestamp" % table.name
                 
-                #for col in table:
-                #    if col.fk_table and col.fk_col:
-                #        create_table_sql += ", FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE" % (col.name, col.fk_table, col.fk_col)
-                    
                 create_table_sql += ")"
                 self.query(create_table_sql, squelch=True)
                 self.commit()
@@ -63,7 +59,7 @@ class db:
                     if col.required:
                         sql += " NOT NULL DEFAULT ''"
                     if col.fk_table and col.fk_col:
-                        sql += " REFERENCES %s(%s)" % (col.fk_table, col.fk_col)
+                        sql += " REFERENCES %s(%s) ON DELETE CASCADE" % (col.fk_table, col.fk_col)
                     self.query(sql, squelch=True)
                     self.commit()
                 self.query("PRAGMA foreign_keys = 1")

@@ -67,10 +67,10 @@ def run():
                 pass
             return row
         
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "NODES"
-        data["input"]["action"] = "list"
+        
+        meta = {}
+        meta["api"] = "NODES"
+        meta["action"] = "list"
         
         sql = "DELETE FROM NODES WHERE NODES_EXPIRE<?"
         db.query(sql,(time.time(),))
@@ -86,7 +86,7 @@ def run():
         """
         params = ()
 
-        return apis["NODES"].list_call(sql, params, data, calc_row)
+        return apis["NODES"].list_call(sql, params, meta, calc_row)
 
     @haxdb.app.route("/NODES/new", methods=["POST", "GET"])
     @haxdb.require_auth
@@ -99,14 +99,14 @@ def run():
         readonly = haxdb.data.var.get("readonly") or '0'
         expire_seconds = haxdb.data.var.get("expire_seconds") 
         
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "NODES"
-        data["input"]["action"] = "new"
-        data["input"]["people_id"] = people_id
-        data["input"]["dba"] = dba
-        data["input"]["readonly"] = readonly
-        data["input"]["expire_seconds"] = expire_seconds
+        
+        meta = {}
+        meta["api"] = "NODES"
+        meta["action"] = "new"
+        meta["people_id"] = people_id
+        meta["dba"] = dba
+        meta["readonly"] = readonly
+        meta["expire_seconds"] = expire_seconds
 
         if not is_dba:
             people_id = haxdb.session.get("api_people_id")
@@ -128,7 +128,7 @@ def run():
                     """
             params = (api_key,people_id,readonly,dba,)
 
-        return apis["NODES"].new_call(sql, params, data)
+        return apis["NODES"].new_call(sql, params, meta)
         
   
         
@@ -144,21 +144,21 @@ def run():
         val = val or haxdb.data.var.get("val")
         key_id = haxdb.data.session.get("nodes_id")
 
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "NODES"
-        data["input"]["action"] = "save"
-        data["input"]["col"] = col
-        data["input"]["rowid"] = rowid
-        data["input"]["val"] = val
-        data["oid"] = "NODES-%s-%s" % (rowid,col,)
+        
+        meta = {}
+        meta["api"] = "NODES"
+        meta["action"] = "save"
+        meta["col"] = col
+        meta["rowid"] = rowid
+        meta["val"] = val
+        meta["oid"] = "NODES-%s-%s" % (rowid,col,)
         
         if int(key_id) == int(rowid):
-            return haxdb.data.output(success=0, message="CANNOT UPDATE KEY YOU ARE CURRENTLY USING", data=data)
+            return haxdb.data.output(success=0, message="CANNOT UPDATE KEY YOU ARE CURRENTLY USING", meta=meta)
         
         sql = "UPDATE NODES SET %s=? WHERE NODES_ID=?"
         params = (val, rowid)
-        return apis["NODES"].save_call(sql, params, data, col, val, rowid)
+        return apis["NODES"].save_call(sql, params, meta, col, val, rowid)
     
     @haxdb.app.route("/NODES/delete", methods=["GET","POST"])
     @haxdb.app.route("/NODES/delete/<int:rowid>", methods=["GET","POST"])
@@ -169,16 +169,16 @@ def run():
         rowid = rowid or haxdb.data.var.get("rowid")
         key_id = haxdb.session.get("nodes_id")
         
-        data = {}
-        data["input"] = {}
-        data["input"]["api"] = "NODES"
-        data["input"]["action"] = "delete"
-        data["input"]["rowid"] = rowid
+        
+        meta = {}
+        meta["api"] = "NODES"
+        meta["action"] = "delete"
+        meta["rowid"] = rowid
         
         if int(key_id) == int(rowid):
-            return haxdb.data.output(success=0, message="CANNOT DELETE KEY YOU ARE CURRENTLY USING", data=data)
+            return haxdb.data.output(success=0, message="CANNOT DELETE KEY YOU ARE CURRENTLY USING", meta=meta)
         
         sql = "DELETE FROM NODES WHERE NODES_ID=?"
         params = (rowid,)
  
-        return apis["NODES"].delete_call(sql, params, data)
+        return apis["NODES"].delete_call(sql, params, meta)

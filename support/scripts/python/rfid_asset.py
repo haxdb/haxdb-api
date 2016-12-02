@@ -8,7 +8,7 @@ data = { "api_key": config["SCRIPT"]["KEY"] }
 
 while True:
     data["rfid"] = raw_input("RFID: ")
-    r = json.loads(requests.get(url, data=data).text)
+    r = json.loads(requests.get(url, meta=meta).text)
 
     print "###################################"
     print r["success"]
