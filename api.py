@@ -45,7 +45,7 @@ class api_call:
             self.udf_context_id=0
             
         if self.udf_context:
-            context_sql = "UDF_CONTEXT=? AND UDF_CONTEXT_ID=? AND UDF_DATA_ROWID=%s AND UDF_ENABLED=1" % (self.udf_rowid,)
+            context_sql = "UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s AND UDF_DATA_ROWID={} AND UDF_ENABLED=1".format(self.udf_rowid)
             context_params = (self.udf_context,self.udf_context_id)
 
         query = var.get("query")
@@ -58,7 +58,7 @@ class api_call:
                 meta["lists"][list_name] = []
                 list_sql = """
                 SELECT * FROM LIST_ITEMS 
-                JOIN LISTS ON LISTS_ID = LIST_ITEMS_LISTS_ID AND LISTS_NAME=?
+                JOIN LISTS ON LISTS_ID = LIST_ITEMS_LISTS_ID AND LISTS_NAME=%s
                 WHERE
                 LIST_ITEMS_ENABLED = '1'
                 ORDER BY LIST_ITEMS_ORDER
@@ -97,7 +97,7 @@ class api_call:
                             elif val == "NULL" and op == "!=":
                                 sql += "%s IS NOT NULL" % (col,)
                             else:
-                                sql += "%s %s ?" % (col,op,)
+                                sql += "{} {} %s".format(col,op)
                                 params += (val,)
                             
                             valcount += 1
@@ -110,13 +110,13 @@ class api_call:
                             if valcount > 0:
                                 sql += " OR "
                             if val == "NULL" and op == "=":
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE %s and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=? and UDF_ENABLED=1) < 1" % (context_sql,)
+                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE {} and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1) < 1".format(context_sql)
                                 params += context_params + (col,)
                             elif val == "NULL" and op == "!=":
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE %s and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=? and UDF_ENABLED=1) > 0" % (context_sql,)
+                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE {} and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1) > 0".format(context_sql)
                                 params += context_params + (col,)
                             else:
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE %s and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=? and UDF_ENABLED=1 and UDF_DATA_VALUE %s ?) > 0" % (context_sql,op,)
+                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE {} and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_VALUE {} %s) > 0".format(context_sql,op)
                                 params += context_params + (col,val)
                             valcount += 1
                         sql += ")"
@@ -129,12 +129,12 @@ class api_call:
                     for col in self.search_cols:
                         if valcount > 0:
                             sql += " OR "
-                        sql += " %s LIKE ? " % (col,)
+                        sql += " {} LIKE %s ".format(col)
                         params += (query,)
                         valcount += 1
                     
                     if self.udf_context:
-                        sql += " OR (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE %s and UDF_ID=UDF_DATA_UDF_ID and UDF_ENABLED=1 and UDF_DATA_VALUE LIKE ?) > 0" % (context_sql,)
+                        sql += " OR (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE {} and UDF_ID=UDF_DATA_UDF_ID and UDF_ENABLED=1 and UDF_DATA_VALUE LIKE %s) > 0".format(context_sql)
                         params += context_params + (query,)
                     sql += ")"
                     
@@ -158,10 +158,10 @@ class api_call:
                 rowid = r[self.udf_rowid]
                 udf_sql = """
                 SELECT * FROM UDF
-                LEFT OUTER JOIN UDF_DATA ON UDF_DATA_UDF_ID=UDF_ID AND UDF_DATA_ROWID=?
+                LEFT OUTER JOIN UDF_DATA ON UDF_DATA_UDF_ID=UDF_ID AND UDF_DATA_ROWID=%s
                 WHERE
-                UDF_CONTEXT=?
-                AND UDF_CONTEXT_ID=?
+                UDF_CONTEXT=%s
+                AND UDF_CONTEXT_ID=%s
                 AND UDF_ENABLED=1
                 """
                 udf_params = (rowid, self.udf_context, self.udf_context_id)
@@ -185,7 +185,7 @@ class api_call:
                 meta["lists"][list_name] = []
                 list_sql = """
                 SELECT * FROM LIST_ITEMS 
-                JOIN LISTS ON LISTS_ID = LIST_ITEMS_LISTS_ID AND LISTS_NAME=?
+                JOIN LISTS ON LISTS_ID = LIST_ITEMS_LISTS_ID AND LISTS_NAME=%s
                 WHERE
                 LIST_ITEMS_ENABLED = '1'
                 ORDER BY LIST_ITEMS_ORDER
@@ -236,15 +236,15 @@ class api_call:
     def save_call(self, sql, params, meta, col, val, rowid=None):
         if col not in self.cols:
             if self.udf_context:
-                udf_sql = "SELECT * FROM UDF WHERE UDF_CONTEXT=? and UDF_NAME=? and UDF_CONTEXT_ID=?"
+                udf_sql = "SELECT * FROM UDF WHERE UDF_CONTEXT=%s and UDF_NAME=%s and UDF_CONTEXT_ID=%s"
                 udf_params = (self.udf_context, col, self.udf_context_id)
                 row = db.qaf(udf_sql, udf_params)
                 if not row:
                     return output(success=0, meta=meta, message="INVALID COL: %s" % (col,))
                 if valid_value(row["UDF_TYPE"], val):
-                    udf_sql = "DELETE FROM UDF_DATA WHERE UDF_DATA_UDF_ID=? and UDF_DATA_ROWID=?"
+                    udf_sql = "DELETE FROM UDF_DATA WHERE UDF_DATA_UDF_ID=%s and UDF_DATA_ROWID=%s"
                     db.query(udf_sql, (row["UDF_ID"], rowid))
-                    udf_sql = "INSERT INTO UDF_DATA (UDF_DATA_UDF_ID, UDF_DATA_ROWID, UDF_DATA_VALUE) VALUES (?,?,?)"
+                    udf_sql = "INSERT INTO UDF_DATA (UDF_DATA_UDF_ID, UDF_DATA_ROWID, UDF_DATA_VALUE) VALUES (%s,%s,%s)"
                     db.query(udf_sql, (row["UDF_ID"], rowid, val))
                     if db.error:
                         return output(success=0, meta=meta, message=db.error)
@@ -261,7 +261,7 @@ class api_call:
         if not valid_value(col_type, val):
             return output(success=0, meta=meta, message="INVALID %s VALUE FOR COL (%s): %s" % (col_type, col, val))
         
-        sql = sql % (col,)
+        sql = sql.format(col)
         db.query(sql, params)
         
         if db.error:

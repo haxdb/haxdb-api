@@ -12,7 +12,7 @@ def init(app_db, app_config):
     t = db.tables.table("PEOPLE")
     t.add("PEOPLE_NAME_FIRST", "CHAR", col_size=50)
     t.add("PEOPLE_NAME_LAST", "CHAR", col_size=50)
-    t.add("PEOPLE_EMAIL", "CHAR", col_size=255)
+    t.add("PEOPLE_EMAIL", "CHAR", col_size=100)
     t.add("PEOPLE_DBA", "INT", col_size=1, col_required=True)
     tables.append(t)
 
@@ -24,10 +24,10 @@ def init(app_db, app_config):
     
 def run():
 
-    insert_list = "INSERT INTO LISTS (LISTS_NAME, LISTS_INTERNAL) VALUES (?, 1)"
-    insert_list_item = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_INTERNAL, LIST_ITEMS_ORDER) VALUES (?, ?, ?, 1, 1, 999)"
-    find_list = "select LISTS_ID FROM LISTS WHERE LISTS_NAME=?"
-    insert_udf = "INSERT INTO UDF (UDF_CONTEXT, UDF_CONTEXT_ID, UDF_CATEGORY, UDF_NAME, UDF_TYPE, UDF_LISTS_ID, UDF_ORDER, UDF_ENABLED, UDF_INTERNAL) VALUES ('PEOPLE',0,?,?,?,?,999,1,1)"
+    insert_list = "INSERT INTO LISTS (LISTS_NAME, LISTS_INTERNAL) VALUES (%s, 1)"
+    insert_list_item = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_INTERNAL, LIST_ITEMS_ORDER) VALUES (%s, %s, %s, 1, 1, 999)"
+    find_list = "select LISTS_ID FROM LISTS WHERE LISTS_NAME=%s"
+    insert_udf = "INSERT INTO UDF (UDF_CONTEXT, UDF_CONTEXT_ID, UDF_CATEGORY, UDF_NAME, UDF_TYPE, UDF_LISTS_ID, UDF_ORDER, UDF_ENABLED, UDF_INTERNAL) VALUES ('PEOPLE',0,%s,%s,%s,%s,999,1,1)"
 
     db.query(insert_list, ("MEMBERSHIPS",), squelch=True)
 

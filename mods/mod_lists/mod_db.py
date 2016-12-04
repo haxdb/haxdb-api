@@ -16,7 +16,7 @@ def init(app_db, app_config):
     
     t = db.tables.table('LIST_ITEMS')
     t.add("LIST_ITEMS_LISTS_ID", "INT", col_required=True)
-    t.add("LIST_ITEMS_VALUE", "CHAR", col_size=255, col_required=True)
+    t.add("LIST_ITEMS_VALUE", "CHAR", col_size=100, col_required=True)
     t.add("LIST_ITEMS_DESCRIPTION", "CHAR", col_size=255, col_required=True)
     t.add("LIST_ITEMS_ENABLED", "INT", col_size=1, col_required=True)
     t.add("LIST_ITEMS_INTERNAL", "INT", col_size=1)
@@ -29,27 +29,11 @@ def init(app_db, app_config):
 
     db.create(tables=tables, indexes=indexes)    
     
-    sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (?,1)"
-    db.query(sql, ("MEMBERSHIP TYPES",), squelch=True)
+    sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (%s,1)"
     db.query(sql, ("YES/NO",), squelch=True)
     db.commit()
 
     
 def run():
-
-    find_sql = "select LISTS_ID FROM LISTS WHERE LISTS_NAME=?"
-
-    db.query(find_sql, ("YES/NO",))
-    row = db.next()
-    options_sql = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER) VALUES (%s, ?, ?, 1, ?)" % row["LISTS_ID"]
-    db.query(options_sql, ( "1", "YES", 1 ), squelch=True )
-    db.query(options_sql, ( "0", "NO", 2 ), squelch=True )  
-    db.commit()
-
-    db.query(find_sql, ("MEMBERSHIP TYPES",))
-    row = db.next()
-    options_sql = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER) VALUES (%s, ?, ?, 1, ?)" % row["LISTS_ID"]
-    db.query(options_sql, ( "TRIAL", "TRIAL", 1 ), squelch=True )      
-    db.query(options_sql, ( "MEMBER", "MEMBER", 2 ), squelch=True )      
-    db.commit()
+    pass
     

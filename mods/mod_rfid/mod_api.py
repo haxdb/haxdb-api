@@ -47,7 +47,7 @@ def run():
         params = ()
         if rfid:
             sql += """
-            LEFT OUTER JOIN PEOPLE_RFID ON PEOPLE_RFID_RFID=? AND PEOPLE_RFID_ENABLED=1 AND PEOPLE_RFID_RFID IS NOT NULL AND PEOPLE_RFID_RFID != ''
+            LEFT OUTER JOIN PEOPLE_RFID ON PEOPLE_RFID_RFID=%s AND PEOPLE_RFID_ENABLED=1 AND PEOPLE_RFID_RFID IS NOT NULL AND PEOPLE_RFID_RFID != ''
             LEFT OUTER JOIN PEOPLE ON PEOPLE_RFID_PEOPLE_ID=PEOPLE_ID
             """
             params += (rfid,)        
@@ -57,7 +57,7 @@ def run():
         LEFT OUTER JOIN ASSET_AUTHS ON ASSET_AUTHS_ASSETS_ID=ASSETS_ID AND ASSET_AUTHS_PEOPLE_ID=PEOPLE_ID
         LEFT OUTER JOIN ASSETS_RFID ON ASSETS_RFID_ASSETS_ID=ASSETS_ID
         WHERE
-        NODES_API_KEY=?
+        NODES_API_KEY=%s
         AND NODES_API_KEY IS NOT NULL
         AND NODES_API_KEY != ''
         """
@@ -73,7 +73,7 @@ def run():
             JOIN PEOPLE_RFID ON PEOPLE_RFID_ENABLED=1 AND PEOPLE_RFID_RFID IS NOT NULL AND PEOPLE_RFID_RFID != ''
             WHERE
             PEOPLE_DBA=1
-            AND PEOPLE_RFID_RFID=?
+            AND PEOPLE_RFID_RFID=%s
             """
             params = (rfid,)
             person = db.qaf(sql, params)
@@ -83,7 +83,7 @@ def run():
                 # ATTEMPT TO REGISTER NODE IN QUEUE
                 ip = str(request.environ['REMOTE_ADDR'])
 
-                sql = "SELECT * FROM NODES WHERE NODES_IP=?"
+                sql = "SELECT * FROM NODES WHERE NODES_IP=%s"
                 row = db.qaf(sql,(ip,))
                 if db.error: return haxdb.data.output(success=0, meta=meta, message=db.error)
                 if row:
@@ -91,7 +91,7 @@ def run():
                 
                 sql = """
                     INSERT INTO NODES (NODES_API_KEY, NODES_PEOPLE_ID, NODES_NAME, NODES_READONLY, NODES_DBA, NODES_IP, NODES_ENABLED, NODES_QUEUED)
-                    VALUES (?,?,?,'1','0',?,'0','1')
+                    VALUES (%s,%s,%s,'1','0',%s,'0','1')
                     """
                 api_key = tools.create_api_key()
                 node_name = "%s %s REGISTERED (RFID)" % (person["PEOPLE_NAME_FIRST"],person["PEOPLE_NAME_LAST"])
@@ -186,7 +186,7 @@ def run():
         LEFT OUTER JOIN ASSETS_RFID ON ASSETS_ID = ASSETS_RFID_ASSETS_ID
         LEFT OUTER JOIN PEOPLE ON ASSETS_RFID_AUTH_PEOPLE_ID=PEOPLE_ID
         WHERE
-        ASSETS_ID=?
+        ASSETS_ID=%s
         """
         params = (rowid,)
         return apis["ASSETS_RFID"].view_call(sql, params, meta, calc_row)
@@ -207,12 +207,12 @@ def run():
         meta["action"] = "save"
         meta["rowid"] = rowid
         
-        sql = "INSERT INTO ASSETS_RFID(ASSETS_RFID_ASSETS_ID) VALUES (?)"
+        sql = "INSERT INTO ASSETS_RFID(ASSETS_RFID_ASSETS_ID) VALUES (%s)"
         db.query(sql,(rowid,), squelch=True)
         db.commit()
 
         sql = """
-        UPDATE ASSETS_RFID SET %s = ? WHERE ASSETS_RFID_ASSETS_ID = ?
+        UPDATE ASSETS_RFID SET {}=%s WHERE ASSETS_RFID_ASSETS_ID = %s
         """
         params = (val, rowid,)
         
@@ -231,7 +231,7 @@ def run():
         meta["action"] = "list"
         meta["people_id"] = people_id
 
-        sql = "SELECT * FROM PEOPLE WHERE PEOPLE_ID=?"
+        sql = "SELECT * FROM PEOPLE WHERE PEOPLE_ID=%s"
         row = db.qaf(sql,(people_id,))
         meta["people_name"] = "%s %s" % (row["PEOPLE_NAME_FIRST"],row["PEOPLE_NAME_LAST"],)
         
@@ -239,7 +239,7 @@ def run():
         SELECT *,
         PEOPLE_NAME_FIRST, PEOPLE_NAME_LAST
         FROM PEOPLE_RFID
-        JOIN PEOPLE ON PEOPLE_RFID_PEOPLE_ID=PEOPLE_ID AND PEOPLE_ID=?
+        JOIN PEOPLE ON PEOPLE_RFID_PEOPLE_ID=PEOPLE_ID AND PEOPLE_ID=%s
         """
         params = (people_id,)
         return apis["PEOPLE_RFID"].list_call(sql, params, meta)
@@ -261,7 +261,7 @@ def run():
         meta["name"] = name
         
         sql = "INSERT INTO PEOPLE_RFID (PEOPLE_RFID_PEOPLE_ID, PEOPLE_RFID_NAME, PEOPLE_RFID_ENABLED) "
-        sql += "VALUES (?, ?, 0)"
+        sql += "VALUES (%s, %s, 0)"
         params = (people_id, name,)
         return apis["PEOPLE_RFID"].new_call(sql, params, meta)
     
@@ -284,7 +284,7 @@ def run():
         meta["val"] = val
         meta["oid"] = "PEOPLE_RFID-%s-%s" % (rowid, col,)
         
-        sql = "UPDATE PEOPLE_RFID SET %s=? WHERE PEOPLE_RFID_ID=?" 
+        sql = "UPDATE PEOPLE_RFID SET {}=%s WHERE PEOPLE_RFID_ID=%s" 
         params = (val,rowid,)
         return apis["PEOPLE_RFID"].save_call(sql, params, meta, col, val, rowid)
     
@@ -302,6 +302,6 @@ def run():
         meta["action"] = "delete"
         meta["rowid"] = rowid
         
-        sql = "DELETE FROM PEOPLE_RFID WHERE PEOPLE_RFID_ID=?"
+        sql = "DELETE FROM PEOPLE_RFID WHERE PEOPLE_RFID_ID=%s"
         params = (rowid,)
         return apis["PEOPLE_RFID"].delete_call(sql, params, meta)    

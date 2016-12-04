@@ -50,7 +50,7 @@ def run():
         meta["action"] = "new"
         meta["name"] = name
         
-        sql = "INSERT INTO LISTS (LISTS_NAME,  LISTS_INTERNAL) VALUES (?, 0)"
+        sql = "INSERT INTO LISTS (LISTS_NAME,  LISTS_INTERNAL) VALUES (%s, 0)"
         params = (name,)
         return apis["LISTS"].new_call(sql, params, meta)
 
@@ -68,7 +68,7 @@ def run():
         meta["action"] = "delete"
         meta["rowid"] = rowid
         
-        sql = "DELETE FROM LISTS WHERE LISTS_ID=? and LISTS_INTERNAL!=1"
+        sql = "DELETE FROM LISTS WHERE LISTS_ID=%s and LISTS_INTERNAL!=1"
         params = (rowid,)
         return apis["LISTS"].delete_call(sql, params, meta)
         
@@ -93,7 +93,7 @@ def run():
         meta["value"] = val
         meta["oid"] = "LISTS-%s-%s" % (rowid,col,)
 
-        sql = "UPDATE LISTS SET %s=? WHERE LISTS_ID=? and LISTS_INTERNAL!=1"
+        sql = "UPDATE LISTS SET {}=%s WHERE LISTS_ID=%s and LISTS_INTERNAL!=1"
         params = (val,rowid,)
         return apis["LISTS"].save_call(sql, params, meta, col, val, rowid)
     
@@ -121,7 +121,7 @@ def run():
 
         meta["lists_name"] = lists_name
         if lists_id:
-            row = db.qaf("SELECT * FROM LISTS WHERE LISTS_ID=?", (lists_id,))
+            row = db.qaf("SELECT * FROM LISTS WHERE LISTS_ID=%s", (lists_id,))
             meta["lists_name"] = row["LISTS_NAME"]
             
         sql = """
@@ -132,10 +132,10 @@ def run():
         """
         params = ()
         if lists_id:
-            sql += " AND LISTS_ID=?"
+            sql += " AND LISTS_ID=%s"
             params += (lists_id,)
         elif lists_name:
-            sql += " AND LISTS_NAME=?"
+            sql += " AND LISTS_NAME=%s"
             params += (lists_name,)
 
         return apis["LIST_ITEMS"].list_call(sql, params, meta)
@@ -157,7 +157,7 @@ def run():
         meta["name"] = name
         
         sql = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER) "
-        sql += "VALUES (?, ?, ?, 0, 999)"
+        sql += "VALUES (%s, %s, %s, 0, 999)"
         params = (lists_id, name, name,)
         return apis["LIST_ITEMS"].new_call(sql, params, meta)
     
@@ -179,7 +179,7 @@ def run():
         meta["val"] = val
         meta["oid"] = "LIST_ITEMS-%s-%s" % (rowid,col)
         
-        sql = "UPDATE LIST_ITEMS SET %s=? WHERE LIST_ITEMS_ID=?"
+        sql = "UPDATE LIST_ITEMS SET {}=%s WHERE LIST_ITEMS_ID=%s"
         params = (val, rowid,)
         return apis["LIST_ITEMS"].save_call(sql,params,meta,col,val)
         
@@ -198,6 +198,6 @@ def run():
         meta["action"] = "delete"
         meta["rowid"] = rowid
 
-        sql = "DELETE FROM LIST_ITEMS WHERE LIST_ITEMS_ID=?"
+        sql = "DELETE FROM LIST_ITEMS WHERE LIST_ITEMS_ID=%s"
         params = (rowid,)
         return apis["LIST_ITEMS"].delete_call(sql, params, meta)

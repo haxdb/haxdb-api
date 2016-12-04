@@ -45,8 +45,7 @@ def run():
             
         sql = """
         SELECT *
-        FROM UDF
-        JOIN UDF UDF2 ON UDF2.UDF_ID=UDF.UDF_ID AND UDF.UDF_CONTEXT=? AND UDF.UDF_CONTEXT_ID=?
+        FROM ( SELECT * FROM UDF WHERE UDF.UDF_CONTEXT=%s AND UDF.UDF_CONTEXT_ID=%s ) UDF
         """
         params = (context, context_id,)
 
@@ -70,14 +69,14 @@ def run():
         meta["context_id"] = context_id
 
         sql = """
-                SELECT UDF.UDF_CATEGORY, UDF.UDF_NAME, UDF.UDF_TYPE, UDF.UDF_LISTS_ID
-                FROM UDF
-                JOIN (SELECT MUDF.UDF_CATEGORY, MIN(MUDF.UDF_ORDER) UDF_ORDER FROM UDF MUDF WHERE MUDF.UDF_ID=UDF_ID GROUP BY MUDF.UDF_CATEGORY) MUDF
+                SELECT x.UDF_CATEGORY, x.UDF_NAME, x.UDF_TYPE, x.UDF_LISTS_ID, MINORDER
+                FROM UDF x
+                JOIN (SELECT UDF_CATEGORY, MIN(UDF_ORDER) MINORDER FROM UDF WHERE UDF_ENABLED=1 GROUP BY UDF_CATEGORY) y
                 WHERE
-                UDF.UDF_CONTEXT=? and UDF.UDF_CONTEXT_ID=?
-                AND UDF_ENABLED=1
-                GROUP BY UDF.UDF_ID, UDF.UDF_CATEGORY, UDF.UDF_NAME, UDF.UDF_TYPE, UDF.UDF_LISTS_ID, UDF.UDF_ORDER
-                ORDER BY MUDF.UDF_ORDER, UDF.UDF_CATEGORY
+                y.UDF_CATEGORY=x.UDF_CATEGORY
+                AND x.UDF_CONTEXT=%s and x.UDF_CONTEXT_ID=%s
+                AND x.UDF_ENABLED=1
+                ORDER BY MINORDER, x.UDF_CATEGORY
                 """ 
         params = (context, context_id)
             
@@ -86,14 +85,21 @@ def run():
         if db.error:
             return haxdb.data.output(success=0, meta=meta, message=db.error)
         
-        rows = {}
+        rows = []
         row = db.next()
+        lastcat = None
+        cat = []
         while row:
-            c = row["UDF_CATEGORY"]
-            if c not in rows:
-                rows[c] = []
-            rows[c].append(dict(row))
+            if lastcat != row["UDF_CATEGORY"]:
+                if lastcat:
+                    rows.append(cat)
+                cat = []
+                lastcat = row["UDF_CATEGORY"]
+
+            cat.append(dict(row))
             row = db.next()
+        if cat:
+            rows.append(cat)
             
         return haxdb.data.output(success=1, meta=meta, data=rows)
     
@@ -117,7 +123,7 @@ def run():
         
         sql = """
         INSERT INTO UDF (UDF_CONTEXT, UDF_CONTEXT_ID, UDF_CATEGORY, UDF_NAME, UDF_TYPE, UDF_ORDER, UDF_KEY, UDF_ENABLED, UDF_INTERNAL) 
-        VALUES (?, ?, "NEW CATEGORY", ?, "TEXT", 999, 0, 0, 0)
+        VALUES (%s, %s, "NEW CATEGORY", %s, "TEXT", 999, 0, 0, 0)
         """
         params = (context, context_id, name,)
         return apis["UDF"].new_call(sql, params, meta)
@@ -137,7 +143,7 @@ def run():
         meta["action"] = "delete"
         meta["rowid"] = rowid
         
-        sql = "DELETE FROM UDF WHERE UDF_ID=? and UDF_INTERNAL!=1"
+        sql = "DELETE FROM UDF WHERE UDF_ID=%s and UDF_INTERNAL!=1"
         params = (rowid,)
         return apis["UDF"].delete_call(sql, params, data)
         
@@ -161,9 +167,9 @@ def run():
         meta["oid"] = "UDF-%s-%s" % (rowid,col,)
 
         if col in ("UDF_ORDER","UDF_CATEGORY","UDF_ENABLED"):
-            sql = "UPDATE UDF SET %s=? WHERE UDF_ID=?"
+            sql = "UPDATE UDF SET {}=%s WHERE UDF_ID=%s"
         else:
-            sql = "UPDATE UDF SET %s=? WHERE UDF_ID=? and UDF_INTERNAL!=1"
+            sql = "UPDATE UDF SET {}=%s WHERE UDF_ID=%s and UDF_INTERNAL!=1"
         params = (val,rowid,)
         return apis["UDF"].save_call(sql, params, meta, col, val)
         

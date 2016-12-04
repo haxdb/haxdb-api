@@ -10,7 +10,7 @@ def init(app_db, app_config):
     tables = []
     
     t = db.tables.table("AUTH_TOKEN")
-    t.add("AUTH_TOKEN_TOKEN", "CHAR", 255, col_required=True)
+    t.add("AUTH_TOKEN_TOKEN", "ASCII", 255, col_required=True)
     t.add("AUTH_TOKEN_PEOPLE_ID", "INT", col_required=True)
     t.add("AUTH_TOKEN_EXPIRE", "INT", col_required=True)
     tables.append(t)

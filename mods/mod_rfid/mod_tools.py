@@ -32,7 +32,7 @@ def log(people_id, actions_name, assets_id, description, log_nodes_id=None):
     SELECT * FROM LISTS
     JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID = LISTS_ID
     WHERE LISTS_NAME='LOG ACTIONS'
-    AND LIST_ITEMS_VALUE = ?
+    AND LIST_ITEMS_VALUE = %s
     """
     db.query(sql, (actions_name,))
     row = db.next()
@@ -44,7 +44,7 @@ def log(people_id, actions_name, assets_id, description, log_nodes_id=None):
     
     sql = """
     INSERT INTO LOGS (LOGS_ASSETS_ID, LOGS_ACTION_ID, LOGS_ACTION_PEOPLE_ID, LOGS_DESCRIPTION, LOGS_NODES_ID)
-    VALUEs (?, ?, ?, ?, ?)
+    VALUEs (%s, %s, %s, %s, %s)
     """
     db.query(sql, (assets_id, actions_id, people_id, description, log_nodes_id,))
     db.commit()

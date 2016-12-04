@@ -38,11 +38,13 @@ def run():
             select * 
             from NODES 
             where 
-            NODES_API_KEY=? 
+            NODES_API_KEY=%s 
             and NODES_ENABLED='1'
-            and (NODES_IP IS NULL OR NODES_IP='' OR NODES_IP=?)
+            and (NODES_EXPIRE IS NULL OR NODES_EXPIRE > %s)
+            and (NODES_IP IS NULL OR NODES_IP='' OR NODES_IP=%s)
             """
-            db.query(sql,(key,ip))
+            now = int(time.time())
+            db.query(sql,(key,now,ip,))
             row = db.next()
             if row and row["NODES_API_KEY"] == key:
                 haxdb.data.session.set("api_authenticated", 1)
@@ -72,7 +74,7 @@ def run():
         meta["api"] = "NODES"
         meta["action"] = "list"
         
-        sql = "DELETE FROM NODES WHERE NODES_EXPIRE<?"
+        sql = "DELETE FROM NODES WHERE NODES_EXPIRE<%s"
         db.query(sql,(time.time(),))
         
         sql = """
@@ -118,13 +120,13 @@ def run():
             expire_time = int(time.time()) + int(expire_seconds)
             sql = """
                     INSERT INTO NODES (NODES_API_KEY, NODES_PEOPLE_ID, NODES_READONLY, NODES_DBA, NODES_ENABLED, NODES_QUEUED, NODES_EXPIRE)
-                    VALUES (?,?,?,?,'0','0',?)
+                    VALUES (%s,%s,%s,%s,'0','0',%s)
                     """
             params = (api_key,people_id,readonly,dba,expire_time)
         else:
             sql = """
                     INSERT INTO NODES (NODES_API_KEY, NODES_PEOPLE_ID, NODES_READONLY, NODES_DBA, NODES_ENABLED, NODES_QUEUED)
-                    VALUES (?,?,?,?,'0','0')
+                    VALUES (%s,%s,%s,%s,'0','0')
                     """
             params = (api_key,people_id,readonly,dba,)
 
@@ -156,7 +158,7 @@ def run():
         if int(key_id) == int(rowid):
             return haxdb.data.output(success=0, message="CANNOT UPDATE KEY YOU ARE CURRENTLY USING", meta=meta)
         
-        sql = "UPDATE NODES SET %s=? WHERE NODES_ID=?"
+        sql = "UPDATE NODES SET {}=%s WHERE NODES_ID=%s"
         params = (val, rowid)
         return apis["NODES"].save_call(sql, params, meta, col, val, rowid)
     
@@ -178,7 +180,7 @@ def run():
         if int(key_id) == int(rowid):
             return haxdb.data.output(success=0, message="CANNOT DELETE KEY YOU ARE CURRENTLY USING", meta=meta)
         
-        sql = "DELETE FROM NODES WHERE NODES_ID=?"
+        sql = "DELETE FROM NODES WHERE NODES_ID=%s"
         params = (rowid,)
  
         return apis["NODES"].delete_call(sql, params, meta)

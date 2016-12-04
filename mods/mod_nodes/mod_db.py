@@ -11,10 +11,10 @@ def init(app_db, app_config):
     
     
     t = db.tables.table("NODES")
-    t.add("NODES_API_KEY","CHAR", col_size=255, col_required=True)
+    t.add("NODES_API_KEY","ASCII", col_size=255, col_required=True)
     t.add("NODES_PEOPLE_ID","INT")
     t.add("NODES_ASSETS_ID","INT")
-    t.add("NODES_NAME","CHAR", col_size=25)
+    t.add("NODES_NAME","CHAR", col_size=50)
     t.add("NODES_DESCRIPTION","CHAR", col_size=255)
     t.add("NODES_READONLY","INT", col_size=1, col_required=True)
     t.add("NODES_DBA","INT", col_size=1, col_required=True)

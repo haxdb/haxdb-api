@@ -26,6 +26,14 @@ def run():
     app.run(config["HOST"],int(config["PORT"]), debug=debug)
     
 
+@app.before_request
+def open_db():
+    db.open()
+    
+@app.teardown_appcontext
+def close_db(error):
+    db.close()
+
 def require_auth(view_function):
     @wraps(view_function)
     

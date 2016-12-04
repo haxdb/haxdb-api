@@ -39,7 +39,7 @@ def run():
         """
         if query:
             query = "%" + query + "%"
-            sql += "WHERE ASSETS_NAME LIKE ? OR ACTION_VALUE LIKE ? OR ACTION_DESCRIPTION LIKE ? OR ACTION_FIRST_NAME LIKE ? OR ACTION_LAST_NAME LIKE ? OR LOGS_NODE_NAME LIKE ?"
+            sql += "WHERE ASSETS_NAME LIKE %s OR ACTION_VALUE LIKE %s OR ACTION_DESCRIPTION LIKE %s OR ACTION_FIRST_NAME LIKE %s OR ACTION_LAST_NAME LIKE %s OR LOGS_NODE_NAME LIKE %s"
             sql += " ORDER BY LOGS_UPDATED DESC"
             db.query(sql, (query, query, query, query, query, query,))
         else:
@@ -84,7 +84,7 @@ def run():
         meta["description"] = description
         
         if assets_name and not assets_id:
-            sql = "SELECT * FROM ASSETS WHERE ASSET_NAME = ?"
+            sql = "SELECT * FROM ASSETS WHERE ASSET_NAME = %s"
             db.query(sql, (assets_name,))
             row = db.next()
             if not row or not row["ASSETS_ID"]:
@@ -92,7 +92,7 @@ def run():
             assets_id = row["ASSETS_ID"]
             
         if actions_name and not actions_id:
-            sql = "SELECT * FROM LISTS JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID=LISTS_ID WHERE LISTS_NAME='LOG ACTIONS' and LIST_ITEMS_VALUE=?"
+            sql = "SELECT * FROM LISTS JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID=LISTS_ID WHERE LISTS_NAME='LOG ACTIONS' and LIST_ITEMS_VALUE=%s"
             db.query(sql, (actions_name,))
             row = db.next()
             if not row or not row["LIST_ITEMS_ID"]:
@@ -100,7 +100,7 @@ def run():
             actionid = row["LIST_ITEMS_ID"]
 
         sql = "INSERT INTO LOGS (LOGS_ASSETS_ID, LOGS_ACTION_ID, LOGS_ACTION_PEOPLE_ID, LOGS_DESCRIPTION, LOGS_LOG_PEOPLE_ID, LOGS_NODES_ID) "
-        sql += "VALUES (?, ?, ?, ?, ?, ?)"
+        sql += "VALUES (%s, %s, %s, %s, %s, %s)"
         db.query(sql, (assets_id, actions_id, people_id, description, log_people_id, log_nodes_id,))
         if db.rowcount > 0:
             db.commit()

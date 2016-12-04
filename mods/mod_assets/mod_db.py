@@ -18,7 +18,7 @@ def init(app_db, app_config):
     t.add("ASSETS_PRODUCT_ID", "CHAR", col_size=50)
     t.add("ASSETS_SERIAL_NUMBER", "CHAR", col_size=50)
     t.add("ASSETS_QUANTITY", "INT")
-    t.add("ASSETS_LOCATION", "STR")
+    t.add("ASSETS_LOCATION", "CHAR")
     t.add("ASSETS_DESCRIPTION", "TEXT")
     t.add("ASSETS_STATUS","CHAR",col_size=50)
     t.add("ASSETS_STATUS_DESCRIPTION","CHAR",col_size=50)
@@ -64,7 +64,7 @@ def init(app_db, app_config):
     
 def run():
     
-    sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (?,1)"
+    sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (%s,1)"
     db.query(sql, ("ASSET LOCATIONS",), squelch=True)
     db.commit()
     

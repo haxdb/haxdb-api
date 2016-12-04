@@ -1,13 +1,23 @@
 import tables
-        
+       
 class db:
     db = None
     tables = tables
+    config = None
     
     def __init__(self, config):
-        if config["TYPE"] == "SQLITE":
-            import sqlite
-            self.db = sqlite.db(config)
+        self.config = config
+        
+    def open(self):
+        if self.config["TYPE"] == "SQLITE":
+            import driver_sqlite
+            self.db = driver_sqlite.db(self.config)
+        elif self.config["TYPE"] == "MARIADB":
+            import driver_mariadb
+            self.db = driver_mariadb.db(self.config)
+        
+    def close(self):
+        self.db.close()
         
     def create(self, tables, indexes):
         return self.db.create(tables, indexes)
@@ -30,9 +40,6 @@ class db:
     
     def next(self):
         return self.db.next()
-    
-    def table_exists(self, table):
-        return self.db.table_exists(table)
     
     def commit(self):
         return self.db.commit()

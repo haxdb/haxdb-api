@@ -68,7 +68,7 @@ def run():
         
         sql = """
         SELECT * FROM PEOPLE
-        WHERE PEOPLE_ID=?
+        WHERE PEOPLE_ID=%s
         """
         params = (rowid,)
         return apis["PEOPLE"].view_call(sql, params, meta)
@@ -92,7 +92,7 @@ def run():
         meta["val"] = val
         meta["oid"] = "PEOPLE-%s-%s" % (rowid,col)
         
-        sql = "UPDATE PEOPLE SET %s=? WHERE PEOPLE_ID=?"
+        sql = "UPDATE PEOPLE SET {}=%s WHERE PEOPLE_ID=%s"
         params = (val, rowid)
         return apis["PEOPLE"].save_call(sql, params, meta, col, val, rowid)
 
@@ -114,7 +114,7 @@ def run():
         if not email:
             return haxdb.data.output(success=0, message="MISSING INPUT: email", meta=meta)
 
-        sql = "INSERT INTO PEOPLE (PEOPLE_EMAIL,PEOPLE_DBA) VALUES (?,0)"
+        sql = "INSERT INTO PEOPLE (PEOPLE_EMAIL,PEOPLE_DBA) VALUES (%s,0)"
         db.query(sql,(email,))
 
         if db.rowcount > 0:
@@ -144,7 +144,7 @@ def run():
         if not rowid:
             return haxdb.data.output(success=0, message="MISSING INPUT: rowid", meta=meta)
         
-        sql = "DELETE FROM PEOPLE WHERE PEOPLE_ID = ?"
+        sql = "DELETE FROM PEOPLE WHERE PEOPLE_ID = %s"
         db.query(sql,(rowid,))
 
         if db.rowcount > 0:

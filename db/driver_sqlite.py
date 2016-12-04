@@ -12,7 +12,7 @@ class db:
     def get_datatype(self, datatype):
         if datatype == "INT":
             return "INTEGER"
-        if datatype == "VARCHAR" or datatype == "CHAR":
+        if datatype in ("VARCHAR","CHAR","ASCII"):
             return "VARCHAR"
         if datatype == "BOOL":
             return "INTEGER(1)"
@@ -137,23 +137,11 @@ class db:
     def next ( self ):
         return self.cur.fetchone()
 
-    def table_exists (self, table):
-        self.query("select * from sqlite_master where type='table' and name=%s", (table,))
-        row = self.next()
-        return (name in row and row["name"] == table)
-    
-    def get_cols (self, table):
-        rows = []
-        self.query("PRAGMA table_info(%s)" % table)
-        row = self.next()
-        while row:
-            print dict(row)
-            rows.append(row["name"])
-            self.next()
-        return rows
-    
     def commit(self):
         return self.conn.commit()
         
     def rollback(self):
         return self.conn.rollback()
+    
+    def close(self):
+        self.conn.close()

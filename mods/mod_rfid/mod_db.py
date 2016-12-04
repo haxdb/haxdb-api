@@ -25,7 +25,7 @@ def init(app_db, app_config):
     t = db.tables.table('PEOPLE_RFID')
     t.add("PEOPLE_RFID_NAME", "CHAR", col_size=50)
     t.add("PEOPLE_RFID_PEOPLE_ID", "INT", col_required=True, fk_table="PEOPLE", fk_col="PEOPLE_ID")
-    t.add("PEOPLE_RFID_RFID", "TEXT", col_size=255)
+    t.add("PEOPLE_RFID_RFID", "ASCII", col_size=255)
     t.add("PEOPLE_RFID_ENABLED", "INT", col_size=1)
     tables.append(t)
     
@@ -43,13 +43,13 @@ def run():
     row = db.next()
     lists_id = row["LISTS_ID"]
     
-    sql = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER, LIST_ITEMS_INTERNAL) VALUES (?, ?, ?, 1, 99, 1)"
+    sql = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER, LIST_ITEMS_INTERNAL) VALUES (%s, %s, %s, 1, 99, 1)"
     log_actions = ["RFID AUTH","RFID DENY","RFID REGISTER","RFID DEAUTH"]
     for log_action in log_actions:
         db.query(sql, (lists_id, log_action, log_action,), squelch=True)
         db.commit()
 
-    sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (?,1)"
+    sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (%s,1)"
     db.query(sql, ("ASSET STATUSES",), squelch=True)
     db.commit()        
     
@@ -58,7 +58,7 @@ def run():
     row = db.next()
     lists_id = row["LISTS_ID"]
     asset_statuses = ["OPERATIONAL","BORKEN"]
-    sql = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER, LIST_ITEMS_INTERNAL) VALUES (?, ?, ?, 1, 99, 1)"
+    sql = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER, LIST_ITEMS_INTERNAL) VALUES (%s, %s, %s, 1, 99, 1)"
     for asset_status in asset_statuses:
         db.query(sql, (lists_id, asset_status, asset_status,), squelch=True)
         db.commit()

@@ -54,7 +54,7 @@ def run():
         sql = """
         SELECT *
         FROM ASSETS
-        WHERE ASSETS_ID=?
+        WHERE ASSETS_ID=%s
         """
         params = (rowid,)
         return apis["ASSETS"].view_call(sql, params, meta)
@@ -73,7 +73,7 @@ def run():
         meta["action"] = "new"
         meta["name"] = name
         
-        sql = "INSERT INTO ASSETS (ASSETS_NAME, ASSETS_QUANTITY, ASSETS_INTERNAL) VALUES (?, 1, 0)"
+        sql = "INSERT INTO ASSETS (ASSETS_NAME, ASSETS_QUANTITY, ASSETS_INTERNAL) VALUES (%s, 1, 0)"
         params = (name, )
         
         return apis["ASSETS"].new_call(sql, params, meta)
@@ -91,7 +91,7 @@ def run():
         meta["action"] = "delete"
         meta["rowid"] = rowid
         
-        sql = "DELETE FROM ASSETS WHERE ASSETS_ID=? and ASSETS_INTERNAL!=1"
+        sql = "DELETE FROM ASSETS WHERE ASSETS_ID=%s and ASSETS_INTERNAL!=1"
         params = (rowid,)
         
         return apis["ASSETS"].delete_call(sql, params, meta)
@@ -114,7 +114,7 @@ def run():
         meta["val"] = val
         meta["oid"] = "ASSETS-%s-%s" % (rowid,col,)
 
-        sql = "UPDATE ASSETS SET %s=? WHERE ASSETS_ID=? and ASSETS_INTERNAL!=1"
+        sql = "UPDATE ASSETS SET {}=%s WHERE ASSETS_ID=%s and ASSETS_INTERNAL!=1"
         params = (val,rowid,)
         return apis["ASSETS"].save_call(sql, params, meta, col, val, rowid)
         
@@ -129,7 +129,7 @@ def run():
         meta["action"] = "list"
         meta["assets_id"] = assets_id
 
-        sql = "SELECT * FROM ASSETS WHERE ASSETS_ID=?"
+        sql = "SELECT * FROM ASSETS WHERE ASSETS_ID=%s"
         db.query(sql,(assets_id,))
         row = db.next()
         meta["assets_name"] = row["ASSETS_NAME"]
@@ -137,7 +137,7 @@ def run():
         sql = """
         SELECT ASSET_LINKS.*
         FROM ASSETS
-        JOIN ASSET_LINKS ON ASSET_LINKS_ASSETS_ID=ASSETS_ID AND ASSETS_ID=?
+        JOIN ASSET_LINKS ON ASSET_LINKS_ASSETS_ID=ASSETS_ID AND ASSETS_ID=%s
         """
         params = (assets_id,)
 
@@ -160,7 +160,7 @@ def run():
         meta["name"] = name
         
         sql = "INSERT INTO ASSET_LINKS (ASSET_LINKS_ASSETS_ID, ASSET_LINKS_NAME, ASSET_LINKS_ORDER) "
-        sql += "VALUES (?, ?, 999)"
+        sql += "VALUES (%s, %s, 999)"
         params = (assets_id, name,)
         return apis["ASSET_LINKS"].new_call(sql, params, meta)
     
@@ -182,7 +182,7 @@ def run():
         meta["val"] = val
         meta["oid"] = "ASSET_LINKS-%s-%s" % (rowid, col,)
         
-        sql = "UPDATE ASSET_LINKS SET %s=? WHERE ASSET_LINKS_ID=?" 
+        sql = "UPDATE ASSET_LINKS SET {}=%s WHERE ASSET_LINKS_ID=%s" 
         params = (val,rowid,)
         return apis["ASSET_LINKS"].save_call(sql, params, meta, col, val, rowid)
     
@@ -199,7 +199,7 @@ def run():
         meta["action"] = "delete"
         meta["rowid"] = rowid
         
-        sql = "DELETE FROM ASSET_LINKS WHERE ASSET_LINKS_ID=?"
+        sql = "DELETE FROM ASSET_LINKS WHERE ASSET_LINKS_ID=%s"
         params = (rowid,)
         return apis["ASSET_LINKS"].delete_call(sql, params, meta)
     
@@ -213,7 +213,7 @@ def run():
         meta["action"] = "list"
         meta["assets_id"] = assets_id
 
-        sql = "SELECT * FROM ASSETS WHERE ASSETS_ID=?"
+        sql = "SELECT * FROM ASSETS WHERE ASSETS_ID=%s"
         db.query(sql,(assets_id,))
         row = db.next()
         meta["assets_name"] = row["ASSETS_NAME"]
@@ -223,7 +223,7 @@ def run():
         ASSET_AUTHS.*, 
         PEOPLE_NAME_LAST, PEOPLE_NAME_FIRST, PEOPLE_EMAIL
         FROM ASSET_AUTHS
-        JOIN PEOPLE ON ASSET_AUTHS_PEOPLE_ID = PEOPLE_ID and ASSET_AUTHS_ASSETS_ID=?
+        JOIN PEOPLE ON ASSET_AUTHS_PEOPLE_ID = PEOPLE_ID and ASSET_AUTHS_ASSETS_ID=%s
         """
         params = (assets_id,)
         return apis["ASSET_AUTHS"].list_call(sql, params, meta)
@@ -244,7 +244,7 @@ def run():
         meta["people_id"] = people_id
         
         sql = "INSERT INTO ASSET_AUTHS (ASSET_AUTHS_ASSETS_ID, ASSET_AUTHS_PEOPLE_ID) "
-        sql += "VALUES (?, ?)"
+        sql += "VALUES (%s, %s)"
         params = (assets_id, people_id,)
         return apis["ASSET_AUTHS"].new_call(sql, params, meta)
     
@@ -267,11 +267,11 @@ def run():
         meta["people_id"] = people_id
         
         if rowid:
-            sql = "DELETE FROM ASSET_AUTHS WHERE ASSET_AUTHS_ID=?"
+            sql = "DELETE FROM ASSET_AUTHS WHERE ASSET_AUTHS_ID=%s"
             params = (rowid,)
             
         elif assets_id and people_id:
-            sql = "DELETE FROM ASSET_AUTH WHERE ASSET_AUTHS_ASSETS_ID=? and ASSET_AUTHS_PEOPLE_ID=?"
+            sql = "DELETE FROM ASSET_AUTH WHERE ASSET_AUTHS_ASSETS_ID=%s and ASSET_AUTHS_PEOPLE_ID=%s"
             params = (assets_id, people_id,)
             
         else:

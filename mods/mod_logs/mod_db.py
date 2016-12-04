@@ -25,6 +25,6 @@ def init(app_db, app_config):
     
     
 def run():
-    sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (?,1)"
+    sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (%s,1)"
     db.query(sql, ("LOG ACTIONS",), squelch=True)
 
