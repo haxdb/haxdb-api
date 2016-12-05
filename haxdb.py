@@ -12,11 +12,13 @@ app.secret_key = os.urandom(24)
 VERSION = "v1"
 config = None
 db = None
+logger = None
 
-def init(app_config, app_db):
-    global config, db, api
+def init(app_config, app_db, app_logger):
+    global config, db, api, logger
     config = app_config
     db = app_db
+    logger = app_logger
     api.init(db)
 
 def run():

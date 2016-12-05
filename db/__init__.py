@@ -4,17 +4,19 @@ class db:
     db = None
     tables = tables
     config = None
+    logger = None
     
-    def __init__(self, config):
+    def __init__(self, config, logger):
         self.config = config
+        self.logger = logger
         
     def open(self):
         if self.config["TYPE"] == "SQLITE":
             import driver_sqlite
-            self.db = driver_sqlite.db(self.config)
+            self.db = driver_sqlite.db(self.config, self.logger)
         elif self.config["TYPE"] == "MARIADB":
             import driver_mariadb
-            self.db = driver_mariadb.db(self.config)
+            self.db = driver_mariadb.db(self.config, self.logger)
         
     def close(self):
         self.db.close()

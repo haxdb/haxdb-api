@@ -19,16 +19,18 @@ def run():
     sys.path.insert(0,config["MOD"]["PATH"])
     mod_names = [name for name in os.listdir(config["MOD"]["PATH"]) if os.path.isdir(os.path.join(config["MOD"]["PATH"], name))]
 
-    print "MOD.init(): ",
+    db.open()
+    
     for mod_name in mod_names:
-        print mod_name,
+        haxdb.logger.info("{}.init()".format(mod_name))
         mod = __import__(mod_name)
         mod.init(config, db, haxdb)
         mods[mod_name] = mod
     print ""
     
-    print "MOD.run(): ",        
     for mod in mods:
-        print mod,
+        haxdb.logger.info("{}.run()".format(mod))
         mods[mod].run()
     print ""
+
+    db.close()

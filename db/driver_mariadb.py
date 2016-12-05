@@ -1,8 +1,11 @@
 import mysql.connector as mariadb
 
 class db:
+    
+    logger = None
 
-    def __init__( self, config ):
+    def __init__( self, config, logger ):
+        self.logger = logger
         self.conn = mariadb.connect(host=config["HOST"], port=config["PORT"], user=config["USER"], password=config["PASS"], database=config["DB"])
         self.cur = self.conn.cursor(dictionary=True)
     
@@ -93,12 +96,12 @@ class db:
         except mariadb.Error as error:
             self.error = str(error)
             if not squelch:  
-                print "\n########################################\n"
-                print "SQL ERROR: %s" % self.error
-                print data
-                print "-----------------------------------"
-                print sql
-                print "\n########################################\n"
+                self.logger.warn("\n########################################\n")
+                self.logger.warn("SQL ERROR: %s" % self.error)
+                self.logger.warn(data)
+                self.logger.warn("-----------------------------------")
+                self.logger.warn(sql)
+                self.logger.warn("\n########################################\n")
             
     
     def next ( self ):

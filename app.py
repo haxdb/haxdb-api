@@ -2,14 +2,17 @@
 
 from config import config
 import db, haxdb, mods
+import logging
 
-haxdb.init(config["API"], db.db(config["DB"]))
-haxdb.db.open()
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger("gunicorn.error")
+
+haxdb.init(config["API"], db.db(config["DB"], logger), logger)
 mods.init(config, haxdb, haxdb.db)
 mods.run()
-haxdb.db.close()
 
 app = haxdb.app
+
 
 if __name__ == "__main__":
     haxdb.run()
