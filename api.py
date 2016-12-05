@@ -234,6 +234,9 @@ class api_call:
         return None
     
     def save_call(self, sql, params, meta, col, val, rowid=None):
+        if not self.udf_context_id:
+            self.udf_context_id=0
+
         if col not in self.cols:
             if self.udf_context:
                 udf_sql = "SELECT * FROM UDF WHERE UDF_CONTEXT=%s and UDF_NAME=%s and UDF_CONTEXT_ID=%s"
