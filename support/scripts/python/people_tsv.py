@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
 col_map = {
-    "First Name": "PEOPLE_NAME_FIRST",
-    "Last Name": "PEOPLE_NAME_LAST",
-    "Class": "PEOPLE_MEMBERSHIP",
-    "Status": "PEOPLE_ACTIVE",
+    "FIRST NAME": "PEOPLE_NAME_FIRST",
+    "LAST NAME": "PEOPLE_NAME_LAST",
+    "CLASS": "PEOPLE_MEMBERSHIP",
+    "STATUS": "PEOPLE_ACTIVE",
 }
 
 val_map = {
-    "Active": 1,
-    "Inactive": 0,
+    "ACTIVE": 1,
+    "INACTIVE": 0,
     "TRUE": 1,
     "FALSE": 0,
 }
