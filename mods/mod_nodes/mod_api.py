@@ -33,7 +33,7 @@ def run():
         key = haxdb.data.var.get("api_key", use_session=True)
         
         if key:
-            ip = str(request.environ['REMOTE_ADDR'])
+            ip = str(request.access_route[-1])
             sql = """
             select * 
             from NODES 
