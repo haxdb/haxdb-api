@@ -43,19 +43,19 @@ def run():
         sql = """
         SELECT *
         FROM NODES 
+        LEFT OUTER JOIN ASSETS ON NODES_ASSETS_ID=ASSETS_ID
+        LEFT OUTER JOIN ASSETS_RFID ON ASSETS_RFID_ASSETS_ID=ASSETS_ID
         """
         params = ()
         if rfid:
             sql += """
             LEFT OUTER JOIN PEOPLE_RFID ON PEOPLE_RFID_RFID=%s AND PEOPLE_RFID_ENABLED=1 AND PEOPLE_RFID_RFID IS NOT NULL AND PEOPLE_RFID_RFID != ''
-            LEFT OUTER JOIN PEOPLE ON PEOPLE_RFID_PEOPLE_ID=PEOPLE_ID
+            LEFT OUTER JOIN PEOPLE ON PEOPLE_RFID_PEOPLE_ID=PEOPLE_ID AND PEOPLE_ACTIVE=1
+            LEFT OUTER JOIN ASSET_AUTHS ON ASSET_AUTHS_ASSETS_ID=ASSETS_ID AND ASSET_AUTHS_PEOPLE_ID=PEOPLE_ID
             """
             params += (rfid,)        
 
         sql += """
-        LEFT OUTER JOIN ASSETS ON NODES_ASSETS_ID=ASSETS_ID
-        LEFT OUTER JOIN ASSET_AUTHS ON ASSET_AUTHS_ASSETS_ID=ASSETS_ID AND ASSET_AUTHS_PEOPLE_ID=PEOPLE_ID
-        LEFT OUTER JOIN ASSETS_RFID ON ASSETS_RFID_ASSETS_ID=ASSETS_ID
         WHERE
         NODES_API_KEY=%s
         AND NODES_API_KEY IS NOT NULL
@@ -70,7 +70,7 @@ def run():
             # REGISTER IF RFID MATCHES DBA.
             sql = """
             SELECT * FROM PEOPLE
-            JOIN PEOPLE_RFID ON PEOPLE_RFID_ENABLED=1 AND PEOPLE_RFID_RFID IS NOT NULL AND PEOPLE_RFID_RFID != ''
+            JOIN PEOPLE_RFID ON PEOPLE_RFID_PEOPLE_ID=PEOPLE_ID AND PEOPLE_RFID_ENABLED=1 AND PEOPLE_RFID_RFID IS NOT NULL AND PEOPLE_RFID_RFID != ''
             WHERE
             PEOPLE_DBA=1
             AND PEOPLE_RFID_RFID=%s
@@ -79,6 +79,7 @@ def run():
             person = db.qaf(sql, params)
             if db.error: return haxdb.data.output(success=0, meta=meta, message=db.error)
             if person:
+                print dict(person)
                 # RFID MATCHES A DBA.
                 # ATTEMPT TO REGISTER NODE IN QUEUE
                 ip = str(request.access_route[-1])
@@ -98,6 +99,7 @@ def run():
                 db.query(sql, (api_key,person["PEOPLE_ID"],node_name,ip,))
                 if db.error: return haxdb.data.output(success=0, meta=meta, message=db.error)
                 if db.rowcount > 0:
+                    db.commit()
                     return haxdb.data.output(success=0, meta=meta, value=api_key, message="NODE REGISTERED.\nACTIVATION NEEDED.")
                 return haxdb.data.output(success=0, meta=meta, message="I DON'T KNOW WHAT HAPPENED")
             
@@ -115,20 +117,24 @@ def run():
             # NODE NOT ASSIGNED AN ASSET
             return haxdb.data.output(success=0, meta=meta, message="NODE REGISTERED BUT NOT ASSOCIATED WITH ASSET.")
 
-        if int(node["ASSETS_RFID_REQUIRE_RFID"]) != 1:
+        if node["ASSETS_RFID_REQUIRE_RFID"]!=None and int(node["ASSETS_RFID_REQUIRE_RFID"]) != 1:
             # NODE DOES NOT REQUIRE RFID
             # TODO: LOG ASSET_USAGE
-            message ="%s\nREADY" % node["ASSETS_NAME"]
+            message ="%s\n%s" % (node["ASSETS_NAME"], node["ASSETS_RFID_STATUS"])
             return haxdb.data.output(success=1, meta=meta, message=message)
         
         if not rfid:
             # TODO: LOG ASSET_USAGE
-            message ="%s\nREADY" % node["ASSETS_NAME"]
+            message ="%s\n%s" % (node["ASSETS_NAME"], node["ASSETS_RFID_STATUS"])
             return haxdb.data.output(success=0, meta=meta, message=message)
         
         if not node["PEOPLE_ID"]:
             # TODO: DEAUTH ASSET
             return haxdb.data.output(success=0, meta=meta, message="RFID NOT RECOGNIZED.")
+
+        if node["ASSETS_RFID_REQUIRE_AUTH"]!=None and int(node["ASSETS_RFID_REQUIRE_AUTH"])!=1:
+            message = "%s\n%s %s\nNO AUTHORIZE REQUIRED" % (node["ASSETS_NAME"], node["PEOPLE_NAME_FIRST"], node["PEOPLE_NAME_LAST"])
+            return haxdb.data.output(success=0, meta=meta, message=message)
 
         if not node["ASSET_AUTHS_ID"]:
             # TODO: DEAUTH ASSET

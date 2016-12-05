@@ -76,6 +76,7 @@ def run():
         
         sql = "DELETE FROM NODES WHERE NODES_EXPIRE<%s"
         db.query(sql,(time.time(),))
+        db.commit()
         
         sql = """
         SELECT 

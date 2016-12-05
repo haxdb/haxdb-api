@@ -4,16 +4,29 @@ import requests, json
 from config import config
 
 data = { }
+url = "%s/ASSETS_RFID/pulse?format=min" % config["SCRIPT"]["HOST"]
 
-rfid = raw_input("RFID: ")
-data["rfid"] = rfid
-
-url = "%s/ASSETS_RFID/pulse" % config["SCRIPT"]["HOST"]
-r = json.loads(requests.get(url, meta=meta).text)
-
+print "##############################################"
+print " LEAVE API KEY BLANK TO GO THROUGH"
+print " REGISTRATION PROCESS"
+print "##############################################"
 print
-print r["success"]
-print r["message"]
+data["api_key"] = raw_input("API KEY?")
+
+while True:
+    print
+    data["rfid"] = raw_input("RFID: ")
+    r = json.loads(requests.get(url, data=data).text)
+    if r and r["value"]:
+        data["api_key"] = r["value"]
+    
+    print "##############################################"    
+    print "success: {}".format(r["success"])
+    print "message:\n{}".format(r["message"])
+    print "##############################################"
+
+
+
 
 
 

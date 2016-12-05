@@ -1,8 +1,11 @@
 import sqlite3
 
 class db:
+    
+    logger = None
 
-    def __init__( self, config ):
+    def __init__( self, config, logger ):
+        self.logger = logger
         self.conn = sqlite3.connect(config["HOST"])
         self.conn.row_factory = sqlite3.Row
         self.cur = self.conn.cursor()
@@ -65,42 +68,6 @@ class db:
                 self.query("PRAGMA foreign_keys = 1")
                     
                 
-    def create_tables2(self, tables):
-        if tables:
-            for table in tables:
-                key_sql = ""
-                sql = "CREATE TABLE IF NOT EXISTS %s (" % table.name
-                sql += "%s_ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," % table.name
-                total = 0
-                for col in table:
-                    if col.fk_table and col.fk_col:
-                        if key_sql:  key_sql += ","
-                        key_sql += "FOREIGN KEY(%s) REFERENCES %s(%s) ON DELETE CASCADE" % (col.name, col.fk_table, col.fk_col)
-                    if total > 0:
-                        sql += ","
-                    sql += "%s %s" % (col.name, self.get_datatype(col.datatype))
-                    if col.size:
-                        sql += "(%s)" % (str(col.size))
-                    if col.required:
-                        sql += " NOT NULL"
-                    total += 1
-                sql += ", %s_INSERTED TIMESTAMP NOT NULL DEFAULT current_timestamp" % table.name
-                sql += ", %s_UPDATED TIMESTAMP NOT NULL DEFAULT current_timestamp" % table.name
-                if key_sql: sql += "," + key_sql
-                sql += ")"
-                self.query(sql)
-                if self.error:
-                    print self.error
-                    print sql
-                    
-                trigger_sql = """
-                CREATE TRIGGER trigger_%s_update_timestamp AFTER UPDATE ON %s
-                BEGIN
-                  update %s SET %s_UPDATED = current_timestamp WHERE %s_ID = NEW.%s_ID;
-                END;
-                """ % (table.name, table.name, table.name, table.name, table.name, table.name)
-                self.query(trigger_sql)
-                self.commit()
             
     def create_indexes(self, indexes):
         if indexes:
@@ -117,6 +84,7 @@ class db:
         self.error = None
         try:
             if data:
+                sql = sql.replace("%s","?")
                 result = self.cur.execute(sql,data)
             else:
                 result = self.cur.execute(sql) 

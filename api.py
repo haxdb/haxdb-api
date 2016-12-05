@@ -84,7 +84,7 @@ class api_call:
         while row:
             lname = row["LISTS_NAME"]
             if lname not in lists: lists[lname] = []
-            lists[lname].append(row)
+            lists[lname].append(dict(row))
             row = db.next()
             
         return lists
@@ -214,6 +214,7 @@ class api_call:
         if not row:
             return output(success=0, meta=meta, message="NO DATA")
 
+        row = dict(row)
         if self.udf_context:
             udf_sql = """
             SELECT * FROM UDF
