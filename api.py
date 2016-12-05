@@ -40,9 +40,50 @@ class api_call:
     udf_context_id = None
     udf_rowid = None
 
+    def get_lists(self):
+        lists = {}
+        
+        sql = """
+        SELECT LISTS.*, LIST_ITEMS.* FROM LISTS
+        JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID=LISTS_ID AND LIST_ITEMS_ENABLED=1
+        """
+        params = ()
+        
+        if self.lists or self.udf_context:
+            sql += "WHERE"
+            
+        if self.lists:
+            sql += " LISTS_NAME IN ({})".format( ",".join(('%s',) * len(self.lists)) )
+            params += tuple(self.lists)
+            
+        if self.udf_context:
+            if self.lists:
+                sql += " OR "
+            sql += """
+            LISTS_ID IN (
+            SELECT UDF_LISTS_ID 
+            FROM UDF 
+            WHERE
+            UDF_TYPE='LIST'
+            AND UDF_CONTEXT=%s
+            AND UDF_CONTEXT_ID=%s
+            AND UDF_ENABLED=1
+            )
+            """
+            params += (self.udf_context, self.udf_context_id)
+            
+        sql += " ORDER BY LIST_ITEMS_ORDER"
+        row = db.qaf(sql, params)
+        while row:
+            lname = row["LISTS_NAME"]
+            if lname not in lists: lists[lname] = []
+            lists[lname].append(row)
+            row = db.next()
+            
+        return lists
+        
     def list_call(self, sql, params, meta, calc_row_function=None):
-        if not self.udf_context_id:
-            self.udf_context_id=0
+        self.udf_context_id = self.udf_context_id or 0
             
         if self.udf_context:
             context_sql = "UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s AND UDF_DATA_ROWID={} AND UDF_ENABLED=1".format(self.udf_rowid)
@@ -50,27 +91,7 @@ class api_call:
 
         query = var.get("query")
         meta["query"] = query
-        
-        if self.lists:
-            meta["lists"] = {}
-            
-            for list_name in self.lists:
-                meta["lists"][list_name] = []
-                list_sql = """
-                SELECT * FROM LIST_ITEMS 
-                JOIN LISTS ON LISTS_ID = LIST_ITEMS_LISTS_ID AND LISTS_NAME=%s
-                WHERE
-                LIST_ITEMS_ENABLED = '1'
-                ORDER BY LIST_ITEMS_ORDER
-                """
-                db.query(list_sql, (list_name,))
-                if db.error:
-                    print db.error
-                    print list_sql
-                row = db.next()
-                while row:
-                    meta["lists"][list_name].append(dict(row))
-                    row = db.next()
+        meta["lists"] = self.get_lists()
 
         sql += " WHERE 1=1"
         
@@ -172,30 +193,12 @@ class api_call:
                     row = dict(row)
                     r[row["UDF_NAME"]] = row["UDF_DATA_VALUE"]
                     row = db.next()
-
+                    
         return output(success=1, data=rows, meta=meta)
     
     def view_call(self, sql, params, meta, calc_row_function=None):
-        data = {}
-
-        if self.lists:
-            meta["lists"] = {}
-            
-            for list_name in self.lists:
-                meta["lists"][list_name] = []
-                list_sql = """
-                SELECT * FROM LIST_ITEMS 
-                JOIN LISTS ON LISTS_ID = LIST_ITEMS_LISTS_ID AND LISTS_NAME=%s
-                WHERE
-                LIST_ITEMS_ENABLED = '1'
-                ORDER BY LIST_ITEMS_ORDER
-                """
-                db.query(list_sql, (list_name,))
-                row = db.next()
-                while row:
-                    meta["lists"][list_name].append(dict(row))
-                    row = db.next()
-                    
+        self.udf_context_id = self.udf_context_id or 0
+        meta["lists"] = self.get_lists()
                     
         row = db.qaf(sql, params)
         if db.error:
@@ -203,7 +206,23 @@ class api_call:
         
         if not row:
             return output(success=0, meta=meta, message="NO DATA")
-        
+
+        if self.udf_context:
+            udf_sql = """
+            SELECT * FROM UDF
+            JOIN UDF_DATA ON UDF_DATA_UDF_ID=UDF_ID
+            WHERE 
+            UDF_CONTEXT=%s and UDF_CONTEXT_ID=%s AND UDF_DATA_ROWID=%s
+            AND UDF_ENABLED=1 
+            ORDER BY UDF_ORDER
+            """
+            udf_params = (self.udf_context, self.udf_context_id, row[self.udf_rowid])
+            db.query(udf_sql, udf_params)
+            udf = db.next()
+            while udf:
+                row[udf["UDF_NAME"]] = udf["UDF_DATA_VALUE"]
+                udf = db.next()
+            
         if calc_row_function: row = calc_row_function(dict(row))
         return output(success=1, meta=meta, data=dict(row))
 
@@ -234,8 +253,7 @@ class api_call:
         return None
     
     def save_call(self, sql, params, meta, col, val, rowid=None):
-        if not self.udf_context_id:
-            self.udf_context_id=0
+        self.udf_context_id = self.udf_context_id or 0
 
         if col not in self.cols:
             if self.udf_context:

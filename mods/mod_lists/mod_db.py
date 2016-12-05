@@ -29,10 +29,6 @@ def init(app_db, app_config):
 
     db.create(tables=tables, indexes=indexes)    
     
-    sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (%s,1)"
-    db.query(sql, ("YES/NO",), squelch=True)
-    db.commit()
-
     
 def run():
     pass
