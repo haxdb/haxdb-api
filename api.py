@@ -7,6 +7,9 @@ def init(app_db):
     db = app_db
     
 def valid_value(col_type, val):
+    if val == None:
+        return True
+    
     if col_type == "BOOL" and val in (0,1,'0','1'):
         return True
 
@@ -27,6 +30,10 @@ def valid_value(col_type, val):
     if col_type in ("TEXT","STR","LIST"):
         return True
     
+    if col_type == "DATE":
+        d = re.compile("\d\d\d\d\-\d{1,2}\-\d{1,2}")
+        return d.match(val)
+        
     return False
 
 
@@ -234,7 +241,7 @@ class api_call:
         meta["rowcount"] = db.rowcount
         if meta["rowcount"] > 0:
             db.commit()
-            return output(success=1, meta=meta, message="CREATED")
+            return output(success=1, meta=meta, message="CREATED", value=db.lastrowid)
         else:
             return output(success=0, meta=meta, message="NO ROWS CREATED")            
         return None

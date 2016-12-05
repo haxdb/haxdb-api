@@ -69,14 +69,14 @@ def run():
         meta["context_id"] = context_id
 
         sql = """
-                SELECT x.UDF_CATEGORY, x.UDF_NAME, x.UDF_TYPE, x.UDF_LISTS_ID, MINORDER
+                SELECT x.UDF_CATEGORY, x.UDF_NAME, x.UDF_TYPE, x.UDF_LISTS_ID, MINORDER, x.UDF_ORDER
                 FROM UDF x
                 JOIN (SELECT UDF_CATEGORY, MIN(UDF_ORDER) MINORDER FROM UDF WHERE UDF_ENABLED=1 GROUP BY UDF_CATEGORY) y
                 WHERE
                 y.UDF_CATEGORY=x.UDF_CATEGORY
                 AND x.UDF_CONTEXT=%s and x.UDF_CONTEXT_ID=%s
                 AND x.UDF_ENABLED=1
-                ORDER BY MINORDER, x.UDF_CATEGORY
+                ORDER BY MINORDER, x.UDF_CATEGORY, x.UDF_ORDER
                 """ 
         params = (context, context_id)
             
@@ -112,20 +112,22 @@ def run():
         name = name or haxdb.data.var.get("name")
         context = haxdb.data.var.get("context")
         context_id = haxdb.data.var.get("context_id") or 0
-        
+        category = haxdb.data.var.get("category") or "NEW CATEGORY"
+        order = haxdb.data.var.get("order") or 999
         
         meta = {}
         meta["api"] = "UDF"
         meta["action"] = "new"
+        meta["category"] = category
         meta["name"] = name
         meta["context"] = context
         meta["context_id"] = context_id
         
         sql = """
         INSERT INTO UDF (UDF_CONTEXT, UDF_CONTEXT_ID, UDF_CATEGORY, UDF_NAME, UDF_TYPE, UDF_ORDER, UDF_KEY, UDF_ENABLED, UDF_INTERNAL) 
-        VALUES (%s, %s, "NEW CATEGORY", %s, "TEXT", 999, 0, 0, 0)
+        VALUES (%s, %s, %s, %s, "TEXT", %s, 0, 0, 0)
         """
-        params = (context, context_id, name,)
+        params = (context, context_id, category, name, order)
         return apis["UDF"].new_call(sql, params, meta)
     
 
@@ -145,7 +147,7 @@ def run():
         
         sql = "DELETE FROM UDF WHERE UDF_ID=%s and UDF_INTERNAL!=1"
         params = (rowid,)
-        return apis["UDF"].delete_call(sql, params, data)
+        return apis["UDF"].delete_call(sql, params, meta)
         
     @haxdb.app.route("/UDF/save", methods=["GET","POST"])
     @haxdb.app.route("/UDF/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])

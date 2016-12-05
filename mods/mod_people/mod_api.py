@@ -106,7 +106,6 @@ def run():
     @haxdb.no_readonly
     def mod_people_new(email=None):
         email = email or haxdb.data.var.get("email")
-
         
         meta = {}
         meta["api"] = "PEOPLE"
@@ -117,17 +116,9 @@ def run():
             return haxdb.data.output(success=0, message="MISSING INPUT: email", meta=meta)
 
         sql = "INSERT INTO PEOPLE (PEOPLE_EMAIL,PEOPLE_DBA) VALUES (%s,0)"
-        db.query(sql,(email,))
-
-        if db.rowcount > 0:
-            meta["rowid"] = db.lastrowid
-            db.commit()
-            return haxdb.data.output(success=1, meta=meta)
-        
-        if db.error:
-            return haxdb.data.output(success=0, message=db.error, meta=meta)
-        
-        return haxdb.data.output(success=0, message="UNKNOWN ERROR", meta=meta)
+        params = (email,)
+        return apis["PEOPLE"].new_call(sql, params, meta)
+    
     
     @haxdb.app.route("/PEOPLE/delete/", methods=["GET","POST"])
     @haxdb.app.route("/PEOPLE/delete/<int:rowid>", methods=["GET","POST"])

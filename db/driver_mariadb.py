@@ -23,7 +23,7 @@ class db:
             return "INT(1)"
         
         if datatype == "FLOAT":
-            return "FLOAT(5,2)" if not datasize else "FLOAT(%s,4)" % str(datasize)
+            return "FLOAT(10,4)" if not datasize else "FLOAT(%s,4)" % str(datasize)
 
         if datatype == "TEXT":
             return "TEXT"
