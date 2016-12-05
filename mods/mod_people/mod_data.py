@@ -1,7 +1,7 @@
 apis = {}
 
 apis["PEOPLE"] = {
-    "lists": [],
+    "lists": ["MEMBERSHIPS",],
     "cols": {
     "PEOPLE_NAME_FIRST": "STR",
     "PEOPLE_NAME_LAST": "STR",
