@@ -81,7 +81,7 @@ def run():
             if person:
                 # RFID MATCHES A DBA.
                 # ATTEMPT TO REGISTER NODE IN QUEUE
-                ip = str(request.environ['REMOTE_ADDR'])
+                ip = str(request.access_route[-1])
 
                 sql = "SELECT * FROM NODES WHERE NODES_IP=%s"
                 row = db.qaf(sql,(ip,))

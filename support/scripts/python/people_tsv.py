@@ -70,8 +70,8 @@ for row in reader:
             data["col"] = col.upper()
             data["val"] = row[col].upper()
             if data["val"] == "TRUE": data["val"] = 1
-            if data["val"] == "Active": data["val"] = 1
-            if data["val"] == "Inactive": data["val"] = 0
+            if data["val"] == "ACTIVE": data["val"] = 1
+            if data["val"] == "INACTIVE": data["val"] = 0
             r = json.loads(requests.get(url, data=data).text)
             print r["success"],
             if r["success"] == 0:

@@ -136,7 +136,7 @@ def run():
         node_name = "%s %s TOKEN AUTH" % (row["PEOPLE_NAME_FIRST"],row["PEOPLE_NAME_LAST"],)
         dba = row["PEOPLE_DBA"]
         if row["PEOPLE_EMAIL"].upper() in config_dbas: dba = 1
-        ip = str(request.environ['REMOTE_ADDR'])
+        ip = str(request.access_route[-1])
         sql = """
         INSERT INTO NODES (NODES_API_KEY,NODES_PEOPLE_ID,NODES_NAME,NODES_READONLY,NODES_DBA,NODES_IP,NODES_EXPIRE,NODES_ENABLED,NODES_QUEUED)
         VALUES (%s,%s,%s,0,%s,%s,%s,1,0)
