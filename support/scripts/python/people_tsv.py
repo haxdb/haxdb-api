@@ -1,5 +1,19 @@
 #!/usr/bin/env python
 
+col_map = {
+    "First Name": "PEOPLE_NAME_FIRST",
+    "Last Name": "PEOPLE_NAME_LAST",
+    "Class": "PEOPLE_MEMBERSHIP",
+    "Status": "PEOPLE_ACTIVE",
+}
+
+val_map = {
+    "Active": 1,
+    "Inactive": 0,
+    "TRUE": 1,
+    "FALSE": 0,
+}
+
 import sys, requests, json, csv
 from config import config
 
@@ -50,28 +64,12 @@ for row in reader:
         url = "{}/PEOPLE/save".format(config["SCRIPT"]["HOST"])
         data = { "api_key": config["SCRIPT"]["KEY"], "rowid": pid }
 
-        data["col"] = "PEOPLE_NAME_FIRST"
-        data["val"] = row["First Name"].upper()
-        r = json.loads(requests.get(url, data=data).text)
-        print r["success"],
-
-        data["col"] = "PEOPLE_NAME_LAST"
-        data["val"] = row["Last Name"].upper()
-        r = json.loads(requests.get(url, data=data).text)
-        print r["success"],
-
-        data["col"] = "MEMBERSHIP"
-        data["val"] = row["Class"].upper()
-        r = json.loads(requests.get(url, data=data).text)
-        print r["success"],
-
         for col in reader.fieldnames:
             url = "{}/PEOPLE/save".format(config["SCRIPT"]["HOST"])
             data["col"] = col.upper()
             data["val"] = row[col].upper()
-            if data["val"] == "TRUE": data["val"] = 1
-            if data["val"] == "ACTIVE": data["val"] = 1
-            if data["val"] == "INACTIVE": data["val"] = 0
+            if data["col"] in col_map: data["col"] = col_map[data["col"]]
+            if data["val"] in val_map: data["val"] = val_map[data["val"]]
             r = json.loads(requests.get(url, data=data).text)
             print r["success"],
             if r["success"] == 0:

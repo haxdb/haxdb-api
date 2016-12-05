@@ -14,6 +14,8 @@ def init(app_db, app_config):
     t.add("PEOPLE_NAME_LAST", "CHAR", col_size=50)
     t.add("PEOPLE_EMAIL", "CHAR", col_size=100)
     t.add("PEOPLE_DBA", "INT", col_size=1, col_required=True)
+    t.add("PEOPLE_MEMBERSHIP", "CHAR", col_size=50)
+    t.add("PEOPLE_ACTIVE", "INT", col_size=1, col_required=True)
     tables.append(t)
 
     indexes = []
@@ -35,5 +37,4 @@ def run():
     if row:
         db.query(insert_list_item, (row["LISTS_ID"], "TRIAL", "TRIAL",), squelch=True)
         db.query(insert_list_item, (row["LISTS_ID"], "MEMBER", "MEMBER",), squelch=True)
-        db.query(insert_udf, ("PRIMARY","MEMBERSHIP","LIST",row["LISTS_ID"]), squelch=True)
         db.commit()
