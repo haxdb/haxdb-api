@@ -23,7 +23,7 @@ def init(app_db, app_config):
     tables.append(t)
     
     t = db.tables.table('UDF_DATA')
-    t.add("UDF_DATA_UDF_ID", "INT", col_required=True, fktable="UDF", fkcol="UDF_ID")
+    t.add("UDF_DATA_UDF_ID", "INT", col_required=True, fk_table="UDF", fk_col="UDF_ID")
     t.add("UDF_DATA_ROWID", "INT", col_required=True)
     t.add("UDF_DATA_VALUE", "CHAR", col_size=255)
     tables.append(t)
