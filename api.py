@@ -138,8 +138,12 @@ class api_call:
                             if valcount > 0:
                                 sql += " OR "
                             if val == "NULL" and op == "=":
+                                sql += "("
                                 sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE {} and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1) < 1".format(context_sql)
-                                params += context_params + (col,)
+                                sql += " OR "
+                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE {} and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_VALUE IS NULL) > 0".format(context_sql,)
+                                sql += ")"
+                                params += context_params + (col,) + context_params + (col,)
                             elif val == "NULL" and op == "!=":
                                 sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE {} and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1) > 0".format(context_sql)
                                 params += context_params + (col,)

@@ -32,6 +32,16 @@ class db:
         self.rowcount = self.db.rowcount
         self.lastrowid = self.db.lastrowid
         self.error = self.db.error
+        if int(self.config["DEBUG"]) == 1:
+            self.logger.debug("#################################################################################")
+            self.logger.debug("sql: {}".format(sql))
+            self.logger.debug("data: {}".format(data))
+            self.logger.debug("result: {}".format(result))
+            self.logger.debug("rowcount: {}".format(self.rowcount))
+            self.logger.debug("lastrowid: {}".format(self.lastrowid))
+            self.logger.debug("error: {}".format(self.error))
+            self.logger.debug("#################################################################################")
+            
         return result
     
     def qaf (self, sql, data=None):
