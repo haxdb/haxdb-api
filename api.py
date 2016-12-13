@@ -10,8 +10,14 @@ def valid_value(col_type, val):
     if val == None:
         return True
     
-    if col_type == "BOOL" and val in (0,1,'0','1'):
-        return True
+    if col_type == "BOOL":
+        try:
+            if int(val) in (0,1):
+                return True
+            else:
+                return False
+        except:
+            return False
 
     if col_type == "INT":
         try:
