@@ -71,6 +71,13 @@ class var_class:
             val = session.get(key)
         return val
 
+    def getlist(self, key):
+        val = None
+        val = post.getlist(key)
+        if not val:
+            val = get.getlist(key)
+        return val
+    
     def __getitem__(self, key):
         return self.get(key)
     

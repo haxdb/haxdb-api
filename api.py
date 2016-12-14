@@ -252,6 +252,7 @@ class api_call:
         meta["rowcount"] = db.rowcount
         if meta["rowcount"] > 0:
             db.commit()
+            meta["rowid"] = db.lastrowid
             return output(success=1, meta=meta, message="CREATED", value=db.lastrowid)
         else:
             return output(success=0, meta=meta, message="NO ROWS CREATED")            
