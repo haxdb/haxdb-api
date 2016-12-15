@@ -111,12 +111,14 @@ def run():
         
         if col == "COLS":
             cols = haxdb.data.var.getlist("val")
+            meta["val"] = cols
 
             sql = """
             DELETE FROM FIELDSET_COLS WHERE FIELDSET_COLS_FIELDSET_ID=%s
             """
             db.query(sql,(rowid,))
-            
+            if db.error: return haxdb.data.output(success=0, meta=meta, message=db.error)
+   
             sql = """
             INSERT INTO FIELDSET_COLS(FIELDSET_COLS_FIELDSET_ID, FIELDSET_COLS_COL, FIELDSET_COLS_ORDER)
             VALUES (%s, %s, %s)
@@ -126,9 +128,12 @@ def run():
             for col in cols:
                 order += 1
                 db.query(sql, (rowid, col, order))
+                if db.error: return haxdb.data.output(success=0, meta=meta, message=db.error)
+                
                 total += db.rowcount
             
             meta["rowcount"] = total
+            db.commit()
             return haxdb.data.output(success=1, meta=meta, message="SAVED")
                         
         else:
@@ -183,10 +188,11 @@ def run():
         """
         order = 0
         total = 0
-        for col in cols:
-            order += 1
-            db.query(sql, (rowid, col, order))
-            total += db.rowcount        
+        if cols:
+            for col in cols:
+                order += 1
+                db.query(sql, (rowid, col, order))
+                total += db.rowcount        
 
         meta["rowcount"] = total
         db.commit()

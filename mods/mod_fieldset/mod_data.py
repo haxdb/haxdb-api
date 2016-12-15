@@ -11,6 +11,6 @@ apis["FIELDSET"] = {
     "udf_rowid": None,
     "query_cols": ["FIELDSET_NAME", "FIELDSET_QUERY"],
     "search_cols": ["FIELDSET_NAME", "FIELDSET_QUERY"],
-    "order_cols": ["FIELDSET_NAME"]
+    "order_cols": ["FIELDSET_ID"]
 }
 

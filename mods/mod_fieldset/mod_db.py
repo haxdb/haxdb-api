@@ -18,7 +18,7 @@ def init(app_db, app_config):
     tables.append(t)
 
     t = db.tables.table("FIELDSET_COLS")
-    t.add("FIELDSET_COLS_FIELDSET_ID", "INT")
+    t.add("FIELDSET_COLS_FIELDSET_ID", "INT", fk_table="FIELDSET", fk_col="FIELDSET_ID")
     t.add("FIELDSET_COLS_COL", "CHAR", col_size=50)
     t.add("FIELDSET_COLS_ORDER", "CHAR", col_size=255)
     tables.append(t)
