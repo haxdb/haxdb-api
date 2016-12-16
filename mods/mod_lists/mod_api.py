@@ -104,6 +104,7 @@ def run():
     @haxdb.require_auth
     def mod_list_items_list(lists_id=None, lists_name=None):
         lists_id = lists_id or haxdb.data.var.get("lists_id")
+        context_id = haxdb.data.var.get("context_id")
         lists_name = lists_name or haxdb.data.var.get("lists_name")
         query = haxdb.data.var.get("query")
         include_disabled = haxdb.data.var.get("include_disabled")
@@ -115,14 +116,18 @@ def run():
         meta["query"] = query
         meta["include_disabled"] = include_disabled
         meta["lists_id"] = lists_id
+        meta["context_id"] = context_id
 
-        if not lists_id and not lists_name:
+        if not context_id and not lists_id and not lists_name:
             return haxdb.data.output(success=0, meta=meta, message="MISSING VALUE: lists_id or lists_name")
 
-        meta["lists_name"] = lists_name
+        if not lists_id and context_id:
+            lists_id = context_id
+            
+        meta["context_name"] = lists_name
         if lists_id:
             row = db.qaf("SELECT * FROM LISTS WHERE LISTS_ID=%s", (lists_id,))
-            meta["lists_name"] = row["LISTS_NAME"]
+            meta["context_name"] = row["LISTS_NAME"]
             
         sql = """
             SELECT
@@ -141,24 +146,24 @@ def run():
         return apis["LIST_ITEMS"].list_call(sql, params, meta)
     
     @haxdb.app.route("/LIST_ITEMS/new", methods=["POST", "GET"])
-    @haxdb.app.route("/LIST_ITEMS/new/<int:lists_id>", methods=["POST", "GET"])
-    @haxdb.app.route("/LIST_ITEMS/new/<int:lists_id>/<name>", methods=["POST", "GET"])
+    @haxdb.app.route("/LIST_ITEMS/new/<int:context_id>", methods=["POST", "GET"])
+    @haxdb.app.route("/LIST_ITEMS/new/<int:context_id>/<value>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
-    def mod_list_items_new(lists_id=None, name=None):
-        lists_id = lists_id or haxdb.data.var.get("lists_id")
-        name = name or haxdb.data.var.get("name")
+    def mod_list_items_new(context_id=None, value=None):
+        context_id = context_id or haxdb.data.var.get("context_id")
+        value = value or haxdb.data.var.get("value")
         
         meta = {}
         meta["api"] = "LIST_ITEMS"
         meta["action"] = "new"
-        meta["lists_id"] = lists_id
-        meta["name"] = name
+        meta["context_id"] = context_id
+        meta["value"] = value
         
         sql = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER) "
         sql += "VALUES (%s, %s, %s, 0, 999)"
-        params = (lists_id, name, name,)
+        params = (context_id, value, value,)
         return apis["LIST_ITEMS"].new_call(sql, params, meta)
     
     @haxdb.app.route("/LIST_ITEMS/save", methods=["GET","POST"])

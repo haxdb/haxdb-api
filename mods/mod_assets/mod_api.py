@@ -18,6 +18,9 @@ def init(app_haxdb, app_db, app_config, app_tools):
 
     for api_name in mod_data.apis:
         apis[api_name] = haxdb.api.api_call()
+        apis[api_name].udf_context = mod_data.apis[api_name]["udf_context"]
+        apis[api_name].udf_context_id = mod_data.apis[api_name]["udf_context_id"]
+        apis[api_name].udf_rowid = mod_data.apis[api_name]["udf_rowid"]
         apis[api_name].lists = mod_data.apis[api_name]["lists"]
         apis[api_name].cols = mod_data.apis[api_name]["cols"]
         apis[api_name].query_cols = mod_data.apis[api_name]["query_cols"]

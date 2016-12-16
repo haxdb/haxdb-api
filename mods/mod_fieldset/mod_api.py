@@ -154,9 +154,13 @@ def run():
         query = haxdb.data.var.get("query")
         cols = haxdb.data.var.getlist("cols")
         
+        
         people_id = 0
-        if global_fieldset == 1:
-            people_id = haxdb.data.session.get("api_people_id")
+        try:
+            if int(global_fieldset) != 1:
+                people_id = haxdb.data.session.get("api_people_id")
+        except:
+            pass        
             
         meta = {}
         meta["api"] = "FIELDSET"
@@ -199,7 +203,7 @@ def run():
         return haxdb.data.output(success=1, meta=meta, message="SAVED")
     
     
-    @haxdb.app.route("/FIELDSET/delete/", methods=["GET","POST"])
+    @haxdb.app.route("/FIELDSET/delete", methods=["GET","POST"])
     @haxdb.app.route("/FIELDSET/delete/<int:rowid>", methods=["GET","POST"])
     @haxdb.require_auth
     @haxdb.require_dba
