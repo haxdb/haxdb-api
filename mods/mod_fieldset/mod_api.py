@@ -67,7 +67,7 @@ def run():
         (
         SELECT * FROM FIELDSET WHERE FIELDSET_CONTEXT=%s and FIELDSET_CONTEXT_ID=%s AND 
         FIELDSET_PEOPLE_ID IN (0,%s)
-        )
+        ) F
         """
         params = (context,context_id,people_id)
         return apis["FIELDSET"].list_call(sql, params, meta, calc_row)
