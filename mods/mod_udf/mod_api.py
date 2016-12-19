@@ -36,6 +36,10 @@ def run():
         context = context or haxdb.data.var.get("context")
         context_id = context_id or haxdb.data.var.get("context_id") or 0
         
+        try:
+            disabled = int(haxdb.data.var.get("disabled"))
+        except: 
+            disabled = 0
         
         meta = {}
         meta["api"] = "UDF"
@@ -43,10 +47,16 @@ def run():
         meta["context"] = context
         meta["context_id"] = context_id
             
-        sql = """
-        SELECT *
-        FROM ( SELECT * FROM UDF WHERE UDF.UDF_CONTEXT=%s AND UDF.UDF_CONTEXT_ID=%s ) UDF
-        """
+        if disabled == 1:
+            sql = """
+            SELECT *
+            FROM ( SELECT * FROM UDF WHERE UDF.UDF_CONTEXT=%s AND UDF.UDF_CONTEXT_ID=%s) UDF
+            """
+        else:
+            sql = """
+            SELECT *
+            FROM ( SELECT * FROM UDF WHERE UDF.UDF_CONTEXT=%s AND UDF.UDF_CONTEXT_ID=%s AND UDF.UDF_ENABLED=1 ) UDF
+            """
         params = (context, context_id,)
 
         return apis["UDF"].list_call(sql, params, meta)
