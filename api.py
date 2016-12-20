@@ -221,6 +221,9 @@ class api_call:
 
             row = db.next()
 
+        if rowdata:
+            rows.append(rowdata)
+            
         return output(success=1, data=rows, meta=meta)
 
     def view_call(self, sql, params, meta, calc_row_function=None):
