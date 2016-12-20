@@ -1,7 +1,7 @@
 mod_assets
 ===========
 
-This module adds tables and api calls meant to store assets.
+This module adds asset information storage
 
 
 Database
@@ -22,6 +22,7 @@ API
 - /ASSETS/view
 - /ASSETS/new
 - /ASSETS/delete
+- /ASSETS/save
 
 - - - -
 

@@ -23,7 +23,7 @@ def init(app_haxdb, app_db, app_config, app_tools):
         apis[api_name].query_cols = mod_data.apis[api_name]["query_cols"]
         apis[api_name].search_cols = mod_data.apis[api_name]["search_cols"]
         apis[api_name].order_cols = mod_data.apis[api_name]["order_cols"]
-        
+
 
 def run():
     @haxdb.app.route("/UDF/list", methods=["POST","GET"])
@@ -35,18 +35,18 @@ def run():
     def mod_udf_def_list(context=None, context_id=None):
         context = context or haxdb.data.var.get("context")
         context_id = context_id or haxdb.data.var.get("context_id") or 0
-        
+
         try:
             disabled = int(haxdb.data.var.get("disabled"))
-        except: 
+        except:
             disabled = 0
-        
+
         meta = {}
         meta["api"] = "UDF"
         meta["action"] = "list"
         meta["context"] = context
         meta["context_id"] = context_id
-            
+
         if disabled == 1:
             sql = """
             SELECT *
@@ -70,8 +70,8 @@ def run():
     def mod_udf_def_categories(context=None, context_id=None):
         context = context or haxdb.data.var.get("context")
         context_id = context_id or haxdb.data.var.get("context_id") or 0
-        
-        
+
+
         meta = {}
         meta["api"] = "UDF"
         meta["action"] = "categories"
@@ -87,14 +87,14 @@ def run():
                 AND x.UDF_CONTEXT=%s and x.UDF_CONTEXT_ID=%s
                 AND x.UDF_ENABLED=1
                 ORDER BY MINORDER, x.UDF_CATEGORY, x.UDF_ORDER
-                """ 
+                """
         params = (context, context_id)
-            
-        
+
+
         db.query(sql,params)
         if db.error:
             return haxdb.data.output(success=0, meta=meta, message=db.error)
-        
+
         rows = []
         row = db.next()
         lastcat = None
@@ -110,9 +110,9 @@ def run():
             row = db.next()
         if cat:
             rows.append(cat)
-            
+
         return haxdb.data.output(success=1, meta=meta, data=rows)
-    
+
     @haxdb.app.route("/UDF/new", methods=["POST", "GET"])
     @haxdb.app.route("/UDF/new/<name>", methods=["POST", "GET"])
     @haxdb.require_auth
@@ -124,7 +124,7 @@ def run():
         context_id = haxdb.data.var.get("context_id") or 0
         category = haxdb.data.var.get("category") or "NEW CATEGORY"
         order = haxdb.data.var.get("order") or 999
-        
+
         meta = {}
         meta["api"] = "UDF"
         meta["action"] = "new"
@@ -132,14 +132,14 @@ def run():
         meta["name"] = name
         meta["context"] = context
         meta["context_id"] = context_id
-        
+
         sql = """
-        INSERT INTO UDF (UDF_CONTEXT, UDF_CONTEXT_ID, UDF_CATEGORY, UDF_NAME, UDF_TYPE, UDF_ORDER, UDF_KEY, UDF_ENABLED, UDF_INTERNAL) 
+        INSERT INTO UDF (UDF_CONTEXT, UDF_CONTEXT_ID, UDF_CATEGORY, UDF_NAME, UDF_TYPE, UDF_ORDER, UDF_KEY, UDF_ENABLED, UDF_INTERNAL)
         VALUES (%s, %s, %s, %s, "TEXT", %s, 0, 0, 0)
         """
         params = (context, context_id, category, name, order)
         return apis["UDF"].new_call(sql, params, meta)
-    
+
 
     @haxdb.app.route("/UDF/delete", methods=["GET","POST"])
     @haxdb.app.route("/UDF/delete/<int:rowid>", methods=["GET","POST"])
@@ -149,16 +149,16 @@ def run():
     def mod_udf_def_delete(rowid=None):
         rowid = rowid or haxdb.data.var.get("rowid")
 
-        
+
         meta = {}
         meta["api"] = "UDF"
         meta["action"] = "delete"
         meta["rowid"] = rowid
-        
+
         sql = "DELETE FROM UDF WHERE UDF_ID=%s and UDF_INTERNAL!=1"
         params = (rowid,)
         return apis["UDF"].delete_call(sql, params, meta)
-        
+
     @haxdb.app.route("/UDF/save", methods=["GET","POST"])
     @haxdb.app.route("/UDF/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
     @haxdb.require_auth
@@ -168,8 +168,8 @@ def run():
         rowid = rowid or haxdb.data.var.get("rowid")
         col = col or haxdb.data.var.get("col")
         val = val or haxdb.data.var.get("val")
-        
-        
+
+
         meta = {}
         meta["api"] = "UDF"
         meta["action"] = "save"
@@ -184,4 +184,3 @@ def run():
             sql = "UPDATE UDF SET {}=%s WHERE UDF_ID=%s and UDF_INTERNAL!=1"
         params = (val,rowid,)
         return apis["UDF"].save_call(sql, params, meta, col, val)
-        

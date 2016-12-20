@@ -40,16 +40,6 @@ def run():
         meta["action"] = "list"
         meta["category"] = category
 
-        """
-        sql = "SELECT * FROM LISTS ORDER BY LISTS_NAME"
-        apis["PEOPLE"].lists = []
-        db.query(sql)
-        row = db.next()
-        while row:
-            apis["PEOPLE"].lists.append(row["LISTS_NAME"])
-            row = db.next()
-        """
-        
         sql = """
         SELECT * FROM PEOPLE
         """

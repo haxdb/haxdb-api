@@ -3,24 +3,37 @@ mod_rfid
 
 This module provides API calls to facilitate authorization to assets based on RFID values.  
 
-A register API call is added that will create a queued node and return an api_key.  If that node is then activated the api_key can be used to access the API.  This allows you to deploy RFID nodes without hardcoding api_keys for each one.
+It provides an api to access rfid settings/attributes for ASSETS.
 
-Once a node is created it can be assigned an asset.  The auth call can use the RFID value passed to match an entry from PEOPLE and see if they are also authorized to use the nodes assigned asset (entry in ASSET_AUTHS).
+It provies an api to store rfid keys for PEOPLE.
+
+It provides a pulse command which asset nodes can call to with the current read rfid (or none if no rfid) and then react based on the return value.  If node is not registered and a dba rfid is provided the node will then be registered in the queue.  If the node is registered (and active) then success will return with a 1 (if the asset should be powered) or 0 (if it should not be powered).  message will be returned with either the asset's status or an appropriate message about authorization.
 
 
 Database
 --------
 
-Creates the following *LIST_ITEMS* for the *LISTS* entry *LOG ACTIONS*: 
-- **AUTHENTICATE**
-- **DENY**
-- **ACTIVATE**
-- **REGISTER**
-- **DEACTIVATE**
+Creates the following tables:
+ - ASSETS_RFID
+ - PEOPLE_RFID
 
+Creates the following *LISTS*:
+ - ASSET STATUSES
+
+Creates the following *LIST_ITEMS* for the LIST *ASSET STATUSES*:
+ - OPERATIONAL
+ - BORKEN
 
 API
 ---
 
-- /RFID/asset/auth
-- /RFID/asset/register
+- /ASSETS_RFID/pulse
+
+- /ASSETS_RFID/list
+- /ASSETS_RFID/view
+- /ASSETS_RFID/save
+
+- /PEOPLE_RFID/list
+- /PEOPLE_RFID/new
+- /PEOPLE_RFID/save
+- /PEOPLE_RFID/delete

@@ -11,11 +11,6 @@ Creates the following tables:
 - **LISTS**
 - **LIST_ITEMS**
 
-Creates the following entries in *LISTS*: 
-- **YES/NO**
-- **TRUE/FALSE**
-- **MEMBERSHIP TYPES**
-
 
 API
 ---
@@ -31,4 +26,3 @@ API
 - /LIST_ITEMS/new
 - /LIST_ITEMS/save
 - /LIST_ITEMS/delete
-

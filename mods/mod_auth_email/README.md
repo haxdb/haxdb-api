@@ -17,4 +17,3 @@ API
 - /AUTH/email/login
 - /AUTH/email/register
 - /AUTH/email/token
-- /AUTH/email/session
