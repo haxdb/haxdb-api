@@ -83,10 +83,6 @@ server {
         include proxy_params;
         proxy_pass http://unix:/home/haxdb/www/haxdb-api/haxdb.sock;
         add_header Access-Control-Allow-Origin *;
-
-        #proxy_pass http://localhost:8012;
-        #proxy_set_header Host $host;
-        #proxy_set_header X-Real-IP $remote_addr;
     }
 }
 ```
