@@ -7,3 +7,5 @@ mod_files
 
 mod_permissions
   - Add permission context beyond dba
+
+postgresql support
