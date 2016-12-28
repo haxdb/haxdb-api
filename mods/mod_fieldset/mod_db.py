@@ -1,14 +1,15 @@
 db = None
 config = None
 
+
 def init(app_db, app_config):
     global db, config
 
     db = app_db
     config = app_config
-    
+
     tables = []
-    
+
     t = db.tables.table("FIELDSET")
     t.add("FIELDSET_NAME", "CHAR", col_size=50)
     t.add("FIELDSET_PEOPLE_ID", "INT")
@@ -24,12 +25,13 @@ def init(app_db, app_config):
     tables.append(t)
 
     indexes = []
-    indexes.append(db.tables.index("FIELDSET", ["FIELDSET_CONTEXT", "FIELDSET_CONTEXT_ID", "FIELDSET_NAME"], unique=True))
-    indexes.append(db.tables.index("FIELDSET_COLS", ["FIELDSET_COLS_FIELDSET_ID","FIELDSET_COLS_COL"], unique=True))
+    indexes.append(db.tables.index("FIELDSET", ["FIELDSET_CONTEXT",
+                                                "FIELDSET_CONTEXT_ID", "FIELDSET_NAME"], unique=True))
+    indexes.append(db.tables.index("FIELDSET_COLS", ["FIELDSET_COLS_FIELDSET_ID", "FIELDSET_COLS_COL"], unique=True))
 
-    db.create(tables=tables, indexes=indexes)    
-    
-    
+    db.create(tables=tables, indexes=indexes)
+
+
 def run():
 
     insert_list = "INSERT INTO LISTS (LISTS_NAME, LISTS_INTERNAL) VALUES (%s, 1)"

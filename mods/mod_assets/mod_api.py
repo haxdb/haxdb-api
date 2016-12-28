@@ -9,6 +9,7 @@ config = None
 tools = None
 apis = {}
 
+
 def init(app_haxdb, app_db, app_config, app_tools):
     global haxdb, db, config, tools, apis
     haxdb = app_haxdb
@@ -29,8 +30,8 @@ def init(app_haxdb, app_db, app_config, app_tools):
 
 
 def run():
-    @haxdb.app.route("/ASSETS/list", methods=["POST","GET"])
-    @haxdb.app.route("/ASSETS/list/<path:query>", methods=["POST","GET"])
+    @haxdb.app.route("/ASSETS/list", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS/list/<path:query>", methods=["POST", "GET"])
     def mod_assets_list(query=None):
         meta = {}
         meta["api"] = "ASSETS"
@@ -43,9 +44,8 @@ def run():
         params = ()
         return apis["ASSETS"].list_call(sql, params, meta)
 
-
-    @haxdb.app.route("/ASSETS/view", methods=["POST","GET"])
-    @haxdb.app.route("/ASSETS/view/<int:rowid>", methods=["POST","GET"])
+    @haxdb.app.route("/ASSETS/view", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS/view/<int:rowid>", methods=["POST", "GET"])
     def mod_assets_view(rowid=None):
         rowid = rowid or haxdb.data.var.get("rowid")
 
@@ -61,7 +61,6 @@ def run():
         """
         params = (rowid,)
         return apis["ASSETS"].view_call(sql, params, meta)
-
 
     @haxdb.app.route("/ASSETS/new", methods=["POST", "GET"])
     @haxdb.app.route("/ASSETS/new/<name>", methods=["POST", "GET"])
@@ -81,8 +80,8 @@ def run():
 
         return apis["ASSETS"].new_call(sql, params, meta)
 
-    @haxdb.app.route("/ASSETS/delete", methods=["GET","POST"])
-    @haxdb.app.route("/ASSETS/delete/<int:rowid>", methods=["GET","POST"])
+    @haxdb.app.route("/ASSETS/delete", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSETS/delete/<int:rowid>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
@@ -99,12 +98,12 @@ def run():
 
         return apis["ASSETS"].delete_call(sql, params, meta)
 
-    @haxdb.app.route("/ASSETS/save", methods=["GET","POST"])
-    @haxdb.app.route("/ASSETS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
+    @haxdb.app.route("/ASSETS/save", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSETS/save/<int:rowid>/<col>/<val>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
-    def mod_assets_save (rowid=None, col=None, val=None):
+    def mod_assets_save(rowid=None, col=None, val=None):
         rowid = rowid or haxdb.data.var.get("rowid")
         col = col or haxdb.data.var.get("col")
         val = val or haxdb.data.var.get("val")
@@ -115,15 +114,14 @@ def run():
         meta["column"] = col
         meta["rowid"] = rowid
         meta["val"] = val
-        meta["oid"] = "ASSETS-%s-%s" % (rowid,col,)
+        meta["oid"] = "ASSETS-%s-%s" % (rowid, col,)
 
         sql = "UPDATE ASSETS SET {}=%s WHERE ASSETS_ID=%s and ASSETS_INTERNAL!=1"
-        params = (val,rowid,)
+        params = (val, rowid,)
         return apis["ASSETS"].save_call(sql, params, meta, col, val, rowid)
 
-
-    @haxdb.app.route("/ASSET_LINKS/list", methods=["POST","GET"])
-    @haxdb.app.route("/ASSET_LINKS/list/<int:assets_id>", methods=["POST","GET"])
+    @haxdb.app.route("/ASSET_LINKS/list", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSET_LINKS/list/<int:assets_id>", methods=["POST", "GET"])
     def mod_asset_links_asset(assets_id=None):
         assets_id = assets_id or haxdb.data.var.get("assets_id")
 
@@ -133,7 +131,7 @@ def run():
         meta["assets_id"] = assets_id
 
         sql = "SELECT * FROM ASSETS WHERE ASSETS_ID=%s"
-        db.query(sql,(assets_id,))
+        db.query(sql, (assets_id,))
         row = db.next()
         meta["assets_name"] = row["ASSETS_NAME"]
 
@@ -167,12 +165,12 @@ def run():
         params = (assets_id, name,)
         return apis["ASSET_LINKS"].new_call(sql, params, meta)
 
-    @haxdb.app.route("/ASSET_LINKS/save", methods=["GET","POST"])
-    @haxdb.app.route("/ASSET_LINKS/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
+    @haxdb.app.route("/ASSET_LINKS/save", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSET_LINKS/save/<int:rowid>/<col>/<val>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
-    def mod_asset_links_save (rowid=None, col=None, val=None):
+    def mod_asset_links_save(rowid=None, col=None, val=None):
         rowid = rowid or haxdb.data.var.get("rowid")
         col = col or haxdb.data.var.get("col")
         val = val or haxdb.data.var.get("val")
@@ -186,11 +184,11 @@ def run():
         meta["oid"] = "ASSET_LINKS-%s-%s" % (rowid, col,)
 
         sql = "UPDATE ASSET_LINKS SET {}=%s WHERE ASSET_LINKS_ID=%s"
-        params = (val,rowid,)
+        params = (val, rowid,)
         return apis["ASSET_LINKS"].save_call(sql, params, meta, col, val, rowid)
 
-    @haxdb.app.route("/ASSET_LINKS/delete", methods=["GET","POST"])
-    @haxdb.app.route("/ASSET_LINKS/delete/<int:rowid>", methods=["GET","POST"])
+    @haxdb.app.route("/ASSET_LINKS/delete", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSET_LINKS/delete/<int:rowid>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
@@ -206,8 +204,8 @@ def run():
         params = (rowid,)
         return apis["ASSET_LINKS"].delete_call(sql, params, meta)
 
-    @haxdb.app.route("/ASSET_AUTHS/list", methods=["POST","GET"])
-    @haxdb.app.route("/ASSET_AUTHS/list/<int:assets_id>", methods=["POST","GET"])
+    @haxdb.app.route("/ASSET_AUTHS/list", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSET_AUTHS/list/<int:assets_id>", methods=["POST", "GET"])
     def mod_ASSET_AUTHS_asset(assets_id=None):
         assets_id = assets_id or haxdb.data.var.get("assets_id")
 
@@ -217,7 +215,7 @@ def run():
         meta["assets_id"] = assets_id
 
         sql = "SELECT * FROM ASSETS WHERE ASSETS_ID=%s"
-        db.query(sql,(assets_id,))
+        db.query(sql, (assets_id,))
         row = db.next()
         meta["assets_name"] = row["ASSETS_NAME"]
 
@@ -251,9 +249,9 @@ def run():
         params = (assets_id, people_id,)
         return apis["ASSET_AUTHS"].new_call(sql, params, meta)
 
-    @haxdb.app.route("/ASSET_AUTHS/delete", methods=["GET","POST"])
-    @haxdb.app.route("/ASSET_AUTHS/delete/<int:rowid>", methods=["GET","POST"])
-    @haxdb.app.route("/ASSET_AUTHS/delete/<int:assets_id>/<int:people_id>", methods=["GET","POST"])
+    @haxdb.app.route("/ASSET_AUTHS/delete", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSET_AUTHS/delete/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSET_AUTHS/delete/<int:assets_id>/<int:people_id>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly

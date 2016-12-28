@@ -62,7 +62,8 @@ class api_call:
 
         sql = """
         SELECT LISTS.*, LIST_ITEMS.* FROM LISTS
-        JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID=LISTS_ID AND LIST_ITEMS_ENABLED=1
+        JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID=LISTS_ID
+                           AND LIST_ITEMS_ENABLED=1
         """
         params = ()
 
@@ -70,7 +71,7 @@ class api_call:
             sql += "WHERE"
 
         if self.lists:
-            sql += " LISTS_NAME IN ({})".format( ",".join(('%s',) * len(self.lists)) )
+            sql += " LISTS_NAME IN ({})".format(",".join(('%s',) * len(self.lists)))
             params += tuple(self.lists)
 
         if self.udf_context:
@@ -100,7 +101,6 @@ class api_call:
 
         return lists
 
-
     def list_call(self, sql, params, meta, calc_row_function=None):
         self.udf_context_id = self.udf_context_id or 0
 
@@ -108,12 +108,20 @@ class api_call:
         meta["query"] = query
 
         if self.udf_context:
-            context_sql = "UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s AND UDF_DATA_ROWID={} AND UDF_ENABLED=1".format(self.udf_rowid)
+            context_sql = """
+            UDF_CONTEXT=%s
+            AND UDF_CONTEXT_ID=%s
+            AND UDF_DATA_ROWID={}
+            AND UDF_ENABLED=1
+            """.format(self.udf_rowid)
             context_params = (self.udf_context, self.udf_context_id)
 
             sql += """
-            LEFT OUTER JOIN UDF ON UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s AND UDF_ENABLED=1
-            LEFT OUTER JOIN UDF_DATA ON UDF_DATA_UDF_ID=UDF_ID AND UDF_DATA_ROWID={}
+            LEFT OUTER JOIN UDF ON UDF_CONTEXT=%s
+                                   AND UDF_CONTEXT_ID=%s
+                                   AND UDF_ENABLED=1
+            LEFT OUTER JOIN UDF_DATA ON UDF_DATA_UDF_ID=UDF_ID
+                                        AND UDF_DATA_ROWID={}
             """.format(self.udf_rowid)
             params += context_params
 
@@ -156,16 +164,19 @@ class api_call:
                                 sql += " OR "
                             if val == "NULL" and op == "=":
                                 sql += "("
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE {} and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1) < 1".format(context_sql)
+                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE {} and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1) < 1".format(
+                                    context_sql)
                                 sql += " OR "
                                 sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE {} and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_VALUE IS NULL) > 0".format(context_sql,)
                                 sql += ")"
-                                params += context_params + (col,) + context_params + (col,)
+                                params += context_params + \
+                                    (col,) + context_params + (col,)
                             elif val == "NULL" and op == "!=":
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE {} and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1) > 0".format(context_sql)
+                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE {} and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1) > 0".format(
+                                    context_sql)
                                 params += context_params + (col,)
                             else:
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE {} and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_VALUE {} %s) > 0".format(context_sql,op)
+                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE {} and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_VALUE {} %s) > 0".format(context_sql, op)
                                 params += context_params + (col, val)
                             valcount += 1
                         sql += ")"
@@ -189,7 +200,8 @@ class api_call:
 
         if len(self.order_cols) > 0:
             if self.udf_rowid:
-                sql += " ORDER BY {},{}".format(self.udf_rowid, ",".join(self.order_cols))
+                sql += " ORDER BY {},{}".format(self.udf_rowid,
+                                                ",".join(self.order_cols))
             else:
                 sql += " ORDER BY {}".format(",".join(self.order_cols))
 
@@ -223,7 +235,7 @@ class api_call:
 
         if rowdata:
             rows.append(rowdata)
-            
+
         return output(success=1, data=rows, meta=meta)
 
     def view_call(self, sql, params, meta, calc_row_function=None):
@@ -247,7 +259,8 @@ class api_call:
             AND UDF_ENABLED=1
             ORDER BY UDF_ORDER
             """
-            udf_params = (self.udf_context, self.udf_context_id, row[self.udf_rowid])
+            udf_params = (self.udf_context, self.udf_context_id,
+                          row[self.udf_rowid])
             db.query(udf_sql, udf_params)
             udf = db.next()
             while udf:
@@ -289,6 +302,7 @@ class api_call:
         self.udf_context_id = self.udf_context_id or 0
 
         if col not in self.cols:
+            print self.udf_context, self.udf_context_id, col
             if self.udf_context:
                 udf_sql = "SELECT * FROM UDF WHERE UDF_CONTEXT=%s and UDF_NAME=%s and UDF_CONTEXT_ID=%s"
                 udf_params = (self.udf_context, col, self.udf_context_id)

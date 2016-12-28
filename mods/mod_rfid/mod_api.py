@@ -34,7 +34,6 @@ def run():
         rfid = rfid or haxdb.data.var.get("rfid")
         status = status or haxdb.data.var.get("status")
 
-
         meta = {}
         meta["api"] = "ASSETS_RFID"
         meta["action"] = "pulse"
@@ -64,7 +63,8 @@ def run():
         """
         params += (api_key,)
         node = db.qaf(sql, params)
-        if db.error: return haxdb.data.output(success=0, meta=meta, message=db.error)
+        if db.error:
+            return haxdb.data.output(success=0, meta=meta, message=db.error)
 
         if not node:
             # API KEY DOES NOT MATCH A NODE.
@@ -78,7 +78,8 @@ def run():
             """
             params = (rfid,)
             person = db.qaf(sql, params)
-            if db.error: return haxdb.data.output(success=0, meta=meta, message=db.error)
+            if db.error:
+                return haxdb.data.output(success=0, meta=meta, message=db.error)
             if person:
                 print dict(person)
                 # RFID MATCHES A DBA.
@@ -86,8 +87,9 @@ def run():
                 ip = str(request.access_route[-1])
 
                 sql = "SELECT * FROM NODES WHERE NODES_IP=%s"
-                row = db.qaf(sql,(ip,))
-                if db.error: return haxdb.data.output(success=0, meta=meta, message=db.error)
+                row = db.qaf(sql, (ip,))
+                if db.error:
+                    return haxdb.data.output(success=0, meta=meta, message=db.error)
                 if row:
                     return haxdb.data.output(success=0, meta=meta, message="NODE ALREADY REGISTERED ON THIS IP.")
 
@@ -96,9 +98,10 @@ def run():
                     VALUES (%s,%s,%s,'1','0',%s,'0','1')
                     """
                 api_key = tools.create_api_key()
-                node_name = "%s %s REGISTERED (RFID)" % (person["PEOPLE_NAME_FIRST"],person["PEOPLE_NAME_LAST"])
-                db.query(sql, (api_key,person["PEOPLE_ID"],node_name,ip,))
-                if db.error: return haxdb.data.output(success=0, meta=meta, message=db.error)
+                node_name = "%s %s REGISTERED (RFID)" % (person["PEOPLE_NAME_FIRST"], person["PEOPLE_NAME_LAST"])
+                db.query(sql, (api_key, person["PEOPLE_ID"], node_name, ip,))
+                if db.error:
+                    return haxdb.data.output(success=0, meta=meta, message=db.error)
                 if db.rowcount > 0:
                     db.commit()
                     return haxdb.data.output(success=0, meta=meta, value=api_key, message="NODE REGISTERED.\nACTIVATION NEEDED.")
@@ -118,34 +121,35 @@ def run():
             # NODE NOT ASSIGNED AN ASSET
             return haxdb.data.output(success=0, meta=meta, message="NODE REGISTERED BUT NOT ASSOCIATED WITH ASSET.")
 
-        if node["ASSETS_RFID_REQUIRE_RFID"]!=None and int(node["ASSETS_RFID_REQUIRE_RFID"]) != 1:
+        if node["ASSETS_RFID_REQUIRE_RFID"] != None and int(node["ASSETS_RFID_REQUIRE_RFID"]) != 1:
             # NODE DOES NOT REQUIRE RFID
             # TODO: LOG ASSET_USAGE
-            message ="%s\n%s" % (node["ASSETS_NAME"], node["ASSETS_RFID_STATUS"])
+            message = "%s\n%s" % (node["ASSETS_NAME"], node["ASSETS_RFID_STATUS"])
             return haxdb.data.output(success=1, meta=meta, message=message)
 
         if not rfid:
             # TODO: LOG ASSET_USAGE
-            message ="%s\n%s" % (node["ASSETS_NAME"], node["ASSETS_RFID_STATUS"])
+            message = "%s\n%s" % (node["ASSETS_NAME"], node["ASSETS_RFID_STATUS"])
             return haxdb.data.output(success=0, meta=meta, message=message)
 
         if not node["PEOPLE_ID"]:
             # TODO: DEAUTH ASSET
             return haxdb.data.output(success=0, meta=meta, message="RFID NOT RECOGNIZED.")
 
-        if node["ASSETS_RFID_REQUIRE_AUTH"]!=None and int(node["ASSETS_RFID_REQUIRE_AUTH"])!=1:
-            message = "%s\n%s %s\nNO AUTHORIZE REQUIRED" % (node["ASSETS_NAME"], node["PEOPLE_NAME_FIRST"], node["PEOPLE_NAME_LAST"])
+        if node["ASSETS_RFID_REQUIRE_AUTH"] != None and int(node["ASSETS_RFID_REQUIRE_AUTH"]) != 1:
+            message = "%s\n%s %s\nNO AUTHORIZE REQUIRED" % (
+                node["ASSETS_NAME"], node["PEOPLE_NAME_FIRST"], node["PEOPLE_NAME_LAST"])
             return haxdb.data.output(success=0, meta=meta, message=message)
 
         if not node["ASSET_AUTHS_ID"]:
             # TODO: DEAUTH ASSET
-            message = "%s\n%s %s\nNOT AUTHORIZED" % (node["ASSETS_NAME"], node["PEOPLE_NAME_FIRST"], node["PEOPLE_NAME_LAST"])
+            message = "%s\n%s %s\nNOT AUTHORIZED" % (
+                node["ASSETS_NAME"], node["PEOPLE_NAME_FIRST"], node["PEOPLE_NAME_LAST"])
             return haxdb.data.output(success=0, meta=meta, message=message)
 
         # AUTH ASSET
         message = "%s\n%s %s\nAUTHORIZED" % (node["ASSETS_NAME"], node["PEOPLE_NAME_FIRST"], node["PEOPLE_NAME_LAST"])
         return haxdb.data.output(success=1, meta=meta, message=message)
-
 
     @haxdb.app.route("/RFID/asset/list", methods=["POST", "GET"])
     @haxdb.app.route("/RFID/asset/list/<path:query>", methods=["POST", "GET"])
@@ -168,19 +172,18 @@ def run():
         """
         return apis["ASSETS_RFID"].list_call(sql, (), meta)
 
-    @haxdb.app.route("/ASSETS_RFID/view", methods=["POST","GET"])
-    @haxdb.app.route("/ASSETS_RFID/view/<int:rowid>", methods=["POST","GET"])
+    @haxdb.app.route("/ASSETS_RFID/view", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS_RFID/view/<int:rowid>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_ASSETS_RFID_view(rowid=None):
         def calc_row(row):
             row["ASSETS_RFID_IN_USE"] = 0
-            if row["ASSETS_RFID_AUTH_LAST"] and row["ASSETS_RFID_AUTH_TIMEOUT"]  and (time.time() - int(row["ASSETS_RFID_AUTH_LAST"])) < row["ASSETS_RFID_AUTH_TIMEOUT"]:
+            if row["ASSETS_RFID_AUTH_LAST"] and row["ASSETS_RFID_AUTH_TIMEOUT"] and (time.time() - int(row["ASSETS_RFID_AUTH_LAST"])) < row["ASSETS_RFID_AUTH_TIMEOUT"]:
                 row["ASSETS_RFID_IN_USE"] = 1
             return row
 
         rowid = rowid or haxdb.data.var.get("rowid")
-
 
         meta = {}
         meta["api"] = "ASSETS_RFID"
@@ -198,9 +201,8 @@ def run():
         params = (rowid,)
         return apis["ASSETS_RFID"].view_call(sql, params, meta, calc_row)
 
-
-    @haxdb.app.route("/ASSETS_RFID/save", methods=["POST","GET"])
-    @haxdb.app.route("/ASSETS_RFID/save/<int:rowid>/<col>/<path:val>", methods=["POST","GET"])
+    @haxdb.app.route("/ASSETS_RFID/save", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS_RFID/save/<int:rowid>/<col>/<path:val>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_ASSETS_RFID_save(rowid=None, col=None, val=None):
@@ -208,14 +210,13 @@ def run():
         col = col or haxdb.data.var.get("col")
         val = val or haxdb.data.var.get("val")
 
-
         meta = {}
         meta["api"] = "ASSETS_RFID"
         meta["action"] = "save"
         meta["rowid"] = rowid
 
         sql = "INSERT INTO ASSETS_RFID(ASSETS_RFID_ASSETS_ID) VALUES (%s)"
-        db.query(sql,(rowid,), squelch=True)
+        db.query(sql, (rowid,), squelch=True)
         db.commit()
 
         sql = """
@@ -223,15 +224,14 @@ def run():
         """
         params = (val, rowid,)
 
-        return apis["ASSETS_RFID"].save_call(sql,params,meta,col,val)
+        return apis["ASSETS_RFID"].save_call(sql, params, meta, col, val)
 
-    @haxdb.app.route("/PEOPLE_RFID/list", methods=["POST","GET"])
-    @haxdb.app.route("/PEOPLE_RFID/list/<int:people_id>", methods=["POST","GET"])
+    @haxdb.app.route("/PEOPLE_RFID/list", methods=["POST", "GET"])
+    @haxdb.app.route("/PEOPLE_RFID/list/<int:people_id>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
-    def mod_PEOPLE_RFID_list (people_id=None):
+    def mod_PEOPLE_RFID_list(people_id=None):
         people_id = people_id or haxdb.data.var.get("people_id")
-
 
         meta = {}
         meta["api"] = "PEOPLE_RFID"
@@ -239,8 +239,8 @@ def run():
         meta["people_id"] = people_id
 
         sql = "SELECT * FROM PEOPLE WHERE PEOPLE_ID=%s"
-        row = db.qaf(sql,(people_id,))
-        meta["people_name"] = "%s %s" % (row["PEOPLE_NAME_FIRST"],row["PEOPLE_NAME_LAST"],)
+        row = db.qaf(sql, (people_id,))
+        meta["people_name"] = "%s %s" % (row["PEOPLE_NAME_FIRST"], row["PEOPLE_NAME_LAST"],)
 
         sql = """
         SELECT *,
@@ -260,7 +260,6 @@ def run():
         people_id = people_id or haxdb.data.var.get("people_id")
         name = name or haxdb.data.var.get("name")
 
-
         meta = {}
         meta["api"] = "PEOPLE_RFID"
         meta["action"] = "new"
@@ -272,16 +271,15 @@ def run():
         params = (people_id, name,)
         return apis["PEOPLE_RFID"].new_call(sql, params, meta)
 
-    @haxdb.app.route("/PEOPLE_RFID/save", methods=["GET","POST"])
-    @haxdb.app.route("/PEOPLE_RFID/save/<int:rowid>/<col>/<val>", methods=["GET","POST"])
+    @haxdb.app.route("/PEOPLE_RFID/save", methods=["GET", "POST"])
+    @haxdb.app.route("/PEOPLE_RFID/save/<int:rowid>/<col>/<val>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
-    def mod_PEOPLE_RFID_save (rowid=None, col=None, val=None):
+    def mod_PEOPLE_RFID_save(rowid=None, col=None, val=None):
         rowid = rowid or haxdb.data.var.get("rowid")
         col = col or haxdb.data.var.get("col")
         val = val or haxdb.data.var.get("val")
-
 
         meta = {}
         meta["api"] = "PEOPLE_RFID"
@@ -292,17 +290,16 @@ def run():
         meta["oid"] = "PEOPLE_RFID-%s-%s" % (rowid, col,)
 
         sql = "UPDATE PEOPLE_RFID SET {}=%s WHERE PEOPLE_RFID_ID=%s"
-        params = (val,rowid,)
+        params = (val, rowid,)
         return apis["PEOPLE_RFID"].save_call(sql, params, meta, col, val, rowid)
 
-    @haxdb.app.route("/PEOPLE_RFID/delete", methods=["GET","POST"])
-    @haxdb.app.route("/PEOPLE_RFID/delete/<int:rowid>", methods=["GET","POST"])
+    @haxdb.app.route("/PEOPLE_RFID/delete", methods=["GET", "POST"])
+    @haxdb.app.route("/PEOPLE_RFID/delete/<int:rowid>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_PEOPLE_RFID_delete(rowid=None):
         rowid = rowid or haxdb.data.var.get("rowid")
-
 
         meta = {}
         meta["api"] = "PEOPLE_RFID"

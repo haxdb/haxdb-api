@@ -1,14 +1,15 @@
 db = None
 config = None
 
+
 def init(app_db, app_config):
     global db, config
 
     db = app_db
     config = app_config
-    
+
     tables = []
-    
+
     t = db.tables.table("PEOPLE")
     t.add("PEOPLE_NAME_FIRST", "CHAR", col_size=50)
     t.add("PEOPLE_NAME_LAST", "CHAR", col_size=50)
@@ -21,9 +22,9 @@ def init(app_db, app_config):
     indexes = []
     indexes.append(db.tables.index("PEOPLE", ["PEOPLE_EMAIL"], unique=True))
 
-    db.create(tables=tables, indexes=indexes)    
-    
-    
+    db.create(tables=tables, indexes=indexes)
+
+
 def run():
 
     insert_list = "INSERT INTO LISTS (LISTS_NAME, LISTS_INTERNAL) VALUES (%s, 1)"

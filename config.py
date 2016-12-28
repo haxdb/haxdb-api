@@ -16,4 +16,4 @@ config = {}
 for section in cfg.sections():
     config[section] = {}
     for option in cfg.options(section):
-        config[section.upper()][option.upper()] = cfg.get(section,option)
+        config[section.upper()][option.upper()] = cfg.get(section, option)

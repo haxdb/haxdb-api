@@ -1,7 +1,9 @@
 #!/usr/bin/python
 
 from config import config
-import db, haxdb, mods
+import db
+import haxdb
+import mods
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
@@ -16,6 +18,3 @@ app = haxdb.app
 
 if __name__ == "__main__":
     haxdb.run()
-
-
-

@@ -10,6 +10,7 @@ db = None
 config = None
 tools = None
 
+
 def init(app_haxdb, app_db, app_config, mod_tools):
     global haxdb, db, config, tools
     haxdb = app_haxdb
@@ -21,8 +22,8 @@ def init(app_haxdb, app_db, app_config, mod_tools):
 def run():
     global haxdb, config, db, tools
 
-    @haxdb.app.route("/AUTH/email/login", methods=["GET","POST"])
-    @haxdb.app.route("/AUTH/email/login/<email>", methods=["GET","POST"])
+    @haxdb.app.route("/AUTH/email/login", methods=["GET", "POST"])
+    @haxdb.app.route("/AUTH/email/login/<email>", methods=["GET", "POST"])
     def mod_auth_email(email=None):
         email = email or haxdb.data.var.get("email")
         subject = haxdb.data.var.get("subject")
@@ -47,20 +48,20 @@ def run():
         token = base64.urlsafe_b64encode(os.urandom(500))[5:260]
         expire = time.time() + int(config["AUTH"]["TOKEN_EXPIRE"])
         sql = "INSERT INTO AUTH_TOKEN (AUTH_TOKEN_TOKEN, AUTH_TOKEN_PEOPLE_ID, AUTH_TOKEN_EXPIRE) VALUES (%s,%s,%s)"
-        db.query(sql, (token,people["PEOPLE_ID"],expire))
-        if db.error: return haxdb.data.output(success=0, message=db.error, meta=meta)
+        db.query(sql, (token, people["PEOPLE_ID"], expire))
+        if db.error:
+            return haxdb.data.output(success=0, message=db.error, meta=meta)
         db.commit()
 
         to = "%s %s <%s>" % (people["PEOPLE_NAME_FIRST"], people["PEOPLE_NAME_LAST"], people["PEOPLE_EMAIL"])
-        message = message.replace("[token]",token)
+        message = message.replace("[token]", token)
         result = tools.send_email(to, subject, message)
         if not result:
             return haxdb.data.output(success=0, message=result, meta=meta)
         return haxdb.data.output(success=1, message="EMAIL SENT", meta=meta)
 
-
-    @haxdb.app.route("/AUTH/email/register", methods=["GET","POST"])
-    @haxdb.app.route("/AUTH/email/register/<email>", methods=["GET","POST"])
+    @haxdb.app.route("/AUTH/email/register", methods=["GET", "POST"])
+    @haxdb.app.route("/AUTH/email/register/<email>", methods=["GET", "POST"])
     def mod_auth_register(email=None):
         email = email or haxdb.data.var.get("email")
         subject = haxdb.data.var.get("subject")
@@ -90,21 +91,21 @@ def run():
         token = base64.urlsafe_b64encode(os.urandom(500))[5:260]
         expire = int(time.time()) + int(config["AUTH"]["TOKEN_EXPIRE"])
         sql = "INSERT INTO AUTH_TOKEN (AUTH_TOKEN_TOKEN, AUTH_TOKEN_PEOPLE_ID, AUTH_TOKEN_EXPIRE) VALUES (%s,%s,%s)"
-        db.query(sql, (token,people_id,expire))
-        if db.error: return haxdb.data.output(success=0, message=db.error, meta=meta)
+        db.query(sql, (token, people_id, expire))
+        if db.error:
+            return haxdb.data.output(success=0, message=db.error, meta=meta)
         db.commit()
 
         to = email
-        message = message.replace("[token]",token)
+        message = message.replace("[token]", token)
         result = tools.send_email(email, subject, message)
 
         if not result:
             return haxdb.data.output(success=0, message=result, meta=meta)
         return haxdb.data.output(success=1, message="EMAIL SENT", meta=meta)
 
-
-    @haxdb.app.route("/AUTH/token", methods=["GET","POST"])
-    @haxdb.app.route("/AUTH/token/<token>", methods=["GET","POST"])
+    @haxdb.app.route("/AUTH/token", methods=["GET", "POST"])
+    @haxdb.app.route("/AUTH/token/<token>", methods=["GET", "POST"])
     def mod_auth_token(token=None):
         token = token or haxdb.data.var.get("token")
         config_dbas = [x.strip().upper() for x in config["AUTH"]["DBA"].split(',')]
@@ -117,7 +118,8 @@ def run():
 
         # DELETE OLD TOKEN
         db.query("DELETE FROM AUTH_TOKEN WHERE AUTH_TOKEN_EXPIRE<%s", (now,))
-        if db.error: return haxdb.data.output(success=0, message=db.error, meta=meta)
+        if db.error:
+            return haxdb.data.output(success=0, message=db.error, meta=meta)
         db.commit()
 
         # VALIDATE TOKEN
@@ -136,22 +138,25 @@ def run():
 
         # CREATE SESSION NODE
         api_key = base64.urlsafe_b64encode(os.urandom(500))[5:260]
-        expire = int(time.time() + 1800) # 30 minutes
-        node_name = "%s %s TOKEN AUTH" % (row["PEOPLE_NAME_FIRST"],row["PEOPLE_NAME_LAST"],)
+        expire = int(time.time() + 1800)  # 30 minutes
+        node_name = "%s %s TOKEN AUTH" % (row["PEOPLE_NAME_FIRST"], row["PEOPLE_NAME_LAST"],)
         dba = row["PEOPLE_DBA"]
-        if row["PEOPLE_EMAIL"].upper() in config_dbas: dba = 1
+        if row["PEOPLE_EMAIL"].upper() in config_dbas:
+            dba = 1
         ip = str(request.access_route[-1])
         sql = """
         INSERT INTO NODES (NODES_API_KEY,NODES_PEOPLE_ID,NODES_NAME,NODES_READONLY,NODES_DBA,NODES_IP,NODES_EXPIRE,NODES_ENABLED,NODES_QUEUED)
         VALUES (%s,%s,%s,0,%s,%s,%s,1,0)
         """
-        db.query(sql,(api_key,row["PEOPLE_ID"],node_name,dba,ip,expire,))
-        if db.error: return haxdb.data.output(success=0, message=db.error, meta=meta)
+        db.query(sql, (api_key, row["PEOPLE_ID"], node_name, dba, ip, expire,))
+        if db.error:
+            return haxdb.data.output(success=0, message=db.error, meta=meta)
 
         # REMOVE TOKEN
         sql = "DELETE FROM AUTH_TOKEN WHERE AUTH_TOKEN_TOKEN=%s"
         db.query(sql, (token,))
-        if db.error: return haxdb.data.output(success=0, message=db.error, meta=meta)
+        if db.error:
+            return haxdb.data.output(success=0, message=db.error, meta=meta)
         db.commit()
 
         meta["people_name"] = "%s %s" % (row["PEOPLE_NAME_FIRST"], row["PEOPLE_NAME_LAST"])
