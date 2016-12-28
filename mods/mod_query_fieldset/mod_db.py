@@ -10,12 +10,21 @@ def init(app_db, app_config):
 
     tables = []
 
+    t = db.tables.table("QUERY")
+    t.add("QUERY_NAME", "CHAR", col_size=50)
+    t.add("QUERY_PEOPLE_ID", "INT")
+    t.add("QUERY_CONTEXT", "CHAR", col_size=50)
+    t.add("QUERY_CONTEXT_ID", "INT")
+    t.add("QUERY_QUERY", "CHAR", col_size=255)
+    t.add("QUERY_ORDER", "INT")
+    tables.append(t)
+
     t = db.tables.table("FIELDSET")
     t.add("FIELDSET_NAME", "CHAR", col_size=50)
     t.add("FIELDSET_PEOPLE_ID", "INT")
     t.add("FIELDSET_CONTEXT", "CHAR", col_size=50)
     t.add("FIELDSET_CONTEXT_ID", "INT")
-    t.add("FIELDSET_QUERY", "CHAR", col_size=255)
+    t.add("FIELDSET_ORDER","INT")
     tables.append(t)
 
     t = db.tables.table("FIELDSET_COLS")
@@ -25,9 +34,32 @@ def init(app_db, app_config):
     tables.append(t)
 
     indexes = []
-    indexes.append(db.tables.index("FIELDSET", ["FIELDSET_CONTEXT",
-                                                "FIELDSET_CONTEXT_ID", "FIELDSET_NAME"], unique=True))
-    indexes.append(db.tables.index("FIELDSET_COLS", ["FIELDSET_COLS_FIELDSET_ID", "FIELDSET_COLS_COL"], unique=True))
+
+    index = db.tables.index("QUERY",
+                            [
+                              "QUERY_CONTEXT",
+                              "QUERY_CONTEXT_ID",
+                              "QUERY_NAME"
+                            ],
+                            unique=True)
+    indexes.append(index)
+
+    index = db.tables.index("FIELDSET",
+                            [
+                              "FIELDSET_CONTEXT",
+                              "FIELDSET_CONTEXT_ID",
+                              "FIELDSET_NAME"
+                            ],
+                            unique=True)
+    indexes.append(index)
+
+    index = db.tables.index("FIELDSET_COLS",
+                            [
+                              "FIELDSET_COLS_FIELDSET_ID",
+                              "FIELDSET_COLS_COL"
+                            ],
+                            unique=True)
+    indexes.append(index)
 
     db.create(tables=tables, indexes=indexes)
 
