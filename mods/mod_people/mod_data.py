@@ -1,3 +1,16 @@
+mdata = {}
+
+mdata["PEOPLE"] = {
+    "COLS": [
+        {"ORDER": 0.1,
+         "NAME": "PEOPLE_NAME_FIRST",
+         "HEADER": "FIRST",
+         "TYPE": "STR"
+         },
+    ]
+}
+
+
 apis = {}
 
 apis["PEOPLE"] = {
