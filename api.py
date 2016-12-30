@@ -48,9 +48,11 @@ def valid_value(col_type, val):
 
 
 class api_call:
-    NAME = ""
-    TABLE = ""
-    ROWID = ""
+    NAME = None
+    TABLE = None
+    ROWID = None
+    CONTEXT_ID = 0
+    CONTEXT_ROW = None
     COLS = []
     _COLS = {}
     UDF = {}
@@ -61,17 +63,14 @@ class api_call:
         self.TABLE = api_def["TABLE"]
         self.ROWID = api_def["ROWID"]
         self.COLS = api_def["COLS"]
-        self.UDF = api_def["UDF"]
         self.ORDER = api_def["ORDER"]
+        self.CONTEXT_ROW api_def["CONTEXT_ROW"]
 
         for col in self.COLS:
             self._COLS[col["NAME"]] = col
 
-        if "CONTEXT_ID" not in self.UDF or not self.UDF["CONTEXT_ID"]:
-            self.UDF["CONTEXT_ID"] = 0
-
     def context_id(self, id):
-        self["UDF_CONTEXT_ID"] = id
+        self.CONTEXT_ID = id
 
     def get_list_id(self, list_name):
         return db.qaf("SELECT * FROM LISTS WHERE LISTS_NAME=%s", (list_name,))
@@ -238,9 +237,14 @@ class api_call:
         LEFT OUTER JOIN UDF_DATA ON UDF_DATA_UDF_ID=UDF_ID
                         AND UDF_DATA_ROWID={}
         """.format(self.ROWID)
-        params += (self.UDF["CONTEXT"], self.UDF["CONTEXT_ID"])
+        params += (self.TABLE, self.CONTEXT_ID)
 
-        sql += " WHERE 1=1"
+        if self.CONTEXT_ID:
+            sql += " WHERE {}=%s".format(self.CONTEXT_ROW)
+            params += (self.CONTEXT_ID,)
+        else:
+            sql += " WHERE 1=1"
+
         sql += self.build_query(query)
 
         if len(self.ORDER) > 0:
@@ -283,6 +287,10 @@ class api_call:
             sql = "SELECT * FROM {} WHERE {}=%s".format(self.TABLE, self.ROWID)
             params = (rowid,)
 
+            if self.CONTEXT_ID:
+                sql += " AND {}=%s".format(self.CONTEXT_ROW)
+                params += (self.CONTEXT_ID)
+
         meta["api"] = self.NAME
         meta["action"] = "view"
         meta["cols"] = self.get_cols()
@@ -316,35 +324,37 @@ class api_call:
             row = calc_row_function(dict(row))
         return output(success=1, meta=meta, data=row)
 
-    def new_call(self, sql=None, params=None, meta=None):
-        params = params or ()
+    def new_call(self, meta=None, defaults=None):
+        defaults = defaults or {}
 
         meta = meta or {}
         meta["api"] = self.NAME
         meta["action"] = "new"
 
-        if not sql:
-            col_names = []
-            col_params = ()
-            udf_names = []
-            udf_params = []
-            cols = self.get_cols()
+        col_names = []
+        col_params = ()
+        udf_names = []
+        udf_params = []
+        cols = self.get_cols()
 
-            errors = ""
-            for col in cols:
-                val = var.get(col)
-                if val is not None:
-                    if valid_value(col["TYPE"], val):
-                        if col["NAME"] in self._COLS:
-                            col_names.append(col["NAME"])
-                            col_params += (val,)
-                        else:
-                            udf_names.append(col["NAME"])
-                            udf_params.append(val)
+        errors = ""
+        for col in cols:
+            val = var.get(col)
+            if val is not None:
+                if valid_value(col["TYPE"], val):
+                    if col["NAME"] in self._COLS:
+                        col_names.append(col["NAME"])
+                        col_params += (val,)
                     else:
-                        errors += "INVALID VALUE FOR {}\n".format(col["NAME"])
-                elif col["REQUIRED"] == 1:
-                    errors += "{} IS REQUIRED.\n".format(col["NAME"])
+                        udf_names.append(col["NAME"])
+                        udf_params.append(val)
+                else:
+                    errors += "INVALID VALUE FOR {}\n".format(col["NAME"])
+            elif col["NAME"] in defaults:
+                col_names.append(col["NAME"])
+                col_params += (defaults[col["NAME"]],)
+            elif col["REQUIRED"] == 1:
+                errors += "{} IS REQUIRED.\n".format(col["NAME"])
 
         if errors:
             return output(success=0, meta=meta, message=errors)
@@ -353,7 +363,7 @@ class api_call:
         INSERT INTO {} ({})
         VALUES ({})
         """.format(self.TABLE, ",".join(col_names), ",".join(["%s"*len(col_names)]))
-        db.query(sql, params)
+        db.query(sql, col_params)
 
         if db.error:
             return output(success=0, meta=meta, message=db.error)

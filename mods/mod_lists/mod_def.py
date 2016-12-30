@@ -31,6 +31,7 @@ mod_def["LIST_ITEMS"] = {
     "NAME": "LIST_ITEMS",
     "TABLE": "LIST_ITEMS",
     "ROWID": "LIST_ITEMS_ID",
+    "CONTEXT_ROW": "LIST_ITEMS_LISTS_ID",
     "COLS": [
         {
          "NAME": "LIST_ITEMS_VALUE",

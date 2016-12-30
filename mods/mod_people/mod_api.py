@@ -5,7 +5,6 @@ import os
 haxdb = None
 db = None
 config = None
-tools = None
 apis = {}
 
 

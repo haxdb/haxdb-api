@@ -11,12 +11,15 @@ config = None
 tools = None
 
 
-def init(app_haxdb, app_db, app_config, mod_tools):
+def init(app_haxdb, mod_def, mod_tools):
     global haxdb, db, config, tools
     haxdb = app_haxdb
-    db = app_db
-    config = app_config
     tools = mod_tools
+    db = haxdb.db
+    config = haxdb.config
+
+    for api_name in mod_def.keys():
+        apis[api_name] = haxdb.api.api_call(mod_def[api_name])
 
 
 def run():

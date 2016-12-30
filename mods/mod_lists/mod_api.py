@@ -6,57 +6,31 @@ import os
 haxdb = None
 db = None
 config = None
-tools = None
 apis = {}
 
 
-def init(app_haxdb, app_db, app_config, app_tools):
+def init(app_haxdb, mod_def):
     global haxdb, db, config, tools
     haxdb = app_haxdb
-    db = app_db
-    config = app_config
-    tools = app_tools
+    db = haxdb.db
+    config = haxdb.config
 
-    for api_name in mod_data.apis:
-        apis[api_name] = haxdb.api.api_call()
-        apis[api_name].udf_context = mod_data.apis[api_name]["udf_context"]
-        apis[api_name].udf_context_id = mod_data.apis[api_name]["udf_context_id"]
-        apis[api_name].udf_rowid = mod_data.apis[api_name]["udf_rowid"]
-        apis[api_name].lists = mod_data.apis[api_name]["lists"]
-        apis[api_name].cols = mod_data.apis[api_name]["cols"]
-        apis[api_name].query_cols = mod_data.apis[api_name]["query_cols"]
-        apis[api_name].search_cols = mod_data.apis[api_name]["search_cols"]
-        apis[api_name].order_cols = mod_data.apis[api_name]["order_cols"]
+    for api_name in mod_def.keys():
+        apis[api_name] = haxdb.api.api_call(mod_def[api_name])
 
 
 def run():
     @haxdb.app.route("/LISTS/list", methods=["POST", "GET"])
     @haxdb.require_auth
     def mod_lists_list():
-        meta = {}
-        meta["api"] = "LISTS"
-        meta["action"] = "list"
-
-        sql = "SELECT * FROM LISTS"
-        params = ()
-        return apis["LISTS"].list_call(sql, params, meta)
+        return apis["LISTS"].list_call()
 
     @haxdb.app.route("/LISTS/new", methods=["POST", "GET"])
-    @haxdb.app.route("/LISTS/new/<name>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_lists_new(name=None):
-        name = name or haxdb.data.var.get("name")
-
-        meta = {}
-        meta["api"] = "LISTS"
-        meta["action"] = "new"
-        meta["name"] = name
-
-        sql = "INSERT INTO LISTS (LISTS_NAME,  LISTS_INTERNAL) VALUES (%s, 0)"
-        params = (name,)
-        return apis["LISTS"].new_call(sql, params, meta)
+        return apis["LISTS"].new_call()
 
     @haxdb.app.route("/LISTS/delete", methods=["GET", "POST"])
     @haxdb.app.route("/LISTS/delete/<int:rowid>", methods=["GET", "POST"])
@@ -64,66 +38,29 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_lists_delete(rowid=None):
-        rowid = rowid or haxdb.data.var.get("rowid")
-
-        meta = {}
-        meta["api"] = "LISTS"
-        meta["action"] = "delete"
-        meta["rowid"] = rowid
-
-        sql = "DELETE FROM LISTS WHERE LISTS_ID=%s and LISTS_INTERNAL!=1"
-        params = (rowid,)
-        return apis["LISTS"].delete_call(sql, params, meta)
+        return apis["LISTS"].delete_call(rowid=rowid)
 
     @haxdb.app.route("/LISTS/save", methods=["GET", "POST"])
-    @haxdb.app.route("/LISTS/save/<int:rowid>/<col>/<val>", methods=["GET", "POST"])
+    @haxdb.app.route("/LISTS/save/<int:rowid>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
-    def mod_lists_save(rowid=None, col=None, val=None):
-        valid_cols = ["LISTS_NAME"]
-
-        rowid = rowid or haxdb.data.var.get("rowid")
-        col = col or haxdb.data.var.get("col")
-        val = val or haxdb.data.var.get("val")
-
-        meta = {}
-        meta["api"] = "LISTS"
-        meta["action"] = "save"
-        meta["col"] = col
-        meta["rowid"] = rowid
-        meta["value"] = val
-        meta["oid"] = "LISTS-%s-%s" % (rowid, col,)
-
-        sql = "UPDATE LISTS SET {}=%s WHERE LISTS_ID=%s and LISTS_INTERNAL!=1"
-        params = (val, rowid,)
-        return apis["LISTS"].save_call(sql, params, meta, col, val, rowid)
+    def mod_lists_save(rowid=None):
+        return apis["LISTS"].save_call(rowid=rowid)
 
     @haxdb.app.route("/LIST_ITEMS/list", methods=["POST", "GET"])
-    @haxdb.app.route("/LIST_ITEMS/list/<int:lists_id>", methods=["POST", "GET"])
+    @haxdb.app.route("/LIST_ITEMS/list/<int:context_id>", methods=["POST", "GET"])
     @haxdb.app.route("/LIST_ITEMS/list/<lists_name>", methods=["POST", "GET"])
     @haxdb.require_auth
-    def mod_list_items_list(lists_id=None, lists_name=None):
-        lists_id = lists_id or haxdb.data.var.get("lists_id")
-        context_id = haxdb.data.var.get("context_id")
+    def mod_list_items_list(context_id=None, lists_name=None):
+        context_id = context_id or haxdb.data.var.get("context_id") or haxdb.data.var.get("lists_id")
         lists_name = lists_name or haxdb.data.var.get("lists_name")
-        query = haxdb.data.var.get("query")
         include_disabled = haxdb.data.var.get("include_disabled")
-
-        meta = {}
-        meta["api"] = "LIST_ITEMS"
-        meta["action"] = "list"
-        meta["query"] = query
-        meta["include_disabled"] = include_disabled
-        meta["lists_id"] = lists_id
-        meta["context_id"] = context_id
 
         if not context_id and not lists_id and not lists_name:
             return haxdb.data.output(success=0, meta=meta, message="MISSING VALUE: lists_id or lists_name")
 
-        if not lists_id and context_id:
-            lists_id = context_id
-
+        meta = {}
         meta["context_name"] = lists_name
         if lists_id:
             row = db.qaf("SELECT * FROM LISTS WHERE LISTS_ID=%s", (lists_id,))
@@ -143,8 +80,8 @@ def run():
             sql += " AND LISTS_NAME=%s"
             params += (lists_name,)
 
-        apis["LIST_ITEMS"].udf_context_id = context_id
-        return apis["LIST_ITEMS"].list_call(sql, params, meta)
+        apis["LIST_ITEMS"].context_id(context_id)
+        return apis["LIST_ITEMS"].list_call(sql=sql, params=params, meta=meta)
 
     @haxdb.app.route("/LIST_ITEMS/new", methods=["POST", "GET"])
     @haxdb.app.route("/LIST_ITEMS/new/<int:context_id>", methods=["POST", "GET"])

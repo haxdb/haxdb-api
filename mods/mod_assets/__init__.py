@@ -13,9 +13,8 @@ def init(app_config, app_db, app_haxdb):
     db = app_db
     haxdb = app_haxdb
 
-    mod_tools.init(config, db, haxdb)
     mod_db.init(db, config)
-    mod_api.init(haxdb, db, config, mod_tools)
+    mod_api.init(haxdb, mod_def)
 
 
 def run():
