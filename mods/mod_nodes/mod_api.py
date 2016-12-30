@@ -9,28 +9,21 @@ from flask import request, session
 haxdb = None
 db = None
 config = None
-tools = None
 apis = {}
 
 
-def init(app_haxdb, app_db, app_config, mod_tools):
-    global haxdb, db, config, tools
+def init(app_haxdb, mod_def):
+    global haxdb, db, config
     haxdb = app_haxdb
-    db = app_db
-    config = app_config
-    tools = mod_tools
+    db = haxdb.db
+    config = haxdb.config
 
-    for api_name in mod_data.apis:
-        apis[api_name] = haxdb.api.api_call()
-        apis[api_name].lists = mod_data.apis[api_name]["lists"]
-        apis[api_name].cols = mod_data.apis[api_name]["cols"]
-        apis[api_name].query_cols = mod_data.apis[api_name]["query_cols"]
-        apis[api_name].search_cols = mod_data.apis[api_name]["search_cols"]
-        apis[api_name].order_cols = mod_data.apis[api_name]["order_cols"]
+    for api_name in mod_def.keys():
+        apis[api_name] = haxdb.api.api_call(mod_def[api_name])
 
 
 def run():
-    global haxdb, db, config, tools
+    global haxdb, db, config
 
     @haxdb.app.before_request
     def mod_api_keys_before_request():
@@ -40,10 +33,10 @@ def run():
         if key:
             ip = str(request.access_route[-1])
             sql = """
-            select * 
-            from NODES 
-            where 
-            NODES_API_KEY=%s 
+            select *
+            from NODES
+            where
+            NODES_API_KEY=%s
             and NODES_ENABLED='1'
             and (NODES_EXPIRE IS NULL OR NODES_EXPIRE > %s)
             and (NODES_IP IS NULL OR NODES_IP='' OR NODES_IP=%s)
@@ -83,7 +76,7 @@ def run():
         db.commit()
 
         sql = """
-        SELECT 
+        SELECT
         NODES.*,
         PEOPLE_NAME_LAST, PEOPLE_NAME_FIRST
         ASSETS_NAME
@@ -118,7 +111,7 @@ def run():
             people_id = haxdb.session.get("api_people_id")
             dba = 0
 
-        api_key = tools.create_api_key()
+        api_key = base64.urlsafe_b64encode(os.urandom(500))[5:260]
 
         if expire_seconds:
             expire_time = int(time.time()) + int(expire_seconds)

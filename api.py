@@ -64,7 +64,7 @@ class api_call:
         self.ROWID = api_def["ROWID"]
         self.COLS = api_def["COLS"]
         self.ORDER = api_def["ORDER"]
-        self.CONTEXT_ROW api_def["CONTEXT_ROW"]
+        self.CONTEXT_ROW = api_def["CONTEXT_ROW"]
 
         for col in self.COLS:
             self._COLS[col["NAME"]] = col
@@ -73,21 +73,23 @@ class api_call:
         self.CONTEXT_ID = id
 
     def get_list_id(self, list_name):
-        return db.qaf("SELECT * FROM LISTS WHERE LISTS_NAME=%s", (list_name,))
+        row = db.qaf("SELECT * FROM LISTS WHERE LISTS_NAME=%s", (list_name,))
+        if row:
+            return row["LISTS_ID"]
+        return None
 
     def get_lists(self, cols=None):
         cols = cols or self.get_cols()
 
-        list_ids = []
+        list_ids = ()
         for col in cols:
             if col["TYPE"] == "LIST":
                 if "LIST" in col:
-                    list_ids.append(int(col["LIST"]))
+                    list_ids += (int(col["LIST"]),)
                 elif "LIST_NAME" in col:
                     list_id = self.get_list_id(col["LIST_NAME"])
                     if list_id:
-                        list_ids.append(int(list_id))
-
+                        list_ids += (int(list_id),)
         if not list_ids:
             return {}
 
@@ -99,15 +101,16 @@ class api_call:
              AND LIST_ITEMS_ENABLED=1
         WHERE
         LISTS_ID IN ({})
-        """.format(",".join(list_ids))
+        """.format(",".join( ("%s",) * len(list_ids)))
 
         sql += " ORDER BY LIST_ITEMS_ORDER"
-        row = db.qaf(sql, params)
+        row = db.qaf(sql, list_ids)
         while row:
             lname = row["LISTS_NAME"]
             if lname not in lists:
                 lists[lname] = []
             list_item = {
+                "ID": row["LIST_ITEMS_ID"],
                 "VALUE": row["LIST_ITEMS_VALUE"],
                 "DESCRIPTION": row["LIST_ITEMS_DESCRIPTION"],
             }
@@ -124,7 +127,7 @@ class api_call:
         WHERE UDF_CONTEXT=%s and UDF_CONTEXT_ID=%s and UDF_ENABLED=1
         ORDER BY UDF_ORDER
         """
-        row = db.qaf(sql, (self.UDF["CONTEXT"], self.UDF["CONTEXT_ID"], ))
+        row = db.qaf(sql, (self.TABLE, self.CONTEXT_ID, ))
         while row:
             col = {
                     "UDF_ID": row["UDF_ID"],
@@ -146,6 +149,7 @@ class api_call:
     def build_query(self, query):
         sql = ""
         if query:
+            print query
             queries = shlex.split(query)
             for query in queries:
                 opreg = re.compile("([!=><])")
@@ -186,17 +190,17 @@ class api_call:
                                 sql += " OR "
                                 sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_VALUE IS NULL) > 0"
                                 sql += ")"
-                                params += (self.UDF["CONTEXT"], self.UDF["CONTEXT_ID"])
+                                params += (self.TABLE, self.CONTEXT_ID)
                                 params += (col,)
-                                params += (self.UDF["CONTEXT"], self.UDF["CONTEXT_ID"])
+                                params += (self.TABLE, self.CONTEXT_ID)
                                 params += (col,)
                             elif val == "NULL" and op == "!=":
                                 sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1) > 0"
-                                params += (self.UDF["CONTEXT"], self.UDF["CONTEXT_ID"])
+                                params += (self.TABLE, self.CONTEXT_ID)
                                 params += (col,)
                             else:
                                 sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_VALUE {} %s) > 0".format(op)
-                                params += (self.UDF["CONTEXT"], self.UDF["CONTEXT_ID"])
+                                params += (self.TABLE, self.CONTEXT_ID)
                                 params += (col, val,)
                             valcount += 1
                         sql += ")"
@@ -215,11 +219,13 @@ class api_call:
                                 valcount += 1
 
                     sql += " OR (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_ENABLED=1 and UDF_DATA_VALUE LIKE %s) > 0"
-                    params += (self.UDF["CONTEXT"], self.UDF["CONTEXT_ID"], query)
+                    params += (self.TABLE, self.CONTEXT_ID, query)
                     sql += ")"
+        return sql
+
 
     def list_call(self, sql=None, params=None, calc_row_function=None, query=None, meta=None):
-        sql = sql or "SELECT * FROM {}".format(self.TABLE)
+        sql = sql or "SELECT {}.*, UDF_NAME, UDF_DATA_VALUE FROM {}".format(self.TABLE, self.TABLE)
         params = params or ()
         query = query or var.get("query")
 
@@ -261,15 +267,17 @@ class api_call:
             if calc_row_function:
                 row = calc_row_function(dict(row))
 
-            rowid = row[self.udf_rowid]
+            rowid = row[self.ROWID]
             if rowid != lastrowid:
                 if rowdata:
                     rows.append(rowdata)
                 rowdata = {}
                 lastrowid = rowid
-            rowdata.update(row)
             if row["UDF_NAME"]:
                 rowdata[row["UDF_NAME"]] = row["UDF_DATA_VALUE"]
+            del row["UDF_NAME"]
+            del row["UDF_DATA_VALUE"]
+            rowdata.update(row)
 
             row = db.next()
 
@@ -313,7 +321,7 @@ class api_call:
             AND UDF_ENABLED=1
             ORDER BY UDF_ORDER
             """
-            udf_params = (self.UDF["CONTEXT"], self.UDF["CONTEXT_ID"], self.ROWID)
+            udf_params = (self.TABLE, self.CONTEXT_ID, self.ROWID)
             db.query(udf_sql, udf_params)
             udf = db.next()
             while udf:
@@ -373,12 +381,12 @@ class api_call:
             meta["rowid"] = db.lastrowid
             if udf_names:
                 sql = "DELETE FROM UDF WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ROWID=%s"
-                db.query(sql, (self.UDF["CONTEXT"], self.UDF["CONTEXT_ID"], meta["rowid"]))
+                db.query(sql, (self.TABLE, self.CONTEXT_ID, meta["rowid"]))
                 for udf_key in udf_names.keys():
                     udf_name = udf_names[udf_key]
                     udf_val = udf_params[udf_key]
                     sql = "INSERT INTO UDF (UDF_CONTEXT, UDF_CONTEXT_ID, UDF_NAME, UDF_ROWID) VALUES (%s, %s, %s, %s)"
-                    db.query(sql, (self.UDF["CONTEXT"], self.UDF["CONTEXT_ID"], udf_name, udf_val))
+                    db.query(sql, (self.TABLE, self.CONTEXT_ID, udf_name, udf_val))
                     if db.error:
                         return output(success=0, meta=meta, message=db.error)
             db.commit()

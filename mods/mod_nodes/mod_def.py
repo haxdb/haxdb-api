@@ -4,6 +4,7 @@ mod_def["NODES"] = {
     "NAME": "NODES",
     "TABLE": "NODES",
     "ROWID": "NODES_ID",
+    "CONTEXT_ROW": None,
     "COLS": [
         {
          "NAME": "NODES_API_KEY",
@@ -67,7 +68,7 @@ mod_def["NODES"] = {
          "QUERY": 1,
          "SEARCH": 0,
          "REQUIRED": 0,
-        },    
+        },
         {
          "NAME": "NODES_ENABLED",
          "HEADER": "ENABLED",

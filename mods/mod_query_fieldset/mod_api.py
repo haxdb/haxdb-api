@@ -10,21 +10,14 @@ config = None
 apis = {}
 
 
-def init(app_haxdb, app_db, app_config):
+def init(app_haxdb, mod_def):
     global haxdb, db, config, tools, apis
     haxdb = app_haxdb
-    db = app_db
-    config = app_config
+    db = haxdb.db
+    config = haxdb.config
 
-    for api_name in mod_data.apis:
-        apis[api_name] = haxdb.api.api_call()
-        apis[api_name].udf_context = mod_data.apis[api_name]["udf_context"]
-        apis[api_name].udf_context_id = mod_data.apis[api_name]["udf_context_id"]
-        apis[api_name].udf_rowid = mod_data.apis[api_name]["udf_rowid"]
-        apis[api_name].cols = mod_data.apis[api_name]["cols"]
-        apis[api_name].query_cols = mod_data.apis[api_name]["query_cols"]
-        apis[api_name].search_cols = mod_data.apis[api_name]["search_cols"]
-        apis[api_name].order_cols = mod_data.apis[api_name]["order_cols"]
+    for api_name in mod_def.keys():
+        apis[api_name] = haxdb.api.api_call(mod_def[api_name])
 
 
 def run():
@@ -50,7 +43,7 @@ def run():
             fid = row["FIELDSET_COLS_FIELDSET_ID"]
             if fid not in FIELDSET_COLS:
                 FIELDSET_COLS[fid] = []
-            FIELDSET_COLS[fid].append(dict(row))
+            FIELDSET_COLS[fid].append(row["FIELDSET_COLS_COL"])
             row = db.next()
 
         context = context or haxdb.data.var.get("context")
@@ -64,14 +57,14 @@ def run():
         meta["context_id"] = context_id
 
         sql = """
-        SELECT * FROM
+        SELECT F.*, UDF_NAME, UDF_DATA_VALUE FROM
         (
         SELECT * FROM FIELDSET WHERE FIELDSET_CONTEXT=%s and FIELDSET_CONTEXT_ID=%s AND
         FIELDSET_PEOPLE_ID IN (0,%s)
         ) F
         """
         params = (context, context_id, people_id)
-        return apis["FIELDSET"].list_call(sql, params, meta, calc_row)
+        return apis["FIELDSET"].list_call(sql=sql, params=params, meta=meta, calc_row_function=calc_row)
 
     @haxdb.app.route("/FIELDSET/view", methods=["POST", "GET"])
     @haxdb.app.route("/FIELDSET/view/<int:rowid>", methods=["POST", "GET"])

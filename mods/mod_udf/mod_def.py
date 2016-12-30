@@ -4,6 +4,7 @@ mod_def["UDF"] = {
     "NAME": "UDF",
     "TABLE": "UDF",
     "ROWID": "UDF",
+    "CONTEXT_ROW": None,
     "COLS": [
         {
          "NAME": "UDF_CONTEXT",
@@ -41,7 +42,7 @@ mod_def["UDF"] = {
          "NAME": "UDF_NAME",
          "HEADER": "NAME",
          "TYPE": "CHAR",
-         "SIZE": 50
+         "SIZE": 50,
          "EDIT": 1,
          "QUERY": 1,
          "SEARCH": 1,
@@ -52,7 +53,7 @@ mod_def["UDF"] = {
          "NAME": "UDF_TYPE",
          "HEADER": "TYPE",
          "TYPE": "CHAR",
-         "SIZE": 50
+         "SIZE": 50,
          "EDIT": 1,
          "QUERY": 1,
          "SEARCH": 1,
@@ -63,7 +64,7 @@ mod_def["UDF"] = {
          "NAME": "UDF_LISTS_ID",
          "HEADER": "LIST",
          "TYPE": "ID",
-         "SIZE": 50
+         "SIZE": 50,
          "EDIT": 1,
          "QUERY": 1,
          "SEARCH": 0,
@@ -73,7 +74,7 @@ mod_def["UDF"] = {
         {
          "NAME": "UDF_ORDER",
          "HEADER": "ORDER",
-         "TYPE": "FLOAT,
+         "TYPE": "FLOAT",
          "EDIT": 1,
          "QUERY": 1,
          "SEARCH": 0,

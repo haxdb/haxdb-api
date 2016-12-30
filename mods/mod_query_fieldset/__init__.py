@@ -1,5 +1,6 @@
 import mod_db
 import mod_api
+from mod_def import mod_def
 
 db = None
 config = None
@@ -13,7 +14,7 @@ def init(app_config, app_db, app_haxdb):
     haxdb = app_haxdb
 
     mod_db.init(db, config)
-    mod_api.init(haxdb, db, config)
+    mod_api.init(haxdb, mod_def)
 
 
 def run():

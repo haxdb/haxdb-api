@@ -6,24 +6,17 @@ import os
 haxdb = None
 db = None
 config = None
-tools = None
 apis = {}
 
 
-def init(app_haxdb, app_db, app_config, app_tools):
-    global haxdb, db, config, tools, apis
+def init(app_haxdb, mod_def):
+    global haxdb, db, config, apis
     haxdb = app_haxdb
-    db = app_db
-    config = app_config
-    tools = app_tools
+    db = haxdb.db
+    config = haxdb.config
 
-    for api_name in mod_data.apis:
-        apis[api_name] = haxdb.api.api_call()
-        apis[api_name].lists = mod_data.apis[api_name]["lists"]
-        apis[api_name].cols = mod_data.apis[api_name]["cols"]
-        apis[api_name].query_cols = mod_data.apis[api_name]["query_cols"]
-        apis[api_name].search_cols = mod_data.apis[api_name]["search_cols"]
-        apis[api_name].order_cols = mod_data.apis[api_name]["order_cols"]
+    for api_name in mod_def.keys():
+        apis[api_name] = haxdb.api.api_call(mod_def[api_name])
 
 
 def run():

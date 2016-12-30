@@ -54,31 +54,36 @@ def run():
     @haxdb.require_auth
     def mod_list_items_list(context_id=None, lists_name=None):
         context_id = context_id or haxdb.data.var.get("context_id") or haxdb.data.var.get("lists_id")
-        lists_name = lists_name or haxdb.data.var.get("lists_name")
+        context_name = lists_name or haxdb.data.var.get("context_name") or haxdb.data.var.get("lists_name")
         include_disabled = haxdb.data.var.get("include_disabled")
 
-        if not context_id and not lists_id and not lists_name:
-            return haxdb.data.output(success=0, meta=meta, message="MISSING VALUE: lists_id or lists_name")
+        if not context_id and not context_name:
+            return haxdb.data.output(success=0, meta=meta, message="MISSING VALUE: context_id or context_name")
+
+        if context_name and not context_id:
+            row = haxdb.db.qaf("select LISTS_ID from LISTS where LISTS_NAME=%s", (context_name,))
+            try:
+                context_id = row["LISTS_ID"]
+            except:
+                return haxdb.data.output(success=0, meta=meta, message="UNKNOWN LIST")
+
+        if not context_name:
+            row = haxdb.db.qaf("select LISTS_NAME from LISTS where LISTS_ID=%s", (context_id,))
+            try:
+                context_name = row["LISTS_NAME"]
+            except:
+                return haxdb.data.output(success=0, meta=meta, message="UNKNOWN LIST")
 
         meta = {}
-        meta["context_name"] = lists_name
-        if lists_id:
-            row = db.qaf("SELECT * FROM LISTS WHERE LISTS_ID=%s", (lists_id,))
-            meta["context_name"] = row["LISTS_NAME"]
+        meta["context_name"] = context_name
 
         sql = """
             SELECT
             *
             FROM LIST_ITEMS
-            JOIN LISTS ON LIST_ITEMS_LISTS_ID=LISTS_ID
+            JOIN LISTS ON LIST_ITEMS_LISTS_ID=LISTS_ID AND LISTS_ID=%s
         """
-        params = ()
-        if lists_id:
-            sql += " AND LISTS_ID=%s"
-            params += (lists_id,)
-        elif lists_name:
-            sql += " AND LISTS_NAME=%s"
-            params += (lists_name,)
+        params = (context_id, )
 
         apis["LIST_ITEMS"].context_id(context_id)
         return apis["LIST_ITEMS"].list_call(sql=sql, params=params, meta=meta)

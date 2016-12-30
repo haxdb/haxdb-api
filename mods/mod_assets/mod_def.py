@@ -4,6 +4,7 @@ mod_def["ASSETS"] = {
     "NAME": "ASSETS",
     "TABLE": "ASSETS",
     "ROWID": "ASSETS_ID",
+    "CONTEXT_ROW": None,
     "COLS": [
         {
          "NAME": "ASSETS_NAME",
@@ -55,7 +56,7 @@ mod_def["ASSETS"] = {
          "HEADER": "LOCATION",
          "TYPE": "LIST",
          "EDIT": 1,
-         "LIST_NAME": "ASSET LOCATIONS"
+         "LIST_NAME": "ASSET LOCATIONS",
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 0,
@@ -77,6 +78,7 @@ mod_def["ASSET_LINKS"] = {
     "NAME": "ASSET_LINKS",
     "TABLE": "ASSET_LINKS",
     "ROWID": "ASSET_LINKS_ID",
+    "CONTEXT_ROW": None,
     "COLS": [
         {
          "NAME": "ASSET_LINKS_NAME",
@@ -113,6 +115,7 @@ mod_def["ASSET_AUTHS"] = {
     "NAME": "ASSET_AUTHS",
     "TABLE": "ASSET_AUTHS",
     "ROWID": "ASSET_AUTHS_ID",
+    "CONTEXT_ROW": None,
     "COLS": [
         {
          "NAME": "PEOPLE_NAME_LAST",

@@ -4,6 +4,7 @@ mod_def["LISTS"] = {
     "NAME": "LISTS",
     "TABLE": "LISTS",
     "ROWID": "LISTS_ID",
+    "CONTEXT_ROW": None,
     "COLS": [
         {
          "NAME": "LISTS_NAME",
@@ -78,6 +79,6 @@ mod_def["LIST_ITEMS"] = {
          "SEARCH": 0,
          "REQUIRED": 0,
         },
-    ]
+    ],
     "ORDER": ["LIST_ITEMS_ORDER", "LIST_ITEMS_NAME"]
 }

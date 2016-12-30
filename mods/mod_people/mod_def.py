@@ -4,7 +4,18 @@ mod_def["PEOPLE"] = {
     "NAME": "PEOPLE",
     "TABLE": "PEOPLE",
     "ROWID": "PEOPLE_ID",
+    "CONTEXT_ROW": None,
     "COLS": [
+        {
+         "NAME": "PEOPLE_ID",
+         "HEADER": "ID",
+         "TYPE": "INT",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 1,
+         "REQUIRED": 0,
+         "INTERNAL": 0,
+        },
         {
          "NAME": "PEOPLE_NAME_FIRST",
          "HEADER": "FIRST",
@@ -13,6 +24,7 @@ mod_def["PEOPLE"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 0,
+         "INTERNAL": 0,
         },
         {
          "NAME": "PEOPLE_NAME_LAST",
@@ -22,6 +34,7 @@ mod_def["PEOPLE"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 0,
+         "INTERNAL": 0,
         },
         {
          "NAME": "PEOPLE_EMAIL",
@@ -31,6 +44,7 @@ mod_def["PEOPLE"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 0,
+         "INTERNAL": 0,
         },
         {
          "NAME": "PEOPLE_DBA",
@@ -40,15 +54,18 @@ mod_def["PEOPLE"] = {
          "QUERY": 1,
          "SEARCH": 0,
          "REQUIRED": 0,
+         "INTERNAL": 0,
         },
         {
          "NAME": "PEOPLE_MEMBERSHIP",
          "HEADER": "MEMBERSHIP",
-         "TYPE": "STR",
+         "TYPE": "LIST",
+         "LIST_NAME": "MEMBERSHIPS",
          "EDIT": 1,
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 0,
+         "INTERNAL": 0,
         },
     ],
     "ORDER": ["PEOPLE_NAME_LAST", "PEOPLE_NAME_FIRST"]

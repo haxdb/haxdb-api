@@ -4,6 +4,7 @@ mod_def["PEOPLE_RFID"] = {
     "NAME": "PEOPLE_RFID",
     "TABLE": "PEOPLE_RFID",
     "ROWID": "PEOPLE_RFID_ID",
+    "CONTEXT_ROW": None,
     "COLS": [
         {
          "NAME": "PEOPLE_RFID_NAME",
