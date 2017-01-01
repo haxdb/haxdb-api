@@ -45,7 +45,7 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_people_new():
-        return apis["PEOPLE"].new_call(sql, params, meta)
+        return apis["PEOPLE"].new_call()
 
     @haxdb.app.route("/PEOPLE/delete/", methods=["GET", "POST"])
     @haxdb.app.route("/PEOPLE/delete/<int:rowid>", methods=["GET", "POST"])

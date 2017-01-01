@@ -14,6 +14,7 @@ mod_def["ASSETS"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 1,
+         "NEW": 1,
         },
         {
          "NAME": "ASSETS_TYPE",
@@ -22,7 +23,8 @@ mod_def["ASSETS"] = {
          "EDIT": 1,
          "QUERY": 1,
          "SEARCH": 1,
-         "REQUIRED": 0,
+         "REQUIRED": 1,
+         "NEW": 1,
         },
         {
          "NAME": "ASSETS_MANUFACTURER",
@@ -50,6 +52,7 @@ mod_def["ASSETS"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 0,
+         "NEW": 1,
         },
         {
          "NAME": "ASSETS_LOCATION",
@@ -60,6 +63,7 @@ mod_def["ASSETS"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 0,
+         "NEW": 1,
         },
         {
          "NAME": "ASSETS_DESCRIPTION",
@@ -78,7 +82,7 @@ mod_def["ASSET_LINKS"] = {
     "NAME": "ASSET_LINKS",
     "TABLE": "ASSET_LINKS",
     "ROWID": "ASSET_LINKS_ID",
-    "CONTEXT_ROW": None,
+    "CONTEXT_ROW": "ASSET_LINKS_ASSETS_ID",
     "COLS": [
         {
          "NAME": "ASSET_LINKS_NAME",
@@ -88,6 +92,7 @@ mod_def["ASSET_LINKS"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 1,
+         "NEW": 1,
         },
         {
          "NAME": "ASSET_LINKS_LINK",
@@ -97,6 +102,7 @@ mod_def["ASSET_LINKS"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 0,
+         "NEW": 1,
         },
         {
          "NAME": "ASSET_LINKS_ORDER",
@@ -106,6 +112,7 @@ mod_def["ASSET_LINKS"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 0,
+         "NEW": 1,
         },
     ],
     "ORDER": ["ASSET_LINKS_NAME"]
@@ -115,7 +122,7 @@ mod_def["ASSET_AUTHS"] = {
     "NAME": "ASSET_AUTHS",
     "TABLE": "ASSET_AUTHS",
     "ROWID": "ASSET_AUTHS_ID",
-    "CONTEXT_ROW": None,
+    "CONTEXT_ROW": "ASSET_LINKS_ASSETS_ID",
     "COLS": [
         {
          "NAME": "PEOPLE_NAME_LAST",

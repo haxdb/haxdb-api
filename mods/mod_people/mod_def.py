@@ -15,6 +15,7 @@ mod_def["PEOPLE"] = {
          "SEARCH": 1,
          "REQUIRED": 0,
          "INTERNAL": 0,
+         "NEW": 0,
         },
         {
          "NAME": "PEOPLE_NAME_FIRST",
@@ -23,8 +24,9 @@ mod_def["PEOPLE"] = {
          "EDIT": 1,
          "QUERY": 1,
          "SEARCH": 1,
-         "REQUIRED": 0,
+         "REQUIRED": 1,
          "INTERNAL": 0,
+         "NEW": 1,
         },
         {
          "NAME": "PEOPLE_NAME_LAST",
@@ -33,8 +35,9 @@ mod_def["PEOPLE"] = {
          "EDIT": 1,
          "QUERY": 1,
          "SEARCH": 1,
-         "REQUIRED": 0,
+         "REQUIRED": 1,
          "INTERNAL": 0,
+         "NEW": 1,
         },
         {
          "NAME": "PEOPLE_EMAIL",
@@ -43,8 +46,9 @@ mod_def["PEOPLE"] = {
          "EDIT": 1,
          "QUERY": 1,
          "SEARCH": 1,
-         "REQUIRED": 0,
+         "REQUIRED": 1,
          "INTERNAL": 0,
+         "NEW": 1,
         },
         {
          "NAME": "PEOPLE_DBA",
@@ -55,6 +59,7 @@ mod_def["PEOPLE"] = {
          "SEARCH": 0,
          "REQUIRED": 0,
          "INTERNAL": 0,
+         "NEW": 1,
         },
         {
          "NAME": "PEOPLE_MEMBERSHIP",
@@ -66,6 +71,7 @@ mod_def["PEOPLE"] = {
          "SEARCH": 1,
          "REQUIRED": 0,
          "INTERNAL": 0,
+         "NEW": 1,
         },
     ],
     "ORDER": ["PEOPLE_NAME_LAST", "PEOPLE_NAME_FIRST"]

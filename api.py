@@ -85,10 +85,12 @@ class api_call:
         for col in cols:
             if col["TYPE"] == "LIST":
                 if "LIST" in col:
-                    list_ids += (int(col["LIST"]),)
+                    list_id = int(col["LIST"])
+                    if list_id not in list_ids:
+                        list_ids += (list_id, )
                 elif "LIST_NAME" in col:
                     list_id = self.get_list_id(col["LIST_NAME"])
-                    if list_id:
+                    if list_id and list_id not in list_ids:
                         list_ids += (int(list_id),)
         if not list_ids:
             return {}
@@ -123,7 +125,7 @@ class api_call:
         cols = self.COLS
 
         sql = """
-        SELECT UDF_NAME, UDF_TYPE, UDF_LISTS_ID FROM UDF
+        SELECT UDF_ID, UDF_NAME, UDF_TYPE, UDF_LISTS_ID FROM UDF
         WHERE UDF_CONTEXT=%s and UDF_CONTEXT_ID=%s and UDF_ENABLED=1
         ORDER BY UDF_ORDER
         """
@@ -147,6 +149,7 @@ class api_call:
         return cols
 
     def build_query(self, query):
+        params = ()
         sql = ""
         if query:
             print query
@@ -211,17 +214,18 @@ class api_call:
                     valcount = 0
 
                     for col in self.COLS:
-                        if col["SEARCH"]:
+                        if col["NAME"] in self._COLS and col["SEARCH"] == 1:
                             if valcount > 0:
                                 sql += " OR "
-                                sql += " {} LIKE %s ".format(col)
-                                params += (query,)
-                                valcount += 1
-
-                    sql += " OR (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_ENABLED=1 and UDF_DATA_VALUE LIKE %s) > 0"
+                            sql += " {} LIKE %s ".format(col["NAME"])
+                            params += (query,)
+                            valcount += 1
+                    if valcount > 0:
+                        sql += " OR "
+                    sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_ENABLED=1 and UDF_DATA_VALUE LIKE %s) > 0"
                     params += (self.TABLE, self.CONTEXT_ID, query)
                     sql += ")"
-        return sql
+        return sql, params
 
 
     def list_call(self, sql=None, params=None, calc_row_function=None, query=None, meta=None):
@@ -251,7 +255,9 @@ class api_call:
         else:
             sql += " WHERE 1=1"
 
-        sql += self.build_query(query)
+        query_sql, query_params = self.build_query(query)
+        sql += query_sql
+        params += query_params
 
         if len(self.ORDER) > 0:
             sql += " ORDER BY {},{}".format(self.ROWID, ",".join(self.ORDER))
@@ -312,21 +318,20 @@ class api_call:
             return output(success=0, meta=meta, message="NO DATA")
 
         row = dict(row)
-        if self.udf_context:
-            udf_sql = """
-            SELECT * FROM UDF
-            JOIN UDF_DATA ON UDF_DATA_UDF_ID=UDF_ID
-            WHERE
-            UDF_CONTEXT=%s and UDF_CONTEXT_ID=%s AND UDF_DATA_ROWID=%s
-            AND UDF_ENABLED=1
-            ORDER BY UDF_ORDER
-            """
-            udf_params = (self.TABLE, self.CONTEXT_ID, self.ROWID)
-            db.query(udf_sql, udf_params)
+        udf_sql = """
+        SELECT * FROM UDF
+        JOIN UDF_DATA ON UDF_DATA_UDF_ID=UDF_ID
+        WHERE
+        UDF_CONTEXT=%s and UDF_CONTEXT_ID=%s AND UDF_DATA_ROWID=%s
+        AND UDF_ENABLED=1
+        ORDER BY UDF_ORDER
+        """
+        udf_params = (self.TABLE, self.CONTEXT_ID, self.ROWID)
+        db.query(udf_sql, udf_params)
+        udf = db.next()
+        while udf:
+            row[udf["UDF_NAME"]] = udf["UDF_DATA_VALUE"]
             udf = db.next()
-            while udf:
-                row[udf["UDF_NAME"]] = udf["UDF_DATA_VALUE"]
-                udf = db.next()
 
         if calc_row_function:
             row = calc_row_function(dict(row))
@@ -347,7 +352,7 @@ class api_call:
 
         errors = ""
         for col in cols:
-            val = var.get(col)
+            val = var.get(col["NAME"])
             if val is not None:
                 if valid_value(col["TYPE"], val):
                     if col["NAME"] in self._COLS:
@@ -370,7 +375,7 @@ class api_call:
         sql = """
         INSERT INTO {} ({})
         VALUES ({})
-        """.format(self.TABLE, ",".join(col_names), ",".join(["%s"*len(col_names)]))
+        """.format(self.TABLE, ",".join(col_names), ",".join(("%s",)*len(col_names)))
         db.query(sql, col_params)
 
         if db.error:
@@ -417,6 +422,11 @@ class api_call:
 
     def save_call(self, meta=None, rowid=None):
         rowid = rowid or var.get("rowid")
+        meta = meta or {}
+        meta["api"] = self.NAME
+        meta["action"] = "save"
+        meta["rowid"] = rowid
+        meta["updated"] = []
 
         col_names = []
         col_params = ()
@@ -426,13 +436,15 @@ class api_call:
 
         errors = ""
         for col in cols:
-            val = var.get(col)
+            val = var.get(col["NAME"])
             if val is not None:
                 if valid_value(col["TYPE"], val):
                     if col["NAME"] in self._COLS:
+                        meta["updated"].append(col["NAME"])
                         col_names.append("{}=%s".format(col["NAME"]))
                         col_params += (val,)
                     else:
+                        meta["updated"].append(col["NAME"])
                         udf_names.append(col["NAME"])
                         udf_params.append(val)
                 else:
@@ -444,8 +456,8 @@ class api_call:
         meta["rowcount"] = 0
         if col_names:
             sql = "UPDATE {} SET {} WHERE {}=%s".format(self.TABLE, ",".join(col_names), self.ROWID)
-            params = (rowid,)
-            db.query(sql, params)
+            col_params += (rowid,)
+            db.query(sql, col_params)
             if db.error:
                 return output(success=0, meta=meta, message=db.error)
             meta["rowcount"] = db.rowcount
@@ -463,6 +475,7 @@ class api_call:
                 meta["rowcount"] = meta["rowcount"] or db.rowcount
 
         if meta["rowcount"] > 0:
+            db.commit()
             return output(success=1, meta=meta, message="SAVED")
 
         return output(success=0, meta=meta, message="NOTHING UPDATED")

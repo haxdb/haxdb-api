@@ -7,6 +7,16 @@ mod_def["LISTS"] = {
     "CONTEXT_ROW": None,
     "COLS": [
         {
+         "NAME": "LISTS_ID",
+         "HEADER": "ID",
+         "TYPE": "INT",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 0,
+         "REQUIRED": 0,
+         "NEW": 0,
+        },
+        {
          "NAME": "LISTS_NAME",
          "HEADER": "NAME",
          "TYPE": "STR",
@@ -14,6 +24,7 @@ mod_def["LISTS"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 1,
+         "NEW": 1,
         },
         {
          "NAME": "LISTS_INTERNAL",
@@ -35,6 +46,15 @@ mod_def["LIST_ITEMS"] = {
     "CONTEXT_ROW": "LIST_ITEMS_LISTS_ID",
     "COLS": [
         {
+         "NAME": "LIST_ITEMS_ID",
+         "HEADER": "ID",
+         "TYPE": "ID",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 0,
+         "REQUIRED": 0,
+         "NEW": 0,
+        },        {
          "NAME": "LIST_ITEMS_VALUE",
          "HEADER": "VALUE",
          "TYPE": "STR",
@@ -42,6 +62,7 @@ mod_def["LIST_ITEMS"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 1,
+         "NEW": 1,
         },
         {
          "NAME": "LIST_ITEMS_DESCRIPTION",
@@ -50,7 +71,8 @@ mod_def["LIST_ITEMS"] = {
          "EDIT": 1,
          "QUERY": 1,
          "SEARCH": 1,
-         "REQUIRED": 0,
+         "REQUIRED": 1,
+         "NEW": 1,
         },
         {
          "NAME": "LIST_ITEMS_ENABLED",
@@ -60,6 +82,7 @@ mod_def["LIST_ITEMS"] = {
          "QUERY": 0,
          "SEARCH": 0,
          "REQUIRED": 0,
+         "NEW": 1,
         },
         {
          "NAME": "LIST_ITEMS_ORDER",
@@ -69,6 +92,7 @@ mod_def["LIST_ITEMS"] = {
          "QUERY": 0,
          "SEARCH": 0,
          "REQUIRED": 0,
+         "NEW": 1,
         },
         {
          "NAME": "LIST_ITEMS_INTERNAL",
@@ -80,5 +104,5 @@ mod_def["LIST_ITEMS"] = {
          "REQUIRED": 0,
         },
     ],
-    "ORDER": ["LIST_ITEMS_ORDER", "LIST_ITEMS_NAME"]
+    "ORDER": ["LIST_ITEMS_ORDER", "LIST_ITEMS_VALUE"]
 }
