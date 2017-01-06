@@ -122,7 +122,7 @@ class api_call:
         return lists
 
     def get_cols(self):
-        cols = self.COLS
+        cols = list(self.COLS)
 
         sql = """
         SELECT UDF_ID, UDF_NAME, UDF_TYPE, UDF_LISTS_ID FROM UDF
@@ -426,7 +426,14 @@ class api_call:
         meta["api"] = self.NAME
         meta["action"] = "save"
         meta["rowid"] = rowid
-        meta["updated"] = []
+        try:
+            meta["updated"] = meta["updated"]
+        except:
+            meta["updated"] = []
+        try:
+            meta["rowcount"] = meta["rowcount"]
+        except:
+            meta["rowcount"] = 0
 
         col_names = []
         col_params = ()
@@ -453,7 +460,6 @@ class api_call:
         if errors:
             return output(success=0, meta=meta, message=errors)
 
-        meta["rowcount"] = 0
         if col_names:
             sql = "UPDATE {} SET {} WHERE {}=%s".format(self.TABLE, ",".join(col_names), self.ROWID)
             col_params += (rowid,)

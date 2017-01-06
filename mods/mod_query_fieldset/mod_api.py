@@ -86,27 +86,16 @@ def run():
         return apis["FIELDSET"].view_call(sql, params, meta)
 
     @haxdb.app.route("/FIELDSET/save", methods=["GET", "POST"])
-    @haxdb.app.route("/FIELDSET/save/<int:rowid>/<col>/<val>", methods=["GET", "POST"])
+    @haxdb.app.route("/FIELDSET/save/<int:rowid>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
-    def mod_FIELDSET_save(rowid=None, col=None, val=None):
+    def mod_FIELDSET_save(rowid=None):
         rowid = rowid or haxdb.data.var.get("rowid")
-        col = col or haxdb.data.var.get("col")
-        val = val or haxdb.data.var.get("val")
+        cols = haxdb.data.var.getlist("COLS")
 
-        meta = {}
-        meta["api"] = "FIELDSET"
-        meta["action"] = "save"
-        meta["rowid"] = rowid
-        meta["col"] = col
-        meta["val"] = val
-        meta["oid"] = "FIELDSET-%s-%s" % (rowid, col)
-
-        if col == "COLS":
-            cols = haxdb.data.var.getlist("val")
-            meta["val"] = cols
-
+        if cols:
+            meta = {}
             sql = """
             DELETE FROM FIELDSET_COLS WHERE FIELDSET_COLS_FIELDSET_ID=%s
             """
@@ -127,15 +116,12 @@ def run():
                     return haxdb.data.output(success=0, meta=meta, message=db.error)
 
                 total += db.rowcount
-
             meta["rowcount"] = total
             db.commit()
-            return haxdb.data.output(success=1, meta=meta, message="SAVED")
+            return apis["FIELDSET"].save_call(rowid=rowid, meta=meta)
 
         else:
-            sql = "UPDATE FIELDSET SET {}=%s WHERE FIELDSET_ID=%s"
-            params = (val, rowid)
-            return apis["FIELDSET"].save_call(sql, params, meta, col, val, rowid)
+            return apis["FIELDSET"].save_call(rowid=rowid)
 
     @haxdb.app.route("/FIELDSET/new", methods=["GET", "POST"])
     @haxdb.require_auth
@@ -144,10 +130,9 @@ def run():
     def mod_FIELDSET_new():
         context = haxdb.data.var.get("context")
         context_id = haxdb.data.var.get("context_id") or 0
-        name = haxdb.data.var.get("name")
+        name = haxdb.data.var.get("FIELDSET_NAME")
         global_fieldset = haxdb.data.var.get("global") or 0
-        query = haxdb.data.var.get("query")
-        cols = haxdb.data.var.getlist("cols")
+        cols = haxdb.data.var.getlist("COLS")
 
         people_id = 0
         try:
@@ -159,16 +144,12 @@ def run():
         meta = {}
         meta["api"] = "FIELDSET"
         meta["action"] = "new"
-        meta["context"] = context
-        meta["context_id"] = context_id
-        meta["name"] = name
-        meta["global"] = global_fieldset
 
         if not name:
-            return haxdb.data.output(success=0, message="MISSING INPUT: name", meta=meta)
+            return haxdb.data.output(success=0, message="MISSING INPUT: FIELDSET_NAME", meta=meta)
 
-        sql = "INSERT INTO FIELDSET (FIELDSET_NAME, FIELDSET_CONTEXT, FIELDSET_CONTEXT_ID, FIELDSET_PEOPLE_ID, FIELDSET_QUERY) VALUES (%s, %s, %s, %s, %s)"
-        params = (name, context, context_id, people_id, query)
+        sql = "INSERT INTO FIELDSET (FIELDSET_NAME, FIELDSET_CONTEXT, FIELDSET_CONTEXT_ID, FIELDSET_PEOPLE_ID) VALUES (%s, %s, %s, %s)"
+        params = (name, context, context_id, people_id)
         db.query(sql, params)
         if db.error:
             return haxdb.data.output(success=0, message=db.error, meta=meta)
@@ -202,18 +183,7 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_FIELDSET_delete(rowid=None):
-        rowid = rowid or haxdb.data.var.get("rowid")
-
-        meta = {}
-        meta["api"] = "FIELDSET"
-        meta["action"] = "delete"
-        meta["rowid"] = rowid
-
-
-        sql = "DELETE FROM FIELDSET WHERE FIELDSET_ID = %s"
-        params = (rowid,)
-
-        return apis["FIELDSET"].delete_call(sql, params, meta)
+        return apis["FIELDSET"].delete_call(rowid=rowid)
 
     @haxdb.app.route("/QUERY/list", methods=["POST", "GET"])
     @haxdb.app.route("/QUERY/list/<context>", methods=["POST", "GET"])
