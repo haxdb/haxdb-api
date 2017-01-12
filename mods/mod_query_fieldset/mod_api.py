@@ -209,7 +209,7 @@ def run():
         ) F
         """
         params = (context, context_id, people_id)
-        return apis["QUERY"].list_call(sql, params, meta, calc_row)
+        return apis["QUERY"].list_call(sql=sql, params=params)
 
     @haxdb.app.route("/QUERY/view", methods=["POST", "GET"])
     @haxdb.app.route("/QUERY/view/<int:rowid>", methods=["POST", "GET"])
