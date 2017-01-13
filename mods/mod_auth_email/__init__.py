@@ -7,15 +7,15 @@ config = None
 haxdb = None
 
 
-def init(app_config, app_db, app_haxdb):
+def init(app_haxdb, mod_config):
     global config, db, haxdb
-    config = app_config
-    db = app_db
     haxdb = app_haxdb
+    config = mod_config
+    db = haxdb.db
 
     mod_tools.init(config, db, haxdb)
     mod_db.init(db, config)
-    mod_api.init(haxdb, mod_tools)
+    mod_api.init(haxdb, mod_config, mod_tools)
 
 
 def run():

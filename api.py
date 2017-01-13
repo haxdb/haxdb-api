@@ -238,6 +238,7 @@ class api_call:
         meta["query"] = query
         meta["cols"] = self.get_cols()
         meta["lists"] = self.get_lists(meta["cols"])
+        meta["rowid_name"] = self.ROWID
 
         sql += """
         LEFT OUTER JOIN UDF ON UDF_CONTEXT=%s
@@ -349,6 +350,10 @@ class api_call:
         udf_names = []
         udf_params = []
         cols = self.get_cols()
+
+        if self.CONTEXT_ROW and self.context_id:
+            col_names.append(self.CONTEXT_ROW)
+            col_params += (self.CONTEXT_ID,)
 
         errors = ""
         for col in cols:

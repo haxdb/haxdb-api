@@ -78,10 +78,14 @@ def run():
         meta["context_name"] = context_name
 
         sql = """
+            SELECT L.*, UDF_NAME, UDF_DATA_VALUE
+            FROM
+            (
             SELECT
             *
             FROM LIST_ITEMS
             JOIN LISTS ON LIST_ITEMS_LISTS_ID=LISTS_ID AND LISTS_ID=%s
+            ) L
         """
         params = (context_id, )
 
@@ -90,52 +94,23 @@ def run():
 
     @haxdb.app.route("/LIST_ITEMS/new", methods=["POST", "GET"])
     @haxdb.app.route("/LIST_ITEMS/new/<int:context_id>", methods=["POST", "GET"])
-    @haxdb.app.route("/LIST_ITEMS/new/<int:context_id>/<value>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
-    def mod_list_items_new(context_id=None, value=None):
+    def mod_list_items_new(context_id=None):
         context_id = context_id or haxdb.data.var.get("context_id")
-        value = value or haxdb.data.var.get("value")
+        apis["LIST_ITEMS"].context_id(context_id)
+        return apis["LIST_ITEMS"].new_call()
 
-        meta = {}
-        meta["api"] = "LIST_ITEMS"
-        meta["action"] = "new"
-        meta["context_id"] = context_id
-        meta["value"] = value
-
-        sql = "INSERT INTO LIST_ITEMS (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION, LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER) "
-        sql += "VALUES (%s, %s, %s, 0, 999)"
-        params = (context_id, value, value,)
-        return apis["LIST_ITEMS"].new_call(sql, params, meta)
 
     @haxdb.app.route("/LIST_ITEMS/save", methods=["GET", "POST"])
-    @haxdb.app.route("/LIST_ITEMS/save/<int:rowid>/<col>/<val>", methods=["GET", "POST"])
+    @haxdb.app.route("/LIST_ITEMS/save/<int:rowid>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
-    def mod_list_items_save(rowid=None, col=None, val=None):
+    def mod_list_items_save(rowid=None):
         rowid = rowid or haxdb.data.var.get("rowid")
-        col = col or haxdb.data.var.get("col")
-        val = val or haxdb.data.var.get("val")
-        context_id = haxdb.data.var.get("context_id") or None
-
-        if not context_id and rowid:
-            row = db.qaf("SELECT * FROM LIST_ITEMS WHERE LIST_ITEMS_ID=%s", (rowid,))
-            context_id = row["LIST_ITEMS_LISTS_ID"]
-
-        meta = {}
-        meta["api"] = "LIST_ITEMS"
-        meta["action"] = "save"
-        meta["col"] = col
-        meta["rowid"] = rowid
-        meta["val"] = val
-        meta["oid"] = "LIST_ITEMS-%s-%s" % (rowid, col)
-
-        sql = "UPDATE LIST_ITEMS SET {}=%s WHERE LIST_ITEMS_ID=%s"
-        params = (val, rowid,)
-        apis["LIST_ITEMS"].udf_context_id = context_id
-        return apis["LIST_ITEMS"].save_call(sql, params, meta, col, val, rowid=rowid)
+        return apis["LIST_ITEMS"].save_call(rowid=rowid)
 
     @haxdb.app.route("/LIST_ITEMS/delete", methods=["GET", "POST"])
     @haxdb.app.route("/LIST_ITEMS/delete/<int:rowid>", methods=["GET", "POST"])
@@ -144,12 +119,4 @@ def run():
     @haxdb.no_readonly
     def mod_list_items_delete(rowid=None):
         rowid = rowid or haxdb.data.var.get("rowid")
-
-        meta = {}
-        meta["api"] = "LIST_ITEMS"
-        meta["action"] = "delete"
-        meta["rowid"] = rowid
-
-        sql = "DELETE FROM LIST_ITEMS WHERE LIST_ITEMS_ID=%s"
-        params = (rowid,)
-        return apis["LIST_ITEMS"].delete_call(sql, params, meta)
+        return apis["LIST_ITEMS"].delete_call(rowid=rowid)

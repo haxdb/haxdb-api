@@ -20,7 +20,7 @@ mod_def["LISTS"] = {
          "NAME": "LISTS_NAME",
          "HEADER": "NAME",
          "TYPE": "STR",
-         "EDIT": 1,
+         "EDIT": 0,
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 1,
@@ -87,6 +87,7 @@ mod_def["LIST_ITEMS"] = {
          "REQUIRED": 0,
          "NEW": 1,
          "DEFAULT": 1,
+         "DEFAULT_VALUE": 1,
         },
         {
          "NAME": "LIST_ITEMS_ORDER",
@@ -98,6 +99,7 @@ mod_def["LIST_ITEMS"] = {
          "REQUIRED": 0,
          "NEW": 1,
          "DEFAULT": 1,
+         "DEFAULT_VALUE": 999,
         },
         {
          "NAME": "LIST_ITEMS_INTERNAL",

@@ -57,16 +57,7 @@ def run():
     @haxdb.app.route("/NODES/list", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
-    def mod_api_keys_list():
-        def calc_row(row):
-            row["NODES_EXPIRE_VIEW"] = "N/A"
-            try:
-                row["NODES_EXPIRE_VIEW"] = datetime.datetime.fromtimestamp(
-                    row["NODES_EXPIRE"]).strftime('%Y-%m-%d %H:%M:%S')
-            except:
-                pass
-            return row
-
+    def mod_NODES_list():
         sql = "DELETE FROM NODES WHERE NODES_EXPIRE<%s"
         db.query(sql, (time.time(),))
         db.commit()
@@ -84,7 +75,27 @@ def run():
         ) N
         """
 
-        return apis["NODES"].list_call(sql=sql, calc_row_function=calc_row)
+        return apis["NODES"].list_call(sql=sql)
+
+    @haxdb.app.route("/NODES/view", methods=["POST", "GET"])
+    @haxdb.app.route("/NODES/view/<int:rowid>", methods=["POST", "GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    def mod_NODES_view(rowid=None):
+        rowid = rowid or haxdb.data.var.get("rowid")
+        sql = """
+        SELECT N.*
+        FROM (
+        SELECT
+        NODES.*,
+        PEOPLE_NAME_LAST, PEOPLE_NAME_FIRST
+        ASSETS_NAME
+        FROM NODES
+        LEFT OUTER JOIN PEOPLE ON NODES_PEOPLE_ID=PEOPLE_ID
+        LEFT OUTER JOIN ASSETS ON NODES_ASSETS_ID=ASSETS_ID
+        ) N
+        """
+        return apis["NODES"].view_call(sql=sql, rowid=rowid)
 
     @haxdb.app.route("/NODES/new", methods=["POST", "GET"])
     @haxdb.require_auth

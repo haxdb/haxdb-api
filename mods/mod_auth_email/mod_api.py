@@ -11,13 +11,12 @@ config = None
 tools = None
 
 
-def init(app_haxdb, mod_tools):
+def init(app_haxdb, mod_config, mod_tools):
     global haxdb, db, config, tools
     haxdb = app_haxdb
     tools = mod_tools
     db = haxdb.db
-    config = haxdb.config
-
+    config = mod_config
 
 
 def run():
