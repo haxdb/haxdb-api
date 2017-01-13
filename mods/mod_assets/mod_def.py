@@ -15,6 +15,7 @@ mod_def["ASSETS"] = {
          "SEARCH": 1,
          "REQUIRED": 1,
          "NEW": 1,
+         "DEFAULT": 1,
         },
         {
          "NAME": "ASSETS_TYPE",
@@ -25,6 +26,7 @@ mod_def["ASSETS"] = {
          "SEARCH": 1,
          "REQUIRED": 1,
          "NEW": 1,
+         "DEFAULT": 1,
         },
         {
          "NAME": "ASSETS_MANUFACTURER",
@@ -64,6 +66,7 @@ mod_def["ASSETS"] = {
          "SEARCH": 1,
          "REQUIRED": 0,
          "NEW": 1,
+         "DEFAULT": 1,
         },
         {
          "NAME": "ASSETS_DESCRIPTION",

@@ -4,7 +4,7 @@ mod_def["QUERY"] = {
     "NAME": "QUERY",
     "TABLE": "QUERY",
     "ROWID": "QUERY_ID",
-    "CONTEXT_ROW": None,
+    "CONTEXT_ROW": "QUERY_CONTEXT",
     "COLS": [
         {
          "NAME": "QUERY_NAME",
@@ -76,7 +76,7 @@ mod_def["FIELDSET"] = {
     "NAME": "FIELDSET",
     "TABLE": "FIELDSET",
     "ROWID": "FIELDSET_ID",
-    "CONTEXT_ROW": None,
+    "CONTEXT_ROW": "FIELDSET_CONTEXT",
     "COLS": [
         {
          "NAME": "FIELDSET_NAME",

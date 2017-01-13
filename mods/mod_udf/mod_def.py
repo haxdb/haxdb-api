@@ -37,6 +37,7 @@ mod_def["UDF"] = {
          "SEARCH": 1,
          "REQUIRED": 0,
          "INTERNAL": 0,
+         "DEFAULT": 1,
         },
         {
          "NAME": "UDF_NAME",
@@ -48,6 +49,7 @@ mod_def["UDF"] = {
          "SEARCH": 1,
          "REQUIRED": 1,
          "INTERNAL": 0,
+         "DEFAULT": 1,
         },
         {
          "NAME": "UDF_TYPE",
@@ -59,6 +61,7 @@ mod_def["UDF"] = {
          "SEARCH": 1,
          "REQUIRED": 0,
          "INTERNAL": 0,
+         "DEFAULT": 1,
         },
         {
          "NAME": "UDF_LISTS_ID",
@@ -70,6 +73,7 @@ mod_def["UDF"] = {
          "SEARCH": 0,
          "REQUIRED": 0,
          "INTERNAL": 0,
+         "DEFAULT": 1,
         },
         {
          "NAME": "UDF_ORDER",
@@ -80,6 +84,7 @@ mod_def["UDF"] = {
          "SEARCH": 0,
          "REQUIRED": 0,
          "INTERNAL": 0,
+         "DEFAULT": 1,
         },
         {
          "NAME": "UDF_INTERNAL",

@@ -25,6 +25,7 @@ mod_def["LISTS"] = {
          "SEARCH": 1,
          "REQUIRED": 1,
          "NEW": 1,
+         "DEFAULT": 1,
         },
         {
          "NAME": "LISTS_INTERNAL",
@@ -63,6 +64,7 @@ mod_def["LIST_ITEMS"] = {
          "SEARCH": 1,
          "REQUIRED": 1,
          "NEW": 1,
+         "DEFAULT": 1,
         },
         {
          "NAME": "LIST_ITEMS_DESCRIPTION",
@@ -73,6 +75,7 @@ mod_def["LIST_ITEMS"] = {
          "SEARCH": 1,
          "REQUIRED": 1,
          "NEW": 1,
+         "DEFAULT": 1,
         },
         {
          "NAME": "LIST_ITEMS_ENABLED",
@@ -83,6 +86,7 @@ mod_def["LIST_ITEMS"] = {
          "SEARCH": 0,
          "REQUIRED": 0,
          "NEW": 1,
+         "DEFAULT": 1,
         },
         {
          "NAME": "LIST_ITEMS_ORDER",
@@ -93,6 +97,7 @@ mod_def["LIST_ITEMS"] = {
          "SEARCH": 0,
          "REQUIRED": 0,
          "NEW": 1,
+         "DEFAULT": 1,
         },
         {
          "NAME": "LIST_ITEMS_INTERNAL",

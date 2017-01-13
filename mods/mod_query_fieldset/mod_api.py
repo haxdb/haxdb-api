@@ -237,20 +237,7 @@ def run():
     @haxdb.no_readonly
     def mod_QUERY_save(rowid=None, col=None, val=None):
         rowid = rowid or haxdb.data.var.get("rowid")
-        col = col or haxdb.data.var.get("col")
-        val = val or haxdb.data.var.get("val")
-
-        meta = {}
-        meta["api"] = "QUERY"
-        meta["action"] = "save"
-        meta["rowid"] = rowid
-        meta["col"] = col
-        meta["val"] = val
-        meta["oid"] = "QUERY-%s-%s" % (rowid, col)
-
-        sql = "UPDATE QUERY SET {}=%s WHERE QUERY_ID=%s"
-        params = (val, rowid)
-        return apis["QUERY"].save_call(sql, params, meta, col, val, rowid)
+        return apis["QUERY"].save_call(rowid=rowid)
 
     @haxdb.app.route("/QUERY/new", methods=["GET", "POST"])
     @haxdb.require_auth
@@ -259,57 +246,19 @@ def run():
     def mod_QUERY_new():
         context = haxdb.data.var.get("context")
         context_id = haxdb.data.var.get("context_id") or 0
-        name = haxdb.data.var.get("name")
         global_QUERY = haxdb.data.var.get("global") or 0
-        query = haxdb.data.var.get("query")
-        cols = haxdb.data.var.getlist("cols")
 
         people_id = 0
-        try:
-            if int(global_QUERY) != 1:
-                people_id = haxdb.data.session.get("api_people_id")
-        except:
-            pass
+        if global_QUERY and global_QUERY == 1:
+            people_id = haxdb.data.session.get("api_people_id")
 
-        meta = {}
-        meta["api"] = "QUERY"
-        meta["action"] = "new"
-        meta["context"] = context
-        meta["context_id"] = context_id
-        meta["name"] = name
-        meta["global"] = global_QUERY
+        defaults = {
+            "QUERY_CONTEXT": haxdb.data.var.get("context"),
+            "QUERY_CONTEXT_ID": haxdb.data.var.get("context_id"),
+            "QUERY_PEOPLE_ID": people_id
+        }
 
-        if not name:
-            return haxdb.data.output(success=0, message="MISSING INPUT: name", meta=meta)
-
-        sql = "INSERT INTO QUERY (QUERY_NAME, QUERY_CONTEXT, QUERY_CONTEXT_ID, QUERY_PEOPLE_ID, QUERY_QUERY) VALUES (%s, %s, %s, %s, %s)"
-        params = (name, context, context_id, people_id, query)
-        db.query(sql, params)
-        if db.error:
-            return haxdb.data.output(success=0, message=db.error, meta=meta)
-        rowid = db.lastrowid
-        meta["rowid"] = rowid
-
-        sql = """
-        DELETE FROM QUERY_COLS WHERE QUERY_COLS_QUERY_ID=%s
-        """
-        db.query(sql, (rowid,))
-
-        sql = """
-        INSERT INTO QUERY_COLS(QUERY_COLS_QUERY_ID, QUERY_COLS_COL, QUERY_COLS_ORDER)
-        VALUES (%s, %s, %s)
-        """
-        order = 0
-        total = 0
-        if cols:
-            for col in cols:
-                order += 1
-                db.query(sql, (rowid, col, order))
-                total += db.rowcount
-
-        meta["rowcount"] = total
-        db.commit()
-        return haxdb.data.output(success=1, meta=meta, message="SAVED")
+        return apis["QUERY"].new_call(defaults=defaults)
 
     @haxdb.app.route("/QUERY/delete", methods=["GET", "POST"])
     @haxdb.app.route("/QUERY/delete/<int:rowid>", methods=["GET", "POST"])

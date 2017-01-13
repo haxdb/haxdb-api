@@ -189,20 +189,20 @@ class api_call:
                                 sql += " OR "
                             if val == "NULL" and op == "=":
                                 sql += "("
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1) < 1"
+                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_DATA_ROWID={} and UDF_ENABLED=1) < 1".format(self.ROWID)
                                 sql += " OR "
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_VALUE IS NULL) > 0"
+                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_VALUE IS NULL and UDF_DATA_ROWID={}) > 0".format(self.ROWID)
                                 sql += ")"
                                 params += (self.TABLE, self.CONTEXT_ID)
                                 params += (col,)
                                 params += (self.TABLE, self.CONTEXT_ID)
                                 params += (col,)
                             elif val == "NULL" and op == "!=":
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1) > 0"
+                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_ROWID={}) > 0".format(self.ROWID)
                                 params += (self.TABLE, self.CONTEXT_ID)
                                 params += (col,)
                             else:
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_VALUE {} %s) > 0".format(op)
+                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_VALUE {} %s and UDF_DATA_ROWID={}) > 0".format(op, self.ROWID)
                                 params += (self.TABLE, self.CONTEXT_ID)
                                 params += (col, val,)
                             valcount += 1
@@ -222,11 +222,10 @@ class api_call:
                             valcount += 1
                     if valcount > 0:
                         sql += " OR "
-                    sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_ENABLED=1 and UDF_DATA_VALUE LIKE %s) > 0"
+                    sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_ENABLED=1 and UDF_DATA_VALUE LIKE %s and UDF_DATA_ROWID={}) > 0".format(self.ROWID)
                     params += (self.TABLE, self.CONTEXT_ID, query)
                     sql += ")"
         return sql, params
-
 
     def list_call(self, sql=None, params=None, calc_row_function=None, query=None, meta=None):
         sql = sql or "SELECT {}.*, UDF_NAME, UDF_DATA_VALUE FROM {}".format(self.TABLE, self.TABLE)
@@ -268,6 +267,7 @@ class api_call:
         rows = []
         rowdata = None
         lastrowid = None
+        print sql, params
         while row:
             row = dict(row)
             if calc_row_function:

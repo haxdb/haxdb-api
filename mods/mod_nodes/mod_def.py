@@ -23,6 +23,7 @@ mod_def["NODES"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 0,
+         "DEFAULT": 1,
         },
         {
          "NAME": "NODES_DESCRIPTION",
@@ -41,6 +42,7 @@ mod_def["NODES"] = {
          "QUERY": 1,
          "SEARCH": 0,
          "REQUIRED": 0,
+         "DEFAULT": 1,
         },
         {
          "NAME": "NODES_DBA",
@@ -50,6 +52,7 @@ mod_def["NODES"] = {
          "QUERY": 1,
          "SEARCH": 0,
          "REQUIRED": 0,
+         "DEFAULT": 1,
         },
         {
          "NAME": "NODES_IP",
@@ -59,6 +62,7 @@ mod_def["NODES"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 0,
+         "DEFAULT": 1,
         },
         {
          "NAME": "NODES_EXPIRE",
@@ -68,6 +72,7 @@ mod_def["NODES"] = {
          "QUERY": 1,
          "SEARCH": 0,
          "REQUIRED": 0,
+         "DEFAULT": 1,
         },
         {
          "NAME": "NODES_ENABLED",
@@ -77,6 +82,7 @@ mod_def["NODES"] = {
          "QUERY": 1,
          "SEARCH": 0,
          "REQUIRED": 0,
+         "DEFAULT": 1,
         },
         {
          "NAME": "NODES_QUEUED",
