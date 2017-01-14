@@ -91,7 +91,24 @@ def run():
     def mod_ASSET_AUTHS_asset(context_id=None):
         context_id = context_id or haxdb.data.var.get("context_id")
         apis["ASSET_AUTHS"].context_id(context_id)
-        return apis["ASSET_AUTHS"].list_call()
+
+        sql = """
+        SELECT * FROM ASSETS WHERE ASSETS_ID=%s
+        """
+        row = db.qaf(sql, (context_id,))
+        meta = {}
+        meta["context_name"] = row["ASSETS_NAME"]
+
+        sql = """
+            SELECT AA.*, UDF_NAME, UDF_DATA_VALUE
+            from
+            (
+            SELECT ASSET_AUTHS.*, ASSETS_NAME, PEOPLE_NAME_FIRST, PEOPLE_NAME_LAST, PEOPLE_EMAIL FROM ASSET_AUTHS
+            JOIN PEOPLE ON ASSET_AUTHS_PEOPLE_ID=PEOPLE_ID
+            JOIN ASSETS ON ASSETS_ID=ASSET_AUTHS_ASSETS_ID
+            ) AA
+        """
+        return apis["ASSET_AUTHS"].list_call(sql=sql, meta=meta)
 
     @haxdb.app.route("/ASSET_AUTHS/new", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_AUTHS/new/<int:context_id>", methods=["POST", "GET"])
@@ -99,9 +116,10 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_ASSET_AUTHS_new(context_id=None):
-        context_id = context_id or haxdb.data.var.get("context_id")
+        context_id = context_id or haxdb.data.var.get("context_id") or haxdb.data.var.get("ASSET_AUTHS_ASSETS_ID")
         apis["ASSET_AUTHS"].context_id(context_id)
-        return apis["ASSET_AUTHS"].new_call()
+        defaults = { "ASSET_AUTHS_ENABLED": 1 }
+        return apis["ASSET_AUTHS"].new_call(defaults=defaults)
 
     @haxdb.app.route("/ASSET_AUTHS/delete", methods=["GET", "POST"])
     @haxdb.app.route("/ASSET_AUTHS/delete/<int:rowid>", methods=["GET", "POST"])

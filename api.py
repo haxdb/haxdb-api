@@ -37,7 +37,7 @@ def valid_value(col_type, val):
             return False
         return True
 
-    if col_type in ("TEXT", "STR", "LIST"):
+    if col_type in ("TEXT", "STR", "LIST", "ASCII"):
         return True
 
     if col_type == "DATE":
@@ -351,7 +351,7 @@ class api_call:
         udf_params = []
         cols = self.get_cols()
 
-        if self.CONTEXT_ROW and self.context_id:
+        if self.CONTEXT_ROW and self.CONTEXT_ID:
             col_names.append(self.CONTEXT_ROW)
             col_params += (self.CONTEXT_ID,)
 

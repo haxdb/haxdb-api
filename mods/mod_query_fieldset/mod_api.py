@@ -244,7 +244,6 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_QUERY_new():
-        context = haxdb.data.var.get("context")
         context_id = haxdb.data.var.get("context_id") or 0
         global_QUERY = haxdb.data.var.get("global") or 0
 
@@ -254,10 +253,9 @@ def run():
 
         defaults = {
             "QUERY_CONTEXT": haxdb.data.var.get("context"),
-            "QUERY_CONTEXT_ID": haxdb.data.var.get("context_id"),
             "QUERY_PEOPLE_ID": people_id
         }
-
+        apis["QUERY"].context_id(context_id)
         return apis["QUERY"].new_call(defaults=defaults)
 
     @haxdb.app.route("/QUERY/delete", methods=["GET", "POST"])

@@ -125,16 +125,16 @@ mod_def["ASSET_AUTHS"] = {
     "NAME": "ASSET_AUTHS",
     "TABLE": "ASSET_AUTHS",
     "ROWID": "ASSET_AUTHS_ID",
-    "CONTEXT_ROW": "ASSET_LINKS_ASSETS_ID",
+    "CONTEXT_ROW": "ASSET_AUTHS_ASSETS_ID",
     "COLS": [
         {
-         "NAME": "PEOPLE_NAME_LAST",
-         "HEADER": "LAST",
-         "TYPE": "STR",
+         "NAME": "ASSET_AUTHS_PEOPLE_ID",
+         "HEADER": "PEOPLE",
+         "TYPE": "INT",
          "EDIT": 0,
          "QUERY": 1,
-         "SEARCH": 1,
-         "REQUIRED": 0,
+         "SEARCH": 0,
+         "REQUIRED": 1,
         },
         {
          "NAME": "PEOPLE_NAME_FIRST",
@@ -144,6 +144,27 @@ mod_def["ASSET_AUTHS"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 0,
+         "DEFAULT": 1,
+        },
+        {
+         "NAME": "PEOPLE_NAME_LAST",
+         "HEADER": "LAST",
+         "TYPE": "STR",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 1,
+         "REQUIRED": 0,
+         "DEFAULT": 1,
+        },
+        {
+         "NAME": "PEOPLE_EMAIL",
+         "HEADER": "EMAIL",
+         "TYPE": "STR",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 1,
+         "REQUIRED": 0,
+         "DEFAULT": 1,
         },
         {
          "NAME": "ASSET_AUTHS_ENABLED",
@@ -153,7 +174,8 @@ mod_def["ASSET_AUTHS"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 0,
+         "DEFAULT": 1,
         },
     ],
-    "ORDER": ["ASSET_LINKS_NAME"]
+    "ORDER": ["PEOPLE_NAME_LAST","PEOPLE_NAME_FIRST"]
 }

@@ -59,6 +59,7 @@ def init(app_db, app_config):
     t = db.tables.table('ASSET_AUTHS')
     t.add("ASSET_AUTHS_ASSETS_ID", "INT", col_required=True)
     t.add("ASSET_AUTHS_PEOPLE_ID", "CHAR", col_size=50, col_required=True)
+    t.add("ASSET_AUTHS_ENABLED", "INT", col_size=1)
     tables.append(t)
 
     indexes = []

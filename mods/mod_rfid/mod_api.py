@@ -220,71 +220,49 @@ def run():
         return apis["ASSETS_RFID"].save_call(sql, params, meta, col, val)
 
     @haxdb.app.route("/PEOPLE_RFID/list", methods=["POST", "GET"])
-    @haxdb.app.route("/PEOPLE_RFID/list/<int:people_id>", methods=["POST", "GET"])
+    @haxdb.app.route("/PEOPLE_RFID/list/<int:context_id>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
-    def mod_PEOPLE_RFID_list(people_id=None):
-        people_id = people_id or haxdb.data.var.get("people_id")
-
-        meta = {}
-        meta["api"] = "PEOPLE_RFID"
-        meta["action"] = "list"
-        meta["people_id"] = people_id
-
-        sql = "SELECT * FROM PEOPLE WHERE PEOPLE_ID=%s"
-        row = db.qaf(sql, (people_id,))
-        meta["people_name"] = "%s %s" % (row["PEOPLE_NAME_FIRST"], row["PEOPLE_NAME_LAST"],)
+    def mod_PEOPLE_RFID_list(context_id=None):
+        context_id = context_id or haxdb.data.var.get("context_id") or haxdb.data.var.get("people_id")
+        apis["PEOPLE_RFID"].context_id(context_id)
 
         sql = """
-        SELECT *,
-        PEOPLE_NAME_FIRST, PEOPLE_NAME_LAST
-        FROM PEOPLE_RFID
-        JOIN PEOPLE ON PEOPLE_RFID_PEOPLE_ID=PEOPLE_ID AND PEOPLE_ID=%s
+        SELECT * FROM PEOPLE WHERE PEOPLE_ID=%s
         """
-        params = (people_id,)
-        return apis["PEOPLE_RFID"].list_call(sql, params, meta)
+        row = db.qaf(sql, (context_id,))
+        meta = {}
+        meta["context_name"] = "{} {}".format(row["PEOPLE_NAME_FIRST"],row["PEOPLE_NAME_LAST"])
+
+        sql = """
+        SELECT PR.*, UDF_NAME, UDF_DATA_VALUE
+        FROM
+        (
+        SELECT PEOPLE_RFID.*, PEOPLE_NAME_FIRST, PEOPLE_NAME_LAST
+        FROM PEOPLE_RFID
+        JOIN PEOPLE ON PEOPLE_RFID_PEOPLE_ID=PEOPLE_ID
+        ) PR
+        """
+        return apis["PEOPLE_RFID"].list_call(sql=sql, meta=meta)
 
     @haxdb.app.route("/PEOPLE_RFID/new", methods=["POST", "GET"])
-    @haxdb.app.route("/PEOPLE_RFID/new/<int:people_id>/<name>", methods=["POST", "GET"])
+    @haxdb.app.route("/PEOPLE_RFID/new/<int:context_id>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
-    def mod_PEOPLE_RFID_new(people_id=None, name=None):
-        people_id = people_id or haxdb.data.var.get("people_id")
-        name = name or haxdb.data.var.get("name")
-
-        meta = {}
-        meta["api"] = "PEOPLE_RFID"
-        meta["action"] = "new"
-        meta["people_id"] = people_id
-        meta["name"] = name
-
-        sql = "INSERT INTO PEOPLE_RFID (PEOPLE_RFID_PEOPLE_ID, PEOPLE_RFID_NAME, PEOPLE_RFID_ENABLED) "
-        sql += "VALUES (%s, %s, 0)"
-        params = (people_id, name,)
-        return apis["PEOPLE_RFID"].new_call(sql, params, meta)
+    def mod_PEOPLE_RFID_new(context_id=None):
+        context_id = context_id or haxdb.data.var.get("context_id") or haxdb.data.var.get("people_id")
+        apis["PEOPLE_RFID"].context_id(context_id)
+        return apis["PEOPLE_RFID"].new_call()
 
     @haxdb.app.route("/PEOPLE_RFID/save", methods=["GET", "POST"])
-    @haxdb.app.route("/PEOPLE_RFID/save/<int:rowid>/<col>/<val>", methods=["GET", "POST"])
+    @haxdb.app.route("/PEOPLE_RFID/save/<int:rowid>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
-    def mod_PEOPLE_RFID_save(rowid=None, col=None, val=None):
+    def mod_PEOPLE_RFID_save(rowid=None):
         rowid = rowid or haxdb.data.var.get("rowid")
-        col = col or haxdb.data.var.get("col")
-        val = val or haxdb.data.var.get("val")
-
-        meta = {}
-        meta["api"] = "PEOPLE_RFID"
-        meta["action"] = "save"
-        meta["rowid"] = rowid
-        meta["col"] = col
-        meta["val"] = val
-        meta["oid"] = "PEOPLE_RFID-%s-%s" % (rowid, col,)
-
-        sql = "UPDATE PEOPLE_RFID SET {}=%s WHERE PEOPLE_RFID_ID=%s"
-        params = (val, rowid,)
-        return apis["PEOPLE_RFID"].save_call(sql, params, meta, col, val, rowid)
+        return apis["PEOPLE_RFID"].save_call(rowid=rowid)
 
     @haxdb.app.route("/PEOPLE_RFID/delete", methods=["GET", "POST"])
     @haxdb.app.route("/PEOPLE_RFID/delete/<int:rowid>", methods=["GET", "POST"])

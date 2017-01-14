@@ -4,7 +4,7 @@ mod_def["PEOPLE_RFID"] = {
     "NAME": "PEOPLE_RFID",
     "TABLE": "PEOPLE_RFID",
     "ROWID": "PEOPLE_RFID_ID",
-    "CONTEXT_ROW": None,
+    "CONTEXT_ROW": "PEOPLE_RFID_PEOPLE_ID",
     "COLS": [
         {
          "NAME": "PEOPLE_RFID_NAME",
@@ -16,6 +16,8 @@ mod_def["PEOPLE_RFID"] = {
          "SEARCH": 1,
          "REQUIRED": 1,
          "INTERNAL": 0,
+         "DEFAULT": 1,
+         "NEW": 1,
         },
         {
          "NAME": "PEOPLE_RFID_PEOPLE_ID",
@@ -37,6 +39,8 @@ mod_def["PEOPLE_RFID"] = {
          "SEARCH": 1,
          "REQUIRED": 0,
          "INTERNAL": 0,
+         "DEFAULT": 1,
+         "NEW": 1,
         },
         {
          "NAME": "PEOPLE_RFID_ENABLED",
@@ -47,6 +51,9 @@ mod_def["PEOPLE_RFID"] = {
          "SEARCH": 0,
          "REQUIRED": 0,
          "INTERNAL": 0,
+         "DEFAULT": 1,
+         "NEW": 1,
+         "DEFAULT_VALUE": 0,
         },
     ],
     "ORDER": ["PEOPLE_RFID_NAME"]
