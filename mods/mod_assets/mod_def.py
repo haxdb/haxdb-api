@@ -96,6 +96,7 @@ mod_def["ASSET_LINKS"] = {
          "SEARCH": 1,
          "REQUIRED": 1,
          "NEW": 1,
+         "DEFAULT": 1,
         },
         {
          "NAME": "ASSET_LINKS_LINK",
@@ -106,6 +107,7 @@ mod_def["ASSET_LINKS"] = {
          "SEARCH": 1,
          "REQUIRED": 0,
          "NEW": 1,
+         "DEFAULT": 1,
         },
         {
          "NAME": "ASSET_LINKS_ORDER",
@@ -116,6 +118,8 @@ mod_def["ASSET_LINKS"] = {
          "SEARCH": 1,
          "REQUIRED": 0,
          "NEW": 1,
+         "DEFAULT": 1,
+         "DEFAULT_VALUE": 999,
         },
     ],
     "ORDER": ["ASSET_LINKS_NAME"]

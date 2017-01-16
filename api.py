@@ -48,6 +48,7 @@ def valid_value(col_type, val):
 
 
 class api_call:
+    UDF = True
     NAME = None
     TABLE = None
     ROWID = None
@@ -55,7 +56,6 @@ class api_call:
     CONTEXT_ROW = None
     COLS = []
     _COLS = {}
-    UDF = {}
     ORDER = []
 
     def __init__(self, api_def):
@@ -65,9 +65,17 @@ class api_call:
         self.COLS = api_def["COLS"]
         self.ORDER = api_def["ORDER"]
         self.CONTEXT_ROW = api_def["CONTEXT_ROW"]
-
+        if "UDF" in api_def:
+            self.UDF = api_def["UDF"]
+        print self.TABLE, self.NAME, self.UDF
         for col in self.COLS:
             self._COLS[col["NAME"]] = col
+
+    def get_meta(self, action=None):
+        meta = {}
+        meta["api"] = self.NAME
+        meta["action"] = action
+        return meta
 
     def context_id(self, id):
         self.CONTEXT_ID = id
@@ -139,6 +147,7 @@ class api_call:
                     "QUERY": 1,
                     "SEARCH": 1,
                     "REQUIRED": 0,
+                    "EDIT": 1,
                   }
             if row["UDF_TYPE"] == "LIST":
                 col["LIST"] = row["UDF_LISTS_ID"]
@@ -181,7 +190,7 @@ class api_call:
                             valcount += 1
 
                         sql += ")"
-                    else:
+                    elif self.UDF:
                         sql += " AND ("
                         valcount = 0
                         for val in vals:
@@ -208,7 +217,7 @@ class api_call:
                             valcount += 1
                         sql += ")"
 
-                else:
+                elif self.UDF:
                     query = "%" + query + "%"
                     sql += " AND ("
                     valcount = 0
@@ -228,7 +237,7 @@ class api_call:
         return sql, params
 
     def list_call(self, sql=None, params=None, calc_row_function=None, query=None, meta=None):
-        sql = sql or "SELECT {}.*, UDF_NAME, UDF_DATA_VALUE FROM {}".format(self.TABLE, self.TABLE)
+        sql = sql or "SELECT {}.*, U1.UDF_NAME, U1D.UDF_DATA_VALUE FROM {}".format(self.TABLE, self.TABLE)
         params = params or ()
         query = query or var.get("query")
 
@@ -240,20 +249,23 @@ class api_call:
         meta["lists"] = self.get_lists(meta["cols"])
         meta["rowid_name"] = self.ROWID
 
-        sql += """
-        LEFT OUTER JOIN UDF ON UDF_CONTEXT=%s
-                        AND UDF_CONTEXT_ID=%s
-                        AND UDF_ENABLED=1
-        LEFT OUTER JOIN UDF_DATA ON UDF_DATA_UDF_ID=UDF_ID
-                        AND UDF_DATA_ROWID={}
-        """.format(self.ROWID)
-        params += (self.TABLE, self.CONTEXT_ID)
+        if self.UDF:
+            sql += """
+                    LEFT OUTER JOIN UDF U1 ON
+                        U1.UDF_CONTEXT=%s
+                        AND U1.UDF_CONTEXT_ID=%s
+                        AND U1.UDF_ENABLED=1
+                    LEFT OUTER JOIN UDF_DATA U1D ON
+                        U1D.UDF_DATA_UDF_ID=U1.UDF_ID
+                        AND U1D.UDF_DATA_ROWID={}
+                    """.format(self.ROWID)
+            params += (self.TABLE, self.CONTEXT_ID)
 
-        if self.CONTEXT_ID:
-            sql += " WHERE {}=%s".format(self.CONTEXT_ROW)
-            params += (self.CONTEXT_ID,)
-        else:
-            sql += " WHERE 1=1"
+            if self.CONTEXT_ID:
+                sql += " WHERE {}=%s".format(self.CONTEXT_ROW)
+                params += (self.CONTEXT_ID,)
+            else:
+                sql += " WHERE 1=1"
 
         query_sql, query_params = self.build_query(query)
         sql += query_sql
@@ -280,10 +292,11 @@ class api_call:
                     rows.append(rowdata)
                 rowdata = {}
                 lastrowid = rowid
-            if row["UDF_NAME"]:
-                rowdata[row["UDF_NAME"]] = row["UDF_DATA_VALUE"]
-            del row["UDF_NAME"]
-            del row["UDF_DATA_VALUE"]
+            if self.UDF:
+                if row["UDF_NAME"]:
+                    rowdata[row["UDF_NAME"]] = row["UDF_DATA_VALUE"]
+                del row["UDF_NAME"]
+                del row["UDF_DATA_VALUE"]
             rowdata.update(row)
 
             row = db.next()
@@ -301,10 +314,13 @@ class api_call:
         if not sql:
             sql = "SELECT * FROM {} WHERE {}=%s".format(self.TABLE, self.ROWID)
             params = (rowid,)
+        else:
+            sql += " WHERE {}=%s ".format(self.ROWID)
+            params += (rowid,)
 
-            if self.CONTEXT_ID:
-                sql += " AND {}=%s".format(self.CONTEXT_ROW)
-                params += (self.CONTEXT_ID)
+        if self.CONTEXT_ID:
+            sql += " AND {}=%s".format(self.CONTEXT_ROW)
+            params += (self.CONTEXT_ID)
 
         meta["api"] = self.NAME
         meta["action"] = "view"
@@ -327,10 +343,11 @@ class api_call:
         AND UDF_ENABLED=1
         ORDER BY UDF_ORDER
         """
-        udf_params = (self.TABLE, self.CONTEXT_ID, self.ROWID)
+        udf_params = (self.TABLE, self.CONTEXT_ID, rowid)
         db.query(udf_sql, udf_params)
         udf = db.next()
         while udf:
+            print "\n\nudf: {}\n\n".format(udf)
             row[udf["UDF_NAME"]] = udf["UDF_DATA_VALUE"]
             udf = db.next()
 
@@ -442,7 +459,7 @@ class api_call:
 
         col_names = []
         col_params = ()
-        udf_names = []
+        udf_cols = []
         udf_params = []
         cols = self.get_cols()
 
@@ -450,17 +467,20 @@ class api_call:
         for col in cols:
             val = var.get(col["NAME"])
             if val is not None:
-                if valid_value(col["TYPE"], val):
-                    if col["NAME"] in self._COLS:
-                        meta["updated"].append(col["NAME"])
-                        col_names.append("{}=%s".format(col["NAME"]))
-                        col_params += (val,)
-                    else:
-                        meta["updated"].append(col["NAME"])
-                        udf_names.append(col["NAME"])
-                        udf_params.append(val)
+                if "EDIT" in col and col["EDIT"] != 1:
+                    errors += "{} IS NOT EDITABLE".format(col["NAME"])
                 else:
-                    errors += "INVALID VALUE FOR {}\n".format(col["NAME"])
+                    if valid_value(col["TYPE"], val):
+                        if col["NAME"] in self._COLS:
+                            meta["updated"].append(col["NAME"])
+                            col_names.append("{}=%s".format(col["NAME"]))
+                            col_params += (val,)
+                        else:
+                            meta["updated"].append(col["NAME"])
+                            udf_cols.append(col)
+                            udf_params.append(val)
+                    else:
+                        errors += "INVALID VALUE FOR {}\n".format(col["NAME"])
 
         if errors:
             return output(success=0, meta=meta, message=errors)
@@ -473,14 +493,13 @@ class api_call:
                 return output(success=0, meta=meta, message=db.error)
             meta["rowcount"] = db.rowcount
 
-        if udf_names:
-            for udf_key in udf_names.keys():
-                udf_name = udf_names[udf_key]
-                udf_val = udf_params[udf_key]
-                sql = "DELETE FROM UDF_DATA WHERE UDF_DATA_UDF_ID and UDF_ROWID=%s"
-                db.query(sql, (cols[udf_name]["UDF_ID"], rowid))
+        if udf_cols:
+            for idx, udf_col in enumerate(udf_cols):
+                udf_val = udf_params[idx]
+                sql = "DELETE FROM UDF_DATA WHERE UDF_DATA_UDF_ID=%s and UDF_DATA_ROWID=%s"
+                db.query(sql, (udf_col["UDF_ID"], rowid))
                 sql = "INSERT INTO UDF_DATA (UDF_DATA_UDF_ID, UDF_DATA_VALUE, UDF_DATA_ROWID) VALUES (%s, %s, %s)"
-                db.query(sql, (cols[udf_name]["UDF_ID"], udf_val, rowid))
+                db.query(sql, (udf_col["UDF_ID"], udf_val, rowid))
                 if db.error:
                     return output(success=0, meta=meta, message=db.error)
                 meta["rowcount"] = meta["rowcount"] or db.rowcount

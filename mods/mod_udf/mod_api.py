@@ -35,25 +35,19 @@ def run():
         except:
             disabled = 0
 
-        meta = {}
-        meta["api"] = "UDF"
-        meta["action"] = "list"
-        meta["context"] = context
-        meta["context_id"] = context_id
-
         if disabled == 1:
             sql = """
             SELECT *
-            FROM ( SELECT * FROM UDF WHERE UDF.UDF_CONTEXT=%s AND UDF.UDF_CONTEXT_ID=%s) UDF
+            FROM ( SELECT * FROM UDF U2 WHERE U2.UDF_CONTEXT=%s AND U2.UDF_CONTEXT_ID=%s) UDF2
             """
         else:
             sql = """
             SELECT *
-            FROM ( SELECT * FROM UDF WHERE UDF.UDF_CONTEXT=%s AND UDF.UDF_CONTEXT_ID=%s AND UDF.UDF_ENABLED=1 ) UDF
+            FROM ( SELECT * FROM UDF U2 WHERE U2.UDF_CONTEXT=%s AND U2.UDF_CONTEXT_ID=%s AND U2.UDF_ENABLED=1 ) UDF2
             """
         params = (context, context_id,)
 
-        return apis["UDF"].list_call(sql, params, meta)
+        return apis["UDF"].list_call(sql=sql, params=params)
 
     @haxdb.app.route("/UDF/categories", methods=["POST", "GET"])
     @haxdb.app.route("/UDF/categories/<context>", methods=["POST", "GET"])

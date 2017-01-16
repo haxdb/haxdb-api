@@ -54,28 +54,31 @@ def run():
     @haxdb.require_auth
     def mod_list_items_list(context_id=None, lists_name=None):
         context_id = context_id or haxdb.data.var.get("context_id") or haxdb.data.var.get("lists_id")
-        context_name = lists_name or haxdb.data.var.get("context_name") or haxdb.data.var.get("lists_name")
+        page_name = lists_name or haxdb.data.var.get("page_name") or haxdb.data.var.get("lists_name")
         include_disabled = haxdb.data.var.get("include_disabled")
 
-        if not context_id and not context_name:
-            return haxdb.data.output(success=0, meta=meta, message="MISSING VALUE: context_id or context_name")
+        if not context_id and not page_name:
+            meta = apis["LIST_ITEMS"].get_meta("list")
+            return haxdb.data.output(success=0, meta=meta, message="MISSING VALUE: context_id or page_name")
 
-        if context_name and not context_id:
-            row = haxdb.db.qaf("select LISTS_ID from LISTS where LISTS_NAME=%s", (context_name,))
+        if page_name and not context_id:
+            row = haxdb.db.qaf("select LISTS_ID from LISTS where LISTS_NAME=%s", (page_name,))
             try:
                 context_id = row["LISTS_ID"]
             except:
+                meta = apis["LIST_ITEMS"].get_meta("list")
                 return haxdb.data.output(success=0, meta=meta, message="UNKNOWN LIST")
 
-        if not context_name:
+        if not page_name:
             row = haxdb.db.qaf("select LISTS_NAME from LISTS where LISTS_ID=%s", (context_id,))
             try:
-                context_name = row["LISTS_NAME"]
+                page_name = row["LISTS_NAME"]
             except:
+                meta = apis["LIST_ITEMS"].get_meta("list")
                 return haxdb.data.output(success=0, meta=meta, message="UNKNOWN LIST")
 
         meta = {}
-        meta["context_name"] = context_name
+        meta["page_name"] = page_name
 
         sql = """
             SELECT L.*, UDF_NAME, UDF_DATA_VALUE

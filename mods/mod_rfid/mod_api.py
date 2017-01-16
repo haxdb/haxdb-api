@@ -232,7 +232,7 @@ def run():
         """
         row = db.qaf(sql, (context_id,))
         meta = {}
-        meta["context_name"] = "{} {}".format(row["PEOPLE_NAME_FIRST"],row["PEOPLE_NAME_LAST"])
+        meta["page_name"] = "{} {}".format(row["PEOPLE_NAME_FIRST"],row["PEOPLE_NAME_LAST"])
 
         sql = """
         SELECT PR.*, UDF_NAME, UDF_DATA_VALUE

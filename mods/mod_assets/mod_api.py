@@ -57,8 +57,15 @@ def run():
     @haxdb.app.route("/ASSET_LINKS/list/<int:context_id>", methods=["POST", "GET"])
     def mod_asset_links_asset(context_id=None):
         context_id = context_id or haxdb.data.var.get("context_id")
+        sql = """
+        SELECT ASSETS_NAME FROM ASSETS WHERE ASSETS_ID=%s
+        """
+        row = db.qaf(sql, (context_id,))
+        meta = {}
+        meta["page_name"] = row["ASSETS_NAME"]
+
         apis["ASSET_LINKS"].context_id(context_id)
-        return apis["ASSET_LINKS"].list_call()
+        return apis["ASSET_LINKS"].list_call(meta=meta)
 
     @haxdb.app.route("/ASSET_LINKS/new", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_LINKS/new/<int:context_id>", methods=["POST", "GET"])
@@ -97,7 +104,7 @@ def run():
         """
         row = db.qaf(sql, (context_id,))
         meta = {}
-        meta["context_name"] = row["ASSETS_NAME"]
+        meta["page_name"] = row["ASSETS_NAME"]
 
         sql = """
             SELECT AA.*, UDF_NAME, UDF_DATA_VALUE

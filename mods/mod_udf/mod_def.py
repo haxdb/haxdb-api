@@ -3,7 +3,8 @@ mod_def = {}
 mod_def["UDF"] = {
     "NAME": "UDF",
     "TABLE": "UDF",
-    "ROWID": "UDF",
+    "ROWID": "UDF_ID",
+    "UDF": False,
     "CONTEXT_ROW": None,
     "COLS": [
         {
@@ -38,6 +39,7 @@ mod_def["UDF"] = {
          "REQUIRED": 0,
          "INTERNAL": 0,
          "DEFAULT": 1,
+         "NEW": 1,
         },
         {
          "NAME": "UDF_NAME",
@@ -50,6 +52,7 @@ mod_def["UDF"] = {
          "REQUIRED": 1,
          "INTERNAL": 0,
          "DEFAULT": 1,
+         "NEW": 1,
         },
         {
          "NAME": "UDF_TYPE",
@@ -62,6 +65,7 @@ mod_def["UDF"] = {
          "REQUIRED": 0,
          "INTERNAL": 0,
          "DEFAULT": 1,
+         "NEW": 1,
         },
         {
          "NAME": "UDF_LISTS_ID",
@@ -85,6 +89,20 @@ mod_def["UDF"] = {
          "REQUIRED": 0,
          "INTERNAL": 0,
          "DEFAULT": 1,
+         "NEW": 1,
+         "DEFAULT_VALUE": 999,
+        },
+        {
+         "NAME": "UDF_ENABLED",
+         "HEADER": "ENABLED",
+         "TYPE": "BOOL",
+         "EDIT": 1,
+         "QUERY": 1,
+         "SEARCH": 0,
+         "REQUIRED": 0,
+         "INTERNAL": 0,
+         "DEFAULT": 1,
+         "NEW": 1,
         },
         {
          "NAME": "UDF_INTERNAL",
@@ -97,5 +115,5 @@ mod_def["UDF"] = {
          "INTERNAL": 1,
         },
     ],
-    "ORDER": ["UDF_ORDER", "UDF_NAME"]
+    "ORDER": ["UDF2.UDF_ORDER", "UDF2.UDF_NAME"]
 }
