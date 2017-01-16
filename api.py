@@ -10,8 +10,15 @@ def init(app_db):
     db = app_db
 
 
-def valid_value(col_type, val):
+def valid_value(col, val):
+    col_type = col["TYPE"]
+
     if val is None:
+        return True
+
+    if col_type == "SELECT":
+        if "OPTIONS" not in col or val not in col["OPTIONS"]:
+            return False
         return True
 
     if col_type == "BOOL":
@@ -322,8 +329,7 @@ class api_call:
             sql += " AND {}=%s".format(self.CONTEXT_ROW)
             params += (self.CONTEXT_ID)
 
-        meta["api"] = self.NAME
-        meta["action"] = "view"
+        meta = self.get_meta("view")
         meta["cols"] = self.get_cols()
         meta["lists"] = self.get_lists(meta["cols"])
 
@@ -347,7 +353,6 @@ class api_call:
         db.query(udf_sql, udf_params)
         udf = db.next()
         while udf:
-            print "\n\nudf: {}\n\n".format(udf)
             row[udf["UDF_NAME"]] = udf["UDF_DATA_VALUE"]
             udf = db.next()
 
@@ -376,7 +381,7 @@ class api_call:
         for col in cols:
             val = var.get(col["NAME"])
             if val is not None:
-                if valid_value(col["TYPE"], val):
+                if valid_value(col, val):
                     if col["NAME"] in self._COLS:
                         col_names.append(col["NAME"])
                         col_params += (val,)
@@ -470,7 +475,7 @@ class api_call:
                 if "EDIT" in col and col["EDIT"] != 1:
                     errors += "{} IS NOT EDITABLE".format(col["NAME"])
                 else:
-                    if valid_value(col["TYPE"], val):
+                    if valid_value(col, val):
                         if col["NAME"] in self._COLS:
                             meta["updated"].append(col["NAME"])
                             col_names.append("{}=%s".format(col["NAME"]))

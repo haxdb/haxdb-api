@@ -145,24 +145,7 @@ def run():
     @haxdb.no_readonly
     def mod_nodes_save(rowid=None, col=None, val=None):
         rowid = rowid or haxdb.data.var.get("rowid")
-        col = col or haxdb.data.var.get("col")
-        val = val or haxdb.data.var.get("val")
-        key_id = haxdb.data.session.get("nodes_id")
-
-        meta = {}
-        meta["api"] = "NODES"
-        meta["action"] = "save"
-        meta["col"] = col
-        meta["rowid"] = rowid
-        meta["val"] = val
-        meta["oid"] = "NODES-%s-%s" % (rowid, col,)
-
-        if int(key_id) == int(rowid):
-            return haxdb.data.output(success=0, message="CANNOT UPDATE KEY YOU ARE CURRENTLY USING", meta=meta)
-
-        sql = "UPDATE NODES SET {}=%s WHERE NODES_ID=%s"
-        params = (val, rowid)
-        return apis["NODES"].save_call(sql, params, meta, col, val, rowid)
+        return apis["NODES"].save_call(rowid=rowid)
 
     @haxdb.app.route("/NODES/delete", methods=["GET", "POST"])
     @haxdb.app.route("/NODES/delete/<int:rowid>", methods=["GET", "POST"])
