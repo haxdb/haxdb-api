@@ -124,14 +124,15 @@ class api_call:
         row = db.qaf(sql, list_ids)
         while row:
             lname = row["LISTS_NAME"]
-            if lname not in lists:
-                lists[lname] = []
+            lid = row["LISTS_ID"]
+            if lid not in lists:
+                lists[lid] = { "name": lname, "items": [] }
             list_item = {
                 "ID": row["LIST_ITEMS_ID"],
                 "VALUE": row["LIST_ITEMS_VALUE"],
                 "DESCRIPTION": row["LIST_ITEMS_DESCRIPTION"],
             }
-            lists[lname].append(list_item)
+            lists[lid]["items"].append(list_item)
             row = db.next()
 
         return lists
@@ -268,11 +269,11 @@ class api_call:
                     """.format(self.ROWID)
             params += (self.TABLE, self.CONTEXT_ID)
 
-            if self.CONTEXT_ID:
-                sql += " WHERE {}=%s".format(self.CONTEXT_ROW)
-                params += (self.CONTEXT_ID,)
-            else:
-                sql += " WHERE 1=1"
+        if self.CONTEXT_ID:
+            sql += " WHERE {}=%s".format(self.CONTEXT_ROW)
+            params += (self.CONTEXT_ID,)
+        else:
+            sql += " WHERE 1=1"
 
         query_sql, query_params = self.build_query(query)
         sql += query_sql
