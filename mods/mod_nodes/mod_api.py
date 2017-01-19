@@ -62,9 +62,8 @@ def run():
         db.query(sql, (time.time(),))
         db.commit()
 
-        sql = """
-        SELECT N.*, UDF_NAME, UDF_DATA_VALUE
-        FROM (
+        table = """
+        (
         SELECT
         NODES.*,
         PEOPLE_NAME_LAST, PEOPLE_NAME_FIRST
@@ -72,10 +71,10 @@ def run():
         FROM NODES
         LEFT OUTER JOIN PEOPLE ON NODES_PEOPLE_ID=PEOPLE_ID
         LEFT OUTER JOIN ASSETS ON NODES_ASSETS_ID=ASSETS_ID
-        ) N
+        ) NODES
         """
 
-        return apis["NODES"].list_call(sql=sql)
+        return apis["NODES"].list_call(table=table)
 
     @haxdb.app.route("/NODES/view", methods=["POST", "GET"])
     @haxdb.app.route("/NODES/view/<int:rowid>", methods=["POST", "GET"])

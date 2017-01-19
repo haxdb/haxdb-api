@@ -55,7 +55,18 @@ mod_def["LIST_ITEMS"] = {
          "SEARCH": 0,
          "REQUIRED": 0,
          "NEW": 0,
-        },        {
+        },
+        {
+         "NAME": "LIST_ITEMS_LISTS_ID",
+         "HEADER": "LIST",
+         "TYPE": "ID",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 0,
+         "REQUIRED": 0,
+         "NEW": 0,
+        },
+        {
          "NAME": "LIST_ITEMS_VALUE",
          "HEADER": "VALUE",
          "TYPE": "STR",

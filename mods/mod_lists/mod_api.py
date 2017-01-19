@@ -49,61 +49,37 @@ def run():
         return apis["LISTS"].save_call(rowid=rowid)
 
     @haxdb.app.route("/LIST_ITEMS/list", methods=["POST", "GET"])
-    @haxdb.app.route("/LIST_ITEMS/list/<int:context_id>", methods=["POST", "GET"])
-    @haxdb.app.route("/LIST_ITEMS/list/<lists_name>", methods=["POST", "GET"])
+    @haxdb.app.route("/LIST_ITEMS/list/<int:LISTS_ID>", methods=["POST", "GET"])
     @haxdb.require_auth
-    def mod_list_items_list(context_id=None, lists_name=None):
-        context_id = context_id or haxdb.data.var.get("context_id") or haxdb.data.var.get("lists_id")
-        page_name = lists_name or haxdb.data.var.get("page_name") or haxdb.data.var.get("lists_name")
-        include_disabled = haxdb.data.var.get("include_disabled")
+    def mod_list_items_list(LISTS_ID=None):
+        LISTS_ID = LISTS_ID or haxdb.data.var.get("LISTS_ID")
 
-        if not context_id and not page_name:
-            meta = apis["LIST_ITEMS"].get_meta("list")
-            return haxdb.data.output(success=0, meta=meta, message="MISSING VALUE: context_id or page_name")
-
-        if page_name and not context_id:
-            row = haxdb.db.qaf("select LISTS_ID from LISTS where LISTS_NAME=%s", (page_name,))
-            try:
-                context_id = row["LISTS_ID"]
-            except:
-                meta = apis["LIST_ITEMS"].get_meta("list")
-                return haxdb.data.output(success=0, meta=meta, message="UNKNOWN LIST")
-
-        if not page_name:
-            row = haxdb.db.qaf("select LISTS_NAME from LISTS where LISTS_ID=%s", (context_id,))
-            try:
-                page_name = row["LISTS_NAME"]
-            except:
-                meta = apis["LIST_ITEMS"].get_meta("list")
-                return haxdb.data.output(success=0, meta=meta, message="UNKNOWN LIST")
-
-        meta = {}
-        meta["page_name"] = page_name
-
+        # GET ASSETS_NAME
         sql = """
-            SELECT L.*, UDF_NAME, UDF_DATA_VALUE
-            FROM
-            (
-            SELECT
-            *
-            FROM LIST_ITEMS
-            JOIN LISTS ON LIST_ITEMS_LISTS_ID=LISTS_ID AND LISTS_ID=%s
-            ) L
+        SELECT LISTS_NAME FROM LISTS WHERE LISTS_ID=%s
         """
-        params = (context_id, )
+        row = db.qaf(sql, (LISTS_ID,))
+        meta = {"name": row["LISTS_NAME"]}
 
-        apis["LIST_ITEMS"].context_id(context_id)
-        return apis["LIST_ITEMS"].list_call(sql=sql, params=params, meta=meta)
+        where = """
+        LIST_ITEMS_LISTS_ID=%s
+        """
+        params = (LISTS_ID,)
+
+        return apis["LIST_ITEMS"].list_call(params=params, where=where, meta=meta)
 
     @haxdb.app.route("/LIST_ITEMS/new", methods=["POST", "GET"])
-    @haxdb.app.route("/LIST_ITEMS/new/<int:context_id>", methods=["POST", "GET"])
+    @haxdb.app.route("/LIST_ITEMS/new/<int:LISTS_ID>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
-    def mod_list_items_new(context_id=None):
-        context_id = context_id or haxdb.data.var.get("context_id")
-        apis["LIST_ITEMS"].context_id(context_id)
-        return apis["LIST_ITEMS"].new_call()
+    def mod_list_items_new(LISTS_ID=None):
+        LISTS_ID = LISTS_ID or haxdb.data.var.get("LISTS_ID")
+        defaults = {
+            "LIST_ITEMS_LISTS_ID": LISTS_ID,
+            "LIST_ITEMS_ENABLED": 1,
+        }
+        return apis["LIST_ITEMS"].new_call(defaults=defaults)
 
 
     @haxdb.app.route("/LIST_ITEMS/save", methods=["GET", "POST"])

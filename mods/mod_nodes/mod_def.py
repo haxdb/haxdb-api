@@ -106,7 +106,7 @@ mod_def["NODES"] = {
          "SEARCH": 0,
          "REQUIRED": 0,
          "INTERNAL": 0,
-         "DEFAULT": 1,
+         "DEFAULT": 0,
         },
         {
          "NAME": "NODES_ASSETS_ID",
@@ -121,7 +121,7 @@ mod_def["NODES"] = {
          "SEARCH": 0,
          "REQUIRED": 0,
          "INTERNAL": 0,
-         "DEFAULT": 1,
+         "DEFAULT": 0,
         },
     ],
     "ORDER": ["NODES_NAME"]
