@@ -21,7 +21,7 @@ mod_def["UDF"] = {
         {
          "NAME": "UDF_CONTEXT_ID",
          "HEADER": "CONTEXT_ID",
-         "TYPE": "ID",
+         "TYPE": "INT",
          "EDIT": 0,
          "QUERY": 0,
          "SEARCH": 0,

@@ -68,6 +68,7 @@ class api_call:
         self.COLS = api_def["COLS"]
         self.ORDER = api_def["ORDER"]
         for col in self.COLS:
+            col["CATEGORY"] = "PRIMARY"
             self._COLS[col["NAME"]] = col
 
     def get_meta(self, action=None):
@@ -133,7 +134,7 @@ class api_call:
         cols = list(self.COLS)
 
         sql = """
-        SELECT UDF_ID, UDF_NAME, UDF_TYPE, UDF_LISTS_ID FROM UDF
+        SELECT UDF_ID, UDF_NAME, UDF_TYPE, UDF_LISTS_ID, UDF_CATEGORY FROM UDF
         WHERE UDF_CONTEXT=%s and UDF_CONTEXT_ID=%s and UDF_ENABLED=1
         ORDER BY UDF_ORDER
         """
@@ -142,6 +143,7 @@ class api_call:
             col = {
                     "UDF_ID": row["UDF_ID"],
                     "NAME": row["UDF_NAME"],
+                    "CATEGORY": row["UDF_CATEGORY"],
                     "HEADER": row["UDF_NAME"],
                     "TYPE": row["UDF_TYPE"],
                     "QUERY": 1,

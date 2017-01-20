@@ -32,18 +32,20 @@ def run():
         disabled = haxdb.data.var.get("disabled")
         meta = {"name": UDF_CONTEXT}
 
-        if disabled != 1:
-            return apis["UDF"].list_call(meta=meta)
-
         t = """
         (
             SELECT *
             FROM UDF
-            WHERE UDF_ENABLED=1
+            WHERE
+            UDF_CONTEXT=%s
+            AND UDF_CONTEXT_ID=%s
         )
         """
+        p = (UDF_CONTEXT, UDF_CONTEXT_ID)
+        if disabled == 1:
+            t += " AND UDF_ENABLED=1 "
 
-        return apis["UDF"].list_call(table=t, meta=meta)
+        return apis["UDF"].list_call(table=t, params=p, meta=meta)
 
     @haxdb.app.route("/UDF/new", methods=["POST", "GET"])
     @haxdb.app.route("/UDF/new/<UDF_CONTEXT>", methods=["POST", "GET"])

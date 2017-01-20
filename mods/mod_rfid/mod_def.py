@@ -7,6 +7,18 @@ mod_def["PEOPLE_RFID"] = {
     "CONTEXT_ROW": "PEOPLE_RFID_PEOPLE_ID",
     "COLS": [
         {
+         "NAME": "PEOPLE_RFID_ID",
+         "HEADER": "ID",
+         "TYPE": "INT",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 0,
+         "REQUIRED": 0,
+         "INTERNAL": 0,
+         "DEFAULT": 0,
+         "NEW": 0,
+        },
+        {
          "NAME": "PEOPLE_RFID_NAME",
          "HEADER": "NAME",
          "TYPE": "STR",
