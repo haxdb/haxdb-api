@@ -30,7 +30,7 @@ def valid_value(col, val):
         except:
             return False
 
-    if col_type == "INT":
+    if col_type == "INT" or col_type == "ID":
         try:
             int(val)
         except:
