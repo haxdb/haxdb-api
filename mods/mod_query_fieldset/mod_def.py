@@ -30,7 +30,7 @@ mod_def["QUERY"] = {
         {
          "NAME": "QUERY_CONTEXT",
          "HEADER": "CONTEXT",
-         "TYPE": "CHAR",
+         "TYPE": "STR",
          "SIZE": 50,
          "EDIT": 0,
          "QUERY": 0,
@@ -41,7 +41,7 @@ mod_def["QUERY"] = {
         {
          "NAME": "QUERY_CONTEXT_ID",
          "HEADER": "CONTEXT_ID",
-         "TYPE": "ID",
+         "TYPE": "INT",
          "EDIT": 0,
          "QUERY": 0,
          "SEARCH": 0,

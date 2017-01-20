@@ -161,7 +161,6 @@ class api_call:
         params = ()
         sql = ""
         if query:
-            print query
             queries = shlex.split(query)
             for query in queries:
                 opreg = re.compile("([!=><])")
@@ -180,11 +179,11 @@ class api_call:
                                 sql += " OR "
 
                             if val == "NULL" and op == "=":
-                                sql += "%s IS NULL" % (col,)
+                                sql += "HAXDB_LIST_TABLE.{} IS NULL".format(col)
                             elif val == "NULL" and op == "!=":
-                                sql += "%s IS NOT NULL" % (col,)
+                                sql += "HAXDB_LIST_TABLE.{} IS NOT NULL".format(col)
                             else:
-                                sql += "{} {} %s".format(col, op)
+                                sql += "HAXDB_LIST_TABLE.{} {} %s".format(col, op)
                                 params += (val,)
 
                             valcount += 1
@@ -235,36 +234,32 @@ class api_call:
                     sql += ")"
         return sql, params
 
-    def list_call(self, table=None, where=None, params=None, calc_row_function=None, meta=None):
-
-        table = table or self.name
+    def list_call(self, table=None, params=None, calc_row_function=None, meta=None):
+        table = table or self.API_NAME
         query = var.get("query")
-        where = where or "1=1"
 
-        if params:
-            params = (self.API_NAME, self.API_CONTEXT_ID) + params
-        else:
-            params = (self.API_NAME, self.API_CONTEXT_ID)
+        params = params or ()
+        params += (self.API_NAME, self.API_CONTEXT_ID)
 
-        if meta:
-            meta.update(self.get_meta("list"))
-        else:
-            meta = self.get_meta("list")
+        meta = meta or {}
+        meta.update(self.get_meta("list"))
         meta["query"] = query
 
         sql = """
-            SELECT {}.*, UDF_NAME, UDF_DATA_VALUE
-            FROM {}
+            SELECT HAXDB_LIST_TABLE.*,
+            U1.UDF_NAME AS HAXDB_UDF_NAME,
+            U1D.UDF_DATA_VALUE AS HAXDB_UDF_DATA_VALUE
+            FROM {} HAXDB_LIST_TABLE
             LEFT OUTER JOIN UDF U1 ON
                     U1.UDF_CONTEXT=%s
                     AND U1.UDF_CONTEXT_ID=%s
                     AND U1.UDF_ENABLED=1
             LEFT OUTER JOIN UDF_DATA U1D ON
                     U1D.UDF_DATA_UDF_ID=U1.UDF_ID
-                    AND U1D.UDF_DATA_ROWID={}
+                    AND U1D.UDF_DATA_ROWID=HAXDB_LIST_TABLE.{}
             WHERE
-            {}
-            """.format(self.API_NAME, table, self.API_ROWID, where)
+            1=1
+            """.format(table, self.API_ROWID)
 
         query_sql, query_params = self.build_query(query)
         sql += query_sql
@@ -290,10 +285,10 @@ class api_call:
                     rows.append(rowdata)
                 rowdata = {}
                 lastrowid = rowid
-            if row["UDF_NAME"]:
-                rowdata[row["UDF_NAME"]] = row["UDF_DATA_VALUE"]
-            del row["UDF_NAME"]
-            del row["UDF_DATA_VALUE"]
+            if row["HAXDB_UDF_NAME"]:
+                rowdata[row["HAXDB_UDF_NAME"]] = row["HAXDB_UDF_DATA_VALUE"]
+            del row["HAXDB_UDF_NAME"]
+            del row["HAXDB_UDF_DATA_VALUE"]
             rowdata.update(row)
 
             row = db.next()
@@ -303,25 +298,25 @@ class api_call:
 
         return output(success=1, data=rows, meta=meta)
 
-    def view_call(self, sql=None, params=None, calc_row_function=None, rowid=None, meta=None):
-        params = params or ()
+    def view_call(self, table=None, where=None, params=None, calc_row_function=None, rowid=None, meta=None):
         rowid = rowid or var.get("rowid")
+
+        table = table or self.API_NAME
+        where = where or "1=1"
+        params = params or ()
+
         meta = meta or {}
+        meta.update(self.get_meta("view"))
+        meta["rowid"] = rowid
 
-        if not sql:
-            sql = "SELECT * FROM {} WHERE {}=%s".format(self.API_NAME, self.API_ROWID)
-            params = (rowid,)
-        else:
-            sql += " WHERE {}=%s ".format(self.API_ROWID)
-            params += (rowid,)
-
-        if self.API_CONTEXT_ID:
-            sql += " AND {}=%s".format(self.CONTEXT_ROW)
-            params += (self.API_CONTEXT_ID)
-
-        meta = self.get_meta("view")
-        meta["cols"] = self.get_cols()
-        meta["lists"] = self.get_lists(meta["cols"])
+        sql = """
+            select HAXDB_VIEW_TABLE.*
+            FROM {} HAXDB_VIEW_TABLE
+            WHERE
+            {}
+            and {}=%s
+        """.format(table, where, self.API_ROWID)
+        params += (rowid,)
 
         row = db.qaf(sql, params)
         if db.error:
@@ -354,8 +349,7 @@ class api_call:
         defaults = defaults or {}
 
         meta = meta or {}
-        meta["api"] = self.API_NAME
-        meta["action"] = "new"
+        meta.update(self.get_meta("new"))
 
         col_names = []
         col_params = ()
@@ -414,8 +408,8 @@ class api_call:
 
     def delete_call(self, sql=None, params=None, meta=None, rowid=None):
         meta = meta or {}
-        meta["api"] = self.API_NAME
-        meta["action"] = "delete"
+        meta.update(self.get_meta("delete"))
+        meta["rowid"] = rowid
 
         if not sql:
             rowid = rowid or var.get("rowid")
@@ -435,10 +429,11 @@ class api_call:
 
     def save_call(self, meta=None, rowid=None):
         rowid = rowid or var.get("rowid")
+
         meta = meta or {}
-        meta["api"] = self.API_NAME
-        meta["action"] = "save"
+        meta.update(self.get_meta("save"))
         meta["rowid"] = rowid
+
         try:
             meta["updated"] = meta["updated"]
         except:

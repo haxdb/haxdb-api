@@ -71,7 +71,7 @@ def run():
         FROM NODES
         LEFT OUTER JOIN PEOPLE ON NODES_PEOPLE_ID=PEOPLE_ID
         LEFT OUTER JOIN ASSETS ON NODES_ASSETS_ID=ASSETS_ID
-        ) NODES
+        )
         """
 
         return apis["NODES"].list_call(table=table)
@@ -82,9 +82,8 @@ def run():
     @haxdb.require_dba
     def mod_NODES_view(rowid=None):
         rowid = rowid or haxdb.data.var.get("rowid")
-        sql = """
-        SELECT N.*
-        FROM (
+        table = """
+        (
         SELECT
         NODES.*,
         PEOPLE_NAME_LAST, PEOPLE_NAME_FIRST
@@ -92,58 +91,44 @@ def run():
         FROM NODES
         LEFT OUTER JOIN PEOPLE ON NODES_PEOPLE_ID=PEOPLE_ID
         LEFT OUTER JOIN ASSETS ON NODES_ASSETS_ID=ASSETS_ID
-        ) N
+        )
         """
-        return apis["NODES"].view_call(sql=sql, rowid=rowid)
+        return apis["NODES"].view_call(table=table, rowid=rowid)
 
     @haxdb.app.route("/NODES/new", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_nodes_create():
-        is_dba = (haxdb.session.get("api_dba") == 1)
-        people_id = haxdb.data.var.get("people_id") or haxdb.session.get("api_people_id")
-        dba = haxdb.data.var.get("dba") or '0'
-        readonly = haxdb.data.var.get("readonly") or '0'
-        expire_seconds = haxdb.data.var.get("expire_seconds")
+        expire = haxdb.data.var.get("expire")
 
-        meta = {}
-        meta["api"] = "NODES"
-        meta["action"] = "new"
-        meta["people_id"] = people_id
-        meta["dba"] = dba
-        meta["readonly"] = readonly
-        meta["expire_seconds"] = expire_seconds
+        defaults = {
+            "NODES_API_KEY": base64.urlsafe_b64encode(os.urandom(500))[5:260]
+        }
 
-        if not is_dba:
-            people_id = haxdb.session.get("api_people_id")
-            dba = 0
+        if expire:
+            try:
+                defaults["NODES_EXPIRE"] = int(time.time()) + int(expire)
+            except:
+                message = "expire should be a valid integer (seconds)"
+                meta = apis["NODES"].get_meta("new")
+                return haxdb.data.output(success=0, meta=meta, message=message)
 
-        api_key = base64.urlsafe_b64encode(os.urandom(500))[5:260]
-
-        if expire_seconds:
-            expire_time = int(time.time()) + int(expire_seconds)
-            sql = """
-                    INSERT INTO NODES (NODES_API_KEY, NODES_PEOPLE_ID, NODES_READONLY, NODES_DBA, NODES_ENABLED, NODES_QUEUED, NODES_EXPIRE)
-                    VALUES (%s,%s,%s,%s,'0','0',%s)
-                    """
-            params = (api_key, people_id, readonly, dba, expire_time)
-        else:
-            sql = """
-                    INSERT INTO NODES (NODES_API_KEY, NODES_PEOPLE_ID, NODES_READONLY, NODES_DBA, NODES_ENABLED, NODES_QUEUED)
-                    VALUES (%s,%s,%s,%s,'0','0')
-                    """
-            params = (api_key, people_id, readonly, dba,)
-
-        return apis["NODES"].new_call(sql, params, meta)
+        return apis["NODES"].new_call(defaults=defaults)
 
     @haxdb.app.route("/NODES/save", methods=["GET", "POST"])
-    @haxdb.app.route("/NODES/save/<int:rowid>/<col>/<val>", methods=["GET", "POST"])
+    @haxdb.app.route("/NODES/save/<int:rowid>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
-    def mod_nodes_save(rowid=None, col=None, val=None):
+    def mod_nodes_save(rowid=None):
         rowid = rowid or haxdb.data.var.get("rowid")
+        key_id = haxdb.session.get("nodes_id")
+
+        if int(key_id) == int(rowid):
+            message = "CANNOT UPDATE KEY YOU ARE CURRENTLY USING"
+            meta = apis["NODES"].get_meta("save")
+            return haxdb.data.output(success=0, meta=meta, message=message)
         return apis["NODES"].save_call(rowid=rowid)
 
     @haxdb.app.route("/NODES/delete", methods=["GET", "POST"])
@@ -155,15 +140,9 @@ def run():
         rowid = rowid or haxdb.data.var.get("rowid")
         key_id = haxdb.session.get("nodes_id")
 
-        meta = {}
-        meta["api"] = "NODES"
-        meta["action"] = "delete"
-        meta["rowid"] = rowid
-
         if int(key_id) == int(rowid):
-            return haxdb.data.output(success=0, message="CANNOT DELETE KEY YOU ARE CURRENTLY USING", meta=meta)
+            message = "CANNOT DELETE KEY YOU ARE CURRENTLY USING"
+            meta = apis["NODES"].get_meta("delete")
+            return haxdb.data.output(success=0, meta=meta, message=message)
 
-        sql = "DELETE FROM NODES WHERE NODES_ID=%s"
-        params = (rowid,)
-
-        return apis["NODES"].delete_call(sql, params, meta)
+        return apis["NODES"].delete_call(rowid=rowid)

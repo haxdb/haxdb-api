@@ -120,5 +120,5 @@ mod_def["UDF"] = {
          "INTERNAL": 1,
         },
     ],
-    "ORDER": ["UDF2.UDF_ORDER", "UDF2.UDF_NAME"]
+    "ORDER": ["UDF_ORDER", "UDF_NAME"]
 }

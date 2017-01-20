@@ -9,6 +9,16 @@ config = None
 apis = {}
 
 
+def get_assets_name(rowid):
+        sql = """
+        SELECT ASSETS_NAME FROM ASSETS WHERE ASSETS_ID=%s
+        """
+        row = db.qaf(sql, (rowid,))
+        if not row:
+            return None
+        return row["ASSETS_NAME"]
+
+
 def init(app_haxdb, mod_config, mod_def):
     global haxdb, db, config, apis
     haxdb = app_haxdb
@@ -58,19 +68,20 @@ def run():
     def mod_asset_links_asset(ASSETS_ID=None):
         ASSETS_ID = ASSETS_ID or haxdb.data.var.get("ASSETS_ID")
 
-        # GET ASSETS_NAME
-        sql = """
-        SELECT ASSETS_NAME FROM ASSETS WHERE ASSETS_ID=%s
-        """
-        row = db.qaf(sql, (ASSETS_ID,))
-        meta = {"name": row["ASSETS_NAME"]}
+        meta = {"name": get_assets_name(ASSETS_ID)}
 
-        where = """
+        t = """
+        (
+        select A.*, B.ASSETS_NAME
+        FROM ASSET_LINKS A
+        JOIN ASSETS B ON ASSETS_ID=ASSET_LINKS_ASSETS_ID
+        WHERE
         ASSET_LINKS_ASSETS_ID=%s
+        )
         """
         params = (ASSETS_ID,)
 
-        return apis["ASSET_LINKS"].list_call(params=params, where=where, meta=meta)
+        return apis["ASSET_LINKS"].list_call(table=t, params=params, meta=meta)
 
     @haxdb.app.route("/ASSET_LINKS/new", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_LINKS/new/<int:ASSETS_ID>", methods=["POST", "GET"])
@@ -80,7 +91,7 @@ def run():
     def mod_asset_links_new(ASSETS_ID=None):
         ASSETS_ID = ASSETS_ID or haxdb.data.var.get("ASSETS_ID")
         defaults = {
-            "ASSETS_ID": ASSETS_ID,
+            "ASSET_LINKS_ASSETS_ID": ASSETS_ID,
         }
         return apis["ASSET_LINKS"].new_call(defaults=defaults)
 
@@ -105,19 +116,23 @@ def run():
     def mod_ASSET_AUTHS_asset(ASSETS_ID=None):
         ASSETS_ID = ASSETS_ID or haxdb.data.var.get("ASSETS_ID")
 
-        # GET ASSETS_NAME
-        sql = """
-        SELECT ASSETS_NAME FROM ASSETS WHERE ASSETS_ID=%s
-        """
-        row = db.qaf(sql, (ASSETS_ID,))
-        meta = {"name": row["ASSETS_NAME"]}
+        meta = {"name": get_assets_name(ASSETS_ID)}
 
-        where = """
-        ASSET_LINKS_ASSETS_ID=%s
+        t = """
+        (
+        select A.*,
+        B.ASSETS_NAME,
+        C.PEOPLE_NAME_FIRST, C.PEOPLE_NAME_LAST, C.PEOPLE_EMAIL
+        FROM ASSET_AUTHS A
+        JOIN ASSETS B ON ASSETS_ID=ASSET_AUTHS_ASSETS_ID
+        JOIN PEOPLE C ON ASSET_AUTHS_PEOPLE_ID=PEOPLE_ID
+        WHERE
+        ASSET_AUTHS_ASSETS_ID=%s
+        )
         """
         params = (ASSETS_ID,)
 
-        return apis["ASSET_AUTHS"].list_call(params=params, where=where, meta=meta)
+        return apis["ASSET_AUTHS"].list_call(table=t, params=params, meta=meta)
 
     @haxdb.app.route("/ASSET_AUTHS/new", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_AUTHS/new/<int:ASSETS_ID>", methods=["POST", "GET"])
@@ -138,7 +153,6 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_ASSET_AUTHS_delete(rowid=None):
-        rowid = rowid or haxdb.data.var.get("rowid")
         return apis["ASSET_AUTHS"].delete_call(rowid=rowid)
 
     @haxdb.app.route("/ASSET_AUTHS/save", methods=["GET", "POST"])
@@ -147,5 +161,4 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_asset_auths_save(rowid=None):
-        rowid = rowid or haxdb.data.var.get("rowid")
         return apis["ASSET_AUTHS"].save_call(rowid=rowid)

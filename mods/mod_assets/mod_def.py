@@ -7,6 +7,16 @@ mod_def["ASSETS"] = {
     "CONTEXT_ROW": None,
     "COLS": [
         {
+         "NAME": "ASSETS_ID",
+         "HEADER": "ID",
+         "TYPE": "INT",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 0,
+         "REQUIRED": 0,
+         "NEW": 0,
+        },
+        {
          "NAME": "ASSETS_NAME",
          "HEADER": "NAME",
          "TYPE": "STR",
@@ -88,6 +98,28 @@ mod_def["ASSET_LINKS"] = {
     "CONTEXT_ROW": "ASSET_LINKS_ASSETS_ID",
     "COLS": [
         {
+         "NAME": "ASSET_LINKS_ID",
+         "HEADER": "ID",
+         "TYPE": "INT",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 0,
+         "REQUIRED": 0,
+         "NEW": 0,
+         "DEFAULT": 0,
+        },
+        {
+         "NAME": "ASSET_LINKS_ASSETS_ID",
+         "HEADER": "ASSET",
+         "TYPE": "ID",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 0,
+         "REQUIRED": 1,
+         "NEW": 0,
+         "DEFAULT": 0,
+        },
+        {
          "NAME": "ASSET_LINKS_NAME",
          "HEADER": "NAME",
          "TYPE": "STR",
@@ -132,8 +164,17 @@ mod_def["ASSET_AUTHS"] = {
     "CONTEXT_ROW": "ASSET_AUTHS_ASSETS_ID",
     "COLS": [
         {
+         "NAME": "ASSET_AUTHS_ASSETS_ID",
+         "HEADER": "ASSET",
+         "TYPE": "INT",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 0,
+         "REQUIRED": 1,
+        },
+        {
          "NAME": "ASSET_AUTHS_PEOPLE_ID",
-         "HEADER": "PEOPLE",
+         "HEADER": "PERSON",
          "TYPE": "INT",
          "EDIT": 0,
          "QUERY": 1,

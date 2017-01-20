@@ -21,49 +21,43 @@ def init(app_haxdb, mod_def):
 
 def run():
     @haxdb.app.route("/UDF/list", methods=["POST", "GET"])
-    @haxdb.app.route("/UDF/list/<context>", methods=["POST", "GET"])
-    @haxdb.app.route("/UDF/list/<context>/<int:context_id>", methods=["POST", "GET"])
+    @haxdb.app.route("/UDF/list/<UDF_CONTEXT>", methods=["POST", "GET"])
+    @haxdb.app.route("/UDF/list/<UDF_CONTEXT>/<int:UDF_CONTEXT_ID>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.no_readonly
     @haxdb.require_dba
-    def mod_udf_def_list(context=None, context_id=None):
-        context = context or haxdb.data.var.get("context")
-        context_id = context_id or haxdb.data.var.get("context_id") or 0
+    def mod_udf_def_list(UDF_CONTEXT=None, UDF_CONTEXT_ID=None):
+        UDF_CONTEXT = UDF_CONTEXT or haxdb.data.var.get("UDF_CONTEXT")
+        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.data.var.get("UDF_CONTEXT_ID") or 0
+        disabled = haxdb.data.var.get("disabled")
+        meta = {"name": UDF_CONTEXT}
 
-        try:
-            disabled = int(haxdb.data.var.get("disabled"))
-        except:
-            disabled = 0
+        if disabled != 1:
+            return apis["UDF"].list_call(meta=meta)
 
-        if disabled == 1:
-            sql = """
+        t = """
+        (
             SELECT *
-            FROM ( SELECT * FROM UDF U2 WHERE U2.UDF_CONTEXT=%s AND U2.UDF_CONTEXT_ID=%s) UDF2
-            """
-        else:
-            sql = """
-            SELECT *
-            FROM ( SELECT * FROM UDF U2 WHERE U2.UDF_CONTEXT=%s AND U2.UDF_CONTEXT_ID=%s AND U2.UDF_ENABLED=1 ) UDF2
-            """
-        params = (context, context_id,)
+            FROM UDF
+            WHERE UDF_ENABLED=1
+        )
+        """
 
-        meta = apis["UDF"].get_meta("list")
-        meta["page_name"] = context
-        return apis["UDF"].list_call(sql=sql, params=params, meta=meta)
+        return apis["UDF"].list_call(table=t, meta=meta)
 
     @haxdb.app.route("/UDF/new", methods=["POST", "GET"])
-    @haxdb.app.route("/UDF/new/<name>", methods=["POST", "GET"])
+    @haxdb.app.route("/UDF/new/<UDF_CONTEXT>", methods=["POST", "GET"])
+    @haxdb.app.route("/UDF/new/<UDF_CONTEXT>/<int:UDF_CONTEXT_ID>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.no_readonly
     @haxdb.require_dba
-    def mod_udf_def_new(name=None):
-        name = name or haxdb.data.var.get("name")
-        context = haxdb.data.var.get("context")
-        context_id = haxdb.data.var.get("context_id") or 0
+    def mod_udf_def_new(UDF_CONTEXT=None, UDF_CONTEXT_ID=None):
+        UDF_CONTEXT = UDF_CONTEXT or haxdb.data.var.get("UDF_CONTEXT")
+        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.data.var.get("UDF_CONTEXT_ID") or 0
 
         defaults = {
-            "UDF_CONTEXT": context,
-            "UDF_CONTEXT_ID": context_id,
+            "UDF_CONTEXT": UDF_CONTEXT,
+            "UDF_CONTEXT_ID": UDF_CONTEXT_ID,
         }
         return apis["UDF"].new_call(defaults=defaults)
 
@@ -73,7 +67,6 @@ def run():
     @haxdb.no_readonly
     @haxdb.require_dba
     def mod_udf_def_delete(rowid=None):
-        rowid = rowid or haxdb.data.var.get("rowid")
         return apis["UDF"].delete_call(rowid=rowid)
 
     @haxdb.app.route("/UDF/save", methods=["GET", "POST"])
@@ -82,5 +75,4 @@ def run():
     @haxdb.no_readonly
     @haxdb.require_dba
     def mod_udf_def_save(rowid=None, col=None, val=None):
-        rowid = rowid or haxdb.data.var.get("rowid")
         return apis["UDF"].save_call(rowid=rowid)
