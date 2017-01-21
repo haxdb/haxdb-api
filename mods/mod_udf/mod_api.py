@@ -1,4 +1,3 @@
-import mod_data
 from flask import request
 from werkzeug.utils import secure_filename
 import os

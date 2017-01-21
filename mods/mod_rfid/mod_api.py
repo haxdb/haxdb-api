@@ -1,4 +1,3 @@
-import mod_data
 from flask import request
 import time
 
