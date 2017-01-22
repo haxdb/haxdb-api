@@ -15,13 +15,17 @@ def read_mod_config(config_file):
             "ENABLED": 1,
         }
     }
+    print config_file,
     if isfile(config_file):
+        print "FOUND"
         cfg = ConfigParser()
         cfg.read(config_file)
         for section in cfg.sections():
             config[section] = {}
             for option in cfg.options(section):
                 config[section.upper()][option.upper()] = cfg.get(section, option)
+    else:
+        print "NO"
     return config
 
 

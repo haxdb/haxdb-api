@@ -15,7 +15,7 @@ source env/bin/activate
 pip install Flask Flask-CORS msgpack-python mysql-connector-python-rf
 cp haxdb.cfg-example haxdb.cfg
 ```
-Now edit haxdb.cfg with the settings you want.  
+Now edit haxdb.cfg and mods/mod_auth_email/mod.cfg with the settings you want.  
 
 ---
 

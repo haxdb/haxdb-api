@@ -30,6 +30,11 @@ cp haxdb.cfg-example haxdb.cfg
 
 ```
 
+Copy mod.cfg for the email auth mod and then edit it with your email settings.
+```
+cd mods/mod_auth_emailcp mod.cfg-example mod.cfg
+```
+
 At this point you should be able to type ./app.py and have it start on whatever port you chose in the config.
 
 ---
