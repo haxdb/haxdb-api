@@ -10,57 +10,102 @@ def init(app_db, app_config):
 
     tables = []
 
-    t = db.tables.table('ASSETS_RFID')
-    t.add("ASSETS_RFID_ASSETS_ID", "INT", col_required=True,
-          fk_table="ASSETS", fk_col="ASSETS_ID")
-    t.add("ASSETS_RFID_AUTO_LOG", "INT", col_size=1)
-    t.add("ASSETS_RFID_REQUIRE_RFID", "INT", col_size=1)
-    t.add("ASSETS_RFID_REQUIRE_AUTH", "INT", col_size=1)
-    t.add("ASSETS_RFID_AUTH_TIMEOUT", "INT")
-    t.add("ASSETS_RFID_AUTH_PEOPLE_ID", "INT",
-          fk_table="PEOPLE", fk_col="PEOPLE_ID")
-    t.add("ASSETS_RFID_AUTH_START", "INT")
-    t.add("ASSETS_RFID_AUTH_LAST", "INT")
-    t.add("ASSETS_RFID_STATUS", "CHAR")
-    t.add("ASSETS_RFID_STATUS_DESC", "CHAR")
-    tables.append(t)
-
     t = db.tables.table('PEOPLE_RFID')
     t.add("PEOPLE_RFID_NAME", "CHAR", col_size=50)
-    t.add("PEOPLE_RFID_PEOPLE_ID", "INT", col_required=True,
-          fk_table="PEOPLE", fk_col="PEOPLE_ID")
+    t.add("PEOPLE_RFID_PEOPLE_ID", "INT", col_required=True, fk_table="PEOPLE", fk_col="PEOPLE_ID")
     t.add("PEOPLE_RFID_RFID", "ASCII", col_size=255)
     t.add("PEOPLE_RFID_ENABLED", "INT", col_size=1)
     tables.append(t)
 
     indexes = []
-    indexes.append(db.tables.index("ASSETS_RFID", [
-                   "ASSETS_RFID_ASSETS_ID"], unique=True))
-    indexes.append(db.tables.index(
-                   "ASSETS_RFID", ["ASSETS_RFID_AUTH_PEOPLE_ID"]))
-    indexes.append(db.tables.index("PEOPLE_RFID", [
-                   "PEOPLE_RFID_PEOPLE_ID", "PEOPLE_RFID_RFID"], unique=True))
+    idx = db.tables.index("ASSETS_RFID",
+                          ["ASSETS_RFID_ASSETS_ID"],
+                          unique=True)
+    indexes.append(idx)
+
+    idx = db.tables.index("ASSETS_RFID",
+                          ["ASSETS_RFID_AUTH_PEOPLE_ID"])
+    indexes.append(idx)
+
+    idx = db.tables.index("PEOPLE_RFID",
+                          ["PEOPLE_RFID_PEOPLE_ID", "PEOPLE_RFID_RFID"],
+                          unique=True)
+    indexes.append(idx)
 
     db.create(tables=tables, indexes=indexes)
 
 
-def run():
-
-    sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (%s,1)"
-    db.query(sql, ("ASSET STATUSES",), squelch=True)
-    db.commit()
-
-    sql = "SELECT * FROM LISTS WHERE LISTS_NAME = 'ASSET STATUSES'"
-    db.query(sql)
+def get_list(name):
+    sql = "SELECT * FROM LISTS WHERE LISTS_NAME = ?"
+    db.query(sql, (name,))
     row = db.next()
-    lists_id = row["LISTS_ID"]
-    asset_statuses = ["OPERATIONAL", "BORKEN"]
+    if row:
+        return row["LISTS_ID"]
+    return None
+
+
+def add_list(name):
+    sql = "INSERT INTO LISTS (LISTS_NAME,LISTS_INTERNAL) VALUES (%s,1)"
+    db.query(sql, (name,), squelch=True)
+    db.commit()
+    return get_list(name)
+
+
+def add_list_item(lid, item):
     sql = """
     INSERT INTO LIST_ITEMS
     (LIST_ITEMS_LISTS_ID, LIST_ITEMS_VALUE, LIST_ITEMS_DESCRIPTION,
     LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER, LIST_ITEMS_INTERNAL)
     VALUES (%s, %s, %s, 1, 99, 1)
     """
-    for asset_status in asset_statuses:
-        db.query(sql, (lists_id, asset_status, asset_status,), squelch=True)
-        db.commit()
+    db.query(sql, (lid, item, item,), squelch=True)
+    db.commit()
+
+
+def add_udf(ucontext, uname, utype, uapi=None, ulid=None):
+    params = (ucontext, uname, utype)
+    sql = """
+    INSERT INTO UDF
+    (
+    UDF_CONTEXT, UDF_CONTEXT_ID, UDF_CATEGORY, UDF_NAME,
+    UDF_TYPE,UDF_ORDER, UDF_ENABLED, UDF_INTERNAL
+    """
+    if uapi:
+        sql += ", UDF_TYPE_API"
+        params += (uapi,)
+    if ulid:
+        sql += ", UDF_LISTS_ID"
+        params += (ulid,)
+    sql += """
+    )
+    VALUES
+    (
+    %s, 0, 'RFID', %s, %s, 999, 1, 1
+    """
+    if uapi:
+        sql += ", %s"
+    if ulid:
+        sql += ", %s"
+    sql += """
+    )
+    """
+    db.query(sql, params, squelch=True)
+    db.commit()
+
+
+def run():
+    lid = add_list("ASSET_STATUSES")
+
+    if lid:
+        for item in ["OPERATIONAL", "BORKEN"]:
+            add_list_item(lid, item)
+
+    add_udf("ASSETS", "AUTO_LOG", "BOOL")
+    add_udf("ASSETS", "REQUIRE_RFID", "BOOL")
+    add_udf("ASSETS", "REQUIRE_AUTH", "BOOL")
+    add_udf("ASSETS", "AUTH_TIMEOUT", "INT")
+    add_udf("ASSETS", "AUTH_PEOPLE_ID", "ID", uapi="PEOPLE")
+    add_udf("ASSETS", "AUTH_START", "INT")
+    add_udf("ASSETS", "AUTH_LAST", "INT")
+    add_udf("ASSETS", "STATUS", "LIST", ulid=lid)
+    add_udf("ASSETS", "STATUS_DESC", "TEXT")

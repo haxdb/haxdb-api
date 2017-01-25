@@ -32,14 +32,22 @@ def run():
     @haxdb.app.route("/LISTS/list", methods=["POST", "GET"])
     @haxdb.require_auth
     def mod_lists_list():
-        return apis["LISTS"].list_call()
+        def calc_row(row):
+            row["ROW_NAME"] = row["LISTS_NAME"]
+            row["ROW_ID"] = row["LISTS_ID"]
+            return row
+        return apis["LISTS"].list_call(calc_row_function=calc_row)
 
     @haxdb.app.route("/LISTS/new", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_lists_new(name=None):
-        return apis["LISTS"].new_call()
+        def calc_row(row):
+            row["ROW_NAME"] = row["LISTS_NAME"]
+            row["ROW_ID"] = row["LISTS_ID"]
+            return row
+        return apis["LISTS"].new_call(calc_row_function=calc_row)
 
     @haxdb.app.route("/LISTS/delete", methods=["GET", "POST"])
     @haxdb.app.route("/LISTS/delete/<int:rowid>", methods=["GET", "POST"])
@@ -67,7 +75,8 @@ def run():
 
         t = """
         (
-        select A.*, B.LISTS_NAME
+        select A.*, B.LISTS_NAME,
+        A.LIST_ITEMS_ID AS ROW_ID, A.LIST_ITEMS_VALUE AS ROW_NAME
         FROM LIST_ITEMS A
         JOIN LISTS B ON LISTS_ID=LIST_ITEMS_LISTS_ID
         WHERE

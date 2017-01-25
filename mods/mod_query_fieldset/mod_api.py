@@ -53,6 +53,8 @@ def run():
                 row["COLS"] = FIELDSET_COLS[row["FIELDSET_ID"]]
             except:
                 row["COLS"] = []
+            row["ROW_ID"] = row["FIELDSET_ID"]
+            row["ROW_NAME"] = row["FIELDSET_NAME"]
             return row
 
         FIELDSET_CONTEXT = haxdb.data.var.get("FIELDSET_CONTEXT")
@@ -84,6 +86,8 @@ def run():
                 row["COLS"] = get_fieldset_cols(row["FIELDSET_ID"])
             except:
                 row["COLS"] = []
+            row["ROW_ID"] = row["FIELDSET_ID"]
+            row["ROW_NAME"] = row["FIELDSET_NAME"]
             return row
 
         return apis["FIELDSET"].view_call(rowid=rowid, calc_row_function=c)
@@ -204,7 +208,9 @@ def run():
 
         t = """
         (
-            SELECT * FROM QUERY
+            SELECT *,
+            QUERY_ID AS ROW_ID, QUERY_NAME AS ROW_NAME
+            FROM QUERY
             WHERE QUERY_CONTEXT=%s and QUERY_CONTEXT_ID=%s AND
             QUERY_PEOPLE_ID IN (0,%s)
         )
@@ -217,7 +223,11 @@ def run():
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_QUERY_view(rowid=None):
-        return apis["QUERY"].view_call(rowid=rowid)
+        def calc_row(row):
+            row["ROW_NAME"] = row["QUERY_NAME"]
+            row["ROW_ID"] = row["QUERY_ID"]
+            return row
+        return apis["QUERY"].view_call(rowid=rowid, calc_row_function=calc_row)
 
     @haxdb.app.route("/QUERY/save", methods=["GET", "POST"])
     @haxdb.app.route("/QUERY/save/<int:rowid>", methods=["GET", "POST"])

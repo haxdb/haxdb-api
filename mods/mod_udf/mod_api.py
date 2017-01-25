@@ -33,7 +33,8 @@ def run():
 
         t = """
         (
-            SELECT *
+            SELECT *,
+            UDF_ID AS ROW_ID, UDF_NAME AS ROW_NAME
             FROM UDF
             WHERE
             UDF_CONTEXT=%s

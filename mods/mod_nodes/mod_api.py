@@ -65,6 +65,7 @@ def run():
         (
         SELECT
         NODES.*,
+        NODES.NODES_ID AS ROW_ID, NODES.NODES_NAME AS ROW_NAME,
         PEOPLE_NAME_LAST, PEOPLE_NAME_FIRST,
         ASSETS_NAME
         FROM NODES
@@ -85,6 +86,7 @@ def run():
         (
         SELECT
         NODES.*,
+        NODES.NODES_ID AS ROW_ID, NODES.NODES_NAME AS ROW_NAME,
         PEOPLE_NAME_LAST, PEOPLE_NAME_FIRST,
         ASSETS_NAME
         FROM NODES

@@ -93,7 +93,10 @@ class api_call:
         for col in cols:
             if col["TYPE"] == "LIST":
                 if "LIST" in col:
-                    list_id = int(col["LIST"])
+                    try:
+                        list_id = int(col["LIST"])
+                    except:
+                        list_id = 0
                     if list_id not in list_ids:
                         list_ids += (list_id, )
                 elif "LIST_NAME" in col:
@@ -134,7 +137,10 @@ class api_call:
         cols = list(self.COLS)
 
         sql = """
-        SELECT UDF_ID, UDF_NAME, UDF_TYPE, UDF_LISTS_ID, UDF_CATEGORY FROM UDF
+        SELECT
+        UDF_ID, UDF_NAME, UDF_TYPE,
+        UDF_LISTS_ID, UDF_CATEGORY, UDF_TYPE_API
+        FROM UDF
         WHERE UDF_CONTEXT=%s and UDF_CONTEXT_ID=%s and UDF_ENABLED=1
         ORDER BY UDF_ORDER
         """
@@ -153,6 +159,8 @@ class api_call:
                   }
             if row["UDF_TYPE"] == "LIST":
                 col["LIST"] = row["UDF_LISTS_ID"]
+            if row["UDF_TYPE"] == "ID":
+                col["ID_API"] = row["UDF_TYPE_API"]
 
             cols.append(col)
             row = db.next()

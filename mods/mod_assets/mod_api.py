@@ -31,12 +31,20 @@ def init(app_haxdb, mod_config, mod_def):
 def run():
     @haxdb.app.route("/ASSETS/list", methods=["POST", "GET"])
     def mod_assets_list():
-        return apis["ASSETS"].list_call()
+        def calc_row(row):
+            row["ROW_NAME"] = row["ASSETS_NAME"]
+            row["ROW_ID"] = row["ASSETS_ID"]
+            return row
+        return apis["ASSETS"].list_call(calc_row_function=calc_row)
 
     @haxdb.app.route("/ASSETS/view", methods=["POST", "GET"])
     @haxdb.app.route("/ASSETS/view/<int:rowid>", methods=["POST", "GET"])
     def mod_assets_view(rowid=None):
-        return apis["ASSETS"].view_call(rowid=rowid)
+        def calc_row(row):
+            row["ROW_NAME"] = row["ASSETS_NAME"]
+            row["ROW_ID"] = row["ASSETS_ID"]
+            return row
+        return apis["ASSETS"].view_call(rowid=rowid,  calc_row_function=calc_row)
 
     @haxdb.app.route("/ASSETS/new", methods=["POST", "GET"])
     @haxdb.app.route("/ASSETS/new/<name>", methods=["POST", "GET"])
