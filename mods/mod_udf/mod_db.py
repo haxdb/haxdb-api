@@ -16,7 +16,7 @@ def init(app_db, app_config):
     t.add("UDF_CATEGORY", "CHAR", col_size=50)
     t.add("UDF_NAME", "CHAR", col_size=50, col_required=True)
     t.add("UDF_TYPE", "CHAR", col_size=50)
-    t.add("UDF_TYPE_API", "CHAR", col_size=50)
+    t.add("UDF_API", "CHAR", col_size=50)
     t.add("UDF_LISTS_ID", "INT")
     t.add("UDF_ORDER", "FLOAT")
     t.add("UDF_ENABLED", "INT", col_size=1)

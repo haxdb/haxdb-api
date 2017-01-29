@@ -33,9 +33,10 @@ def run():
 
         t = """
         (
-            SELECT *,
+            SELECT UDF.*, LISTS_NAME,
             UDF_ID AS ROW_ID, UDF_NAME AS ROW_NAME
             FROM UDF
+            LEFT OUTER JOIN LISTS ON LISTS_ID=UDF_LISTS_ID
             WHERE
             UDF_CONTEXT=%s
             AND UDF_CONTEXT_ID=%s

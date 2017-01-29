@@ -30,10 +30,10 @@ def output(success=0, message=None, value=None, data=None, meta=None, authentica
 class get_class:
 
     def get(self, key):
-        return request.args.get(key) or None
+        return request.args.get(key)
 
     def getlist(self, key):
-        return request.args.getlist(key) or request.args.getlist(key + "[]") or None
+        return request.args.getlist(key) or request.args.getlist(key + "[]")
 
     def __getitem__(self, key):
         return self.get(key)
@@ -42,10 +42,10 @@ class get_class:
 class post_class:
 
     def get(self, key):
-        return request.form.get(key) or None
+        return request.form.get(key)
 
     def getlist(self, key):
-        return request.form.getlist(key) or request.form.getlist(key + "[]") or None
+        return request.form.getlist(key) or request.form.getlist(key + "[]")
 
     def __getitem__(self, key):
         return self.get(key)
@@ -71,18 +71,16 @@ class session_class:
 class var_class:
 
     def get(self, key, use_session=False):
-        val = None
         val = post.get(key)
-        if not val:
+        if val is None:
             val = get.get(key)
-        if not val and use_session:
+        if val is None and use_session:
             val = session.get(key)
         return val
 
     def getlist(self, key):
-        val = None
         val = post.getlist(key)
-        if not val:
+        if val is None:
             val = get.getlist(key)
         return val
 

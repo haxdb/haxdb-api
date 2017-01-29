@@ -71,7 +71,7 @@ def add_udf(ucontext, uname, utype, uapi=None, ulid=None):
     UDF_TYPE,UDF_ORDER, UDF_ENABLED, UDF_INTERNAL
     """
     if uapi:
-        sql += ", UDF_TYPE_API"
+        sql += ", UDF_API"
         params += (uapi,)
     if ulid:
         sql += ", UDF_LISTS_ID"

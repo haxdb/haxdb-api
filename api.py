@@ -11,6 +11,9 @@ def init(app_db):
 
 
 def valid_value(col, val):
+    if val == '':
+        return True
+
     col_type = col["TYPE"]
 
     if val is None:
@@ -139,7 +142,7 @@ class api_call:
         sql = """
         SELECT
         UDF_ID, UDF_NAME, UDF_TYPE,
-        UDF_LISTS_ID, UDF_CATEGORY, UDF_TYPE_API
+        UDF_LISTS_ID, UDF_CATEGORY, UDF_API
         FROM UDF
         WHERE UDF_CONTEXT=%s and UDF_CONTEXT_ID=%s and UDF_ENABLED=1
         ORDER BY UDF_ORDER
@@ -160,7 +163,7 @@ class api_call:
             if row["UDF_TYPE"] == "LIST":
                 col["LIST"] = row["UDF_LISTS_ID"]
             if row["UDF_TYPE"] == "ID":
-                col["ID_API"] = row["UDF_TYPE_API"]
+                col["ID_API"] = row["UDF_API"]
 
             cols.append(col)
             row = db.next()
@@ -270,6 +273,24 @@ class api_call:
             WHERE
             1=1
             """.format(table, self.API_ROWID)
+
+        rowid = var.get("rowid")
+        if rowid:
+            sql += """
+                AND {} = {}
+            """.format(self.API_ROWID, rowid)
+        else:
+            rowid = var.getlist("rowid")
+            if rowid:
+                try:
+                    rowid = list(rowid)
+                    rowid = map(int, rowid)
+                    rowids = ",".join(str(x) for x in rowid)
+                    sql += """
+                        AND {} in ({})
+                        """.format(self.API_ROWID, rowids)
+                except:
+                    pass
 
         query_sql, query_params = self.build_query(query)
         sql += query_sql
@@ -494,10 +515,11 @@ class api_call:
                 udf_val = udf_params[idx]
                 sql = "DELETE FROM UDF_DATA WHERE UDF_DATA_UDF_ID=%s and UDF_DATA_ROWID=%s"
                 db.query(sql, (udf_col["UDF_ID"], rowid))
-                sql = "INSERT INTO UDF_DATA (UDF_DATA_UDF_ID, UDF_DATA_VALUE, UDF_DATA_ROWID) VALUES (%s, %s, %s)"
-                db.query(sql, (udf_col["UDF_ID"], udf_val, rowid))
-                if db.error:
-                    return output(success=0, meta=meta, message=db.error)
+                if udf_val:
+                    sql = "INSERT INTO UDF_DATA (UDF_DATA_UDF_ID, UDF_DATA_VALUE, UDF_DATA_ROWID) VALUES (%s, %s, %s)"
+                    db.query(sql, (udf_col["UDF_ID"], udf_val, rowid))
+                    if db.error:
+                        return output(success=0, meta=meta, message=db.error)
                 meta["rowcount"] = meta["rowcount"] or db.rowcount
 
         if meta["rowcount"] > 0:
