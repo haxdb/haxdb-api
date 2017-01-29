@@ -14,6 +14,7 @@ virtualenv env
 source env/bin/activate
 pip install Flask Flask-CORS msgpack-python mysql-connector-python-rf
 cp haxdb.cfg-example haxdb.cfg
+cd mods/mod_auth_email/mod.cfg-example mod.cfg
 ```
 Now edit haxdb.cfg and mods/mod_auth_email/mod.cfg with the settings you want.  
 
