@@ -35,6 +35,7 @@ mod_def["PEOPLE_RFID"] = {
          "NAME": "PEOPLE_RFID_PEOPLE_ID",
          "HEADER": "OWNER",
          "TYPE": "ID",
+         "ID_API": "PEOPLE",
          "EDIT": 0,
          "QUERY": 0,
          "SEARCH": 0,

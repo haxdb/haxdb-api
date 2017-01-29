@@ -130,6 +130,7 @@ mod_def["ASSET_LINKS"] = {
          "NAME": "ASSET_LINKS_ASSETS_ID",
          "HEADER": "ASSET",
          "TYPE": "ID",
+         "ID_API": "ASSETS",
          "EDIT": 0,
          "QUERY": 1,
          "SEARCH": 0,

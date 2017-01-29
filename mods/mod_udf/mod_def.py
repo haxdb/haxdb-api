@@ -73,7 +73,6 @@ mod_def["UDF"] = {
          "HEADER": "LIST",
          "TYPE": "ID",
          "ID_API": "LISTS",
-         "ID_API_ROWNAME": "LISTS_NAME",
          "SIZE": 50,
          "EDIT": 1,
          "QUERY": 1,

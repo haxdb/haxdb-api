@@ -49,7 +49,7 @@ mod_def["LIST_ITEMS"] = {
         {
          "NAME": "LIST_ITEMS_ID",
          "HEADER": "ID",
-         "TYPE": "ID",
+         "TYPE": "INT",
          "EDIT": 0,
          "QUERY": 1,
          "SEARCH": 0,
@@ -60,6 +60,7 @@ mod_def["LIST_ITEMS"] = {
          "NAME": "LIST_ITEMS_LISTS_ID",
          "HEADER": "LIST",
          "TYPE": "ID",
+         "ID_API": "LISTS",
          "EDIT": 0,
          "QUERY": 1,
          "SEARCH": 0,

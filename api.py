@@ -297,7 +297,8 @@ class api_call:
         params += query_params
 
         if len(self.ORDER) > 0:
-            sql += " ORDER BY {},{}".format(self.API_ROWID, ",".join(self.ORDER))
+            #sql += " ORDER BY {},{}".format(self.API_ROWID, ",".join(self.ORDER))
+            sql += " ORDER BY {}".format(",".join(self.ORDER))
 
         row = db.qaf(sql, params)
         if db.error:
