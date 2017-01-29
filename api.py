@@ -192,11 +192,11 @@ class api_call:
                                 sql += " OR "
 
                             if val == "NULL" and op == "=":
-                                sql += "HAXDB_LIST_TABLE.{} IS NULL".format(col)
+                                sql += "HDB_LIST.{} IS NULL".format(col)
                             elif val == "NULL" and op == "!=":
-                                sql += "HAXDB_LIST_TABLE.{} IS NOT NULL".format(col)
+                                sql += "HDB_LIST.{} IS NOT NULL".format(col)
                             else:
-                                sql += "HAXDB_LIST_TABLE.{} {} %s".format(col, op)
+                                sql += "HDB_LIST.{} {} %s".format(col, op)
                                 params += (val,)
 
                             valcount += 1
@@ -247,6 +247,101 @@ class api_call:
                     sql += ")"
         return sql, params
 
+    def list_call_test(self, table=None, params=None, calc_row_function=None, meta=None):
+        table = table or self.API_NAME
+        query = var.get("query")
+
+        params = params or ()
+
+        meta = meta or {}
+        meta.update(self.get_meta("list"))
+        meta["query"] = query
+
+        sql = ""
+        for col in meta["cols"]:
+            if not sql:
+                sql = "SELECT "
+            else:
+                sql += ", "
+
+            if "UDF_ID" not in col:
+                sql += "HDB_LIST.{} AS \"{}\"".format(col["NAME"], col["NAME"])
+            else:
+                sql += "UDF{}.UDF_DATA_VALUE AS \"{}\"".format(col["UDF_ID"],
+                                                               col["NAME"])
+        sql += " FROM {} HDB_LIST ".format(table)
+
+        for col in meta["cols"]:
+            if "UDF_ID" in col:
+                params += (col["NAME"],self.API_NAME, self.API_CONTEXT_ID)
+                sql += """
+                    LEFT OUTER JOIN (
+                        select UDF_NAME, UDF_DATA_VALUE, UDF_DATA_ROWID
+                        FROM UDF HDBU{}
+                        JOIN UDF_DATA HDBUD{}
+                        ON HDBUD{}.UDF_DATA_UDF_ID = HDBU{}.UDF_ID
+                        WHERE
+                        HDBU{}.UDF_NAME=%s
+                        AND HDBU{}.UDF_CONTEXT=%s
+                        AND HDBU{}.UDF_CONTEXT_ID=%s
+                        AND HDBU{}.UDF_ENABLED=1
+                        AND HDBUD{}.UDF_DATA_UDF_ID = HDBU{}.UDF_ID
+                    ) UDF{} ON UDF{}.UDF_DATA_ROWID=HDB_LIST.{}
+                """.format(col["UDF_ID"],
+                           col["UDF_ID"],
+                           col["UDF_ID"],
+                           col["UDF_ID"],
+                           col["UDF_ID"],
+                           col["UDF_ID"],
+                           col["UDF_ID"],
+                           col["UDF_ID"],
+                           col["UDF_ID"],
+                           col["UDF_ID"],
+                           col["UDF_ID"],
+                           col["UDF_ID"],
+                           self.API_ROWID,
+                           )
+
+        sql += " WHERE 1=1 "
+
+        rowid = var.get("rowid")
+        if rowid:
+            sql += """
+                AND HDB_LIST.{} = {}
+            """.format(self.API_ROWID, rowid)
+        else:
+            rowid = var.getlist("rowid")
+            if rowid:
+                try:
+                    rowid = list(rowid)
+                    rowid = map(int, rowid)
+                    rowids = ",".join(str(x) for x in rowid)
+                    sql += """
+                        AND HDB_LIST.{} in ({})
+                        """.format(self.API_ROWID, rowids)
+                except:
+                    pass
+
+        query_sql, query_params = self.build_query(query)
+        sql += query_sql
+        params += query_params
+
+        if len(self.ORDER) > 0:
+            sql += " ORDER BY {}".format(",".join(self.ORDER))
+
+        row = db.qaf(sql, params)
+        if db.error:
+            return output(success=0, meta=meta, message=db.error)
+        rows = []
+        while row:
+            row = dict(row)
+            if calc_row_function:
+                row = calc_row_function(dict(row))
+            rows.append(row)
+            row = db.next()
+
+        return output(success=1, data=rows, meta=meta)
+
     def list_call(self, table=None, params=None, calc_row_function=None, meta=None):
         table = table or self.API_NAME
         query = var.get("query")
@@ -259,17 +354,17 @@ class api_call:
         meta["query"] = query
 
         sql = """
-            SELECT HAXDB_LIST_TABLE.*,
+            SELECT HDB_LIST.*,
             U1.UDF_NAME AS HAXDB_UDF_NAME,
             U1D.UDF_DATA_VALUE AS HAXDB_UDF_DATA_VALUE
-            FROM {} HAXDB_LIST_TABLE
+            FROM {} HDB_LIST
             LEFT OUTER JOIN UDF U1 ON
                     U1.UDF_CONTEXT=%s
                     AND U1.UDF_CONTEXT_ID=%s
                     AND U1.UDF_ENABLED=1
             LEFT OUTER JOIN UDF_DATA U1D ON
                     U1D.UDF_DATA_UDF_ID=U1.UDF_ID
-                    AND U1D.UDF_DATA_ROWID=HAXDB_LIST_TABLE.{}
+                    AND U1D.UDF_DATA_ROWID=HDB_LIST.{}
             WHERE
             1=1
             """.format(table, self.API_ROWID)
@@ -296,6 +391,7 @@ class api_call:
         sql += query_sql
         params += query_params
 
+        sql += " GROUP BY {}".format(self.API_ROWID)
         if len(self.ORDER) > 0:
             #sql += " ORDER BY {},{}".format(self.API_ROWID, ",".join(self.ORDER))
             sql += " ORDER BY {}".format(",".join(self.ORDER))

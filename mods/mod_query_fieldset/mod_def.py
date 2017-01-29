@@ -7,6 +7,16 @@ mod_def["QUERY"] = {
     "CONTEXT_ROW": "QUERY_CONTEXT_ID",
     "COLS": [
         {
+         "NAME": "QUERY_ID",
+         "HEADER": "ID",
+         "TYPE": "INT",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 0,
+         "REQUIRED": 0,
+         "INTERNAL": 0,
+        },
+        {
          "NAME": "QUERY_NAME",
          "HEADER": "NAME",
          "TYPE": "STR",
@@ -79,6 +89,16 @@ mod_def["FIELDSET"] = {
     "ROWID": "FIELDSET_ID",
     "CONTEXT_ROW": "FIELDSET_CONTEXT_ID",
     "COLS": [
+        {
+         "NAME": "FIELDSET_ID",
+         "HEADER": "ID",
+         "TYPE": "INT",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 0,
+         "REQUIRED": 0,
+         "INTERNAL": 0,
+        },
         {
          "NAME": "FIELDSET_NAME",
          "HEADER": "NAME",
