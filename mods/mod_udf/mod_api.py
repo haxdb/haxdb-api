@@ -48,6 +48,34 @@ def run():
 
         return apis["UDF"].list_call(table=t, params=p, meta=meta)
 
+    @haxdb.app.route("/UDF/csv", methods=["POST", "GET"])
+    @haxdb.app.route("/UDF/csv/<UDF_CONTEXT>", methods=["POST", "GET"])
+    @haxdb.app.route("/UDF/csv/<UDF_CONTEXT>/<int:UDF_CONTEXT_ID>", methods=["POST", "GET"])
+    @haxdb.require_auth
+    @haxdb.no_readonly
+    @haxdb.require_dba
+    def mod_udf_def_csv(UDF_CONTEXT=None, UDF_CONTEXT_ID=None):
+        UDF_CONTEXT = UDF_CONTEXT or haxdb.data.var.get("UDF_CONTEXT")
+        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.data.var.get("UDF_CONTEXT_ID") or 0
+        disabled = haxdb.data.var.get("disabled")
+
+        t = """
+        (
+            SELECT UDF.*, LISTS_NAME,
+            UDF_ID AS ROW_ID, UDF_NAME AS ROW_NAME
+            FROM UDF
+            LEFT OUTER JOIN LISTS ON LISTS_ID=UDF_LISTS_ID
+            WHERE
+            UDF_CONTEXT=%s
+            AND UDF_CONTEXT_ID=%s
+        )
+        """
+        p = (UDF_CONTEXT, UDF_CONTEXT_ID)
+        if disabled == 1:
+            t += " AND UDF_ENABLED=1 "
+
+        return apis["UDF"].list_call(table=t, params=p, output_format="CSV")
+
     @haxdb.app.route("/UDF/new", methods=["POST", "GET"])
     @haxdb.app.route("/UDF/new/<UDF_CONTEXT>", methods=["POST", "GET"])
     @haxdb.app.route("/UDF/new/<UDF_CONTEXT>/<int:UDF_CONTEXT_ID>", methods=["POST", "GET"])

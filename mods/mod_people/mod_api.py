@@ -35,12 +35,18 @@ def run():
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_people_view(rowid=None):
-        def calc_row(row):
+        def c_row(row):
             row["ROW_NAME"] = "{} {}".format(row["PEOPLE_NAME_FIRST"],
                                              row["PEOPLE_NAME_LAST"])
             row["ROW_ID"] = row["PEOPLE_ID"]
             return row
-        return apis["PEOPLE"].view_call(rowid=rowid, calc_row_function=calc_row)
+        return apis["PEOPLE"].view_call(rowid=rowid, calc_row_function=c_row)
+
+    @haxdb.app.route("/PEOPLE/csv", methods=["POST", "GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    def mod_people_csv():
+        return apis["PEOPLE"].list_call(output_format="CSV")
 
     @haxdb.app.route("/PEOPLE/save", methods=["GET", "POST"])
     @haxdb.app.route("/PEOPLE/save/<int:rowid>", methods=["GET", "POST"])

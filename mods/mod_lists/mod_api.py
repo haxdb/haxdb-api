@@ -38,6 +38,11 @@ def run():
             return row
         return apis["LISTS"].list_call(calc_row_function=calc_row)
 
+    @haxdb.app.route("/LISTS/csv", methods=["POST", "GET"])
+    @haxdb.require_auth
+    def mod_lists_csv():
+        return apis["LISTS"].list_call(output_format="CSV")
+
     @haxdb.app.route("/LISTS/new", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
@@ -86,6 +91,29 @@ def run():
         params = (LISTS_ID,)
 
         return apis["LIST_ITEMS"].list_call(table=t, params=params, meta=meta)
+
+    @haxdb.app.route("/LIST_ITEMS/csv", methods=["POST", "GET"])
+    @haxdb.app.route("/LIST_ITEMS/csv/<int:LISTS_ID>", methods=["POST", "GET"])
+    @haxdb.require_auth
+    def mod_list_items_csv(LISTS_ID=None):
+        LISTS_ID = LISTS_ID or haxdb.data.var.get("LISTS_ID")
+
+        meta = {"name": get_lists_name(LISTS_ID)}
+
+        t = """
+        (
+        select A.*, B.LISTS_NAME,
+        A.LIST_ITEMS_ID AS ROW_ID, A.LIST_ITEMS_VALUE AS ROW_NAME
+        FROM LIST_ITEMS A
+        JOIN LISTS B ON LISTS_ID=LIST_ITEMS_LISTS_ID
+        WHERE
+        LIST_ITEMS_LISTS_ID=%s
+        )
+        """
+        params = (LISTS_ID,)
+
+        return apis["LIST_ITEMS"].list_call(table=t, params=params,
+                                            output_format="CSV")
 
     @haxdb.app.route("/LIST_ITEMS/new", methods=["POST", "GET"])
     @haxdb.app.route("/LIST_ITEMS/new/<int:LISTS_ID>", methods=["POST", "GET"])

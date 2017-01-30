@@ -76,6 +76,25 @@ def run():
 
         return apis["NODES"].list_call(table=table)
 
+    @haxdb.app.route("/NODES/csv", methods=["POST", "GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    def mod_NODES_csv():
+        table = """
+        (
+        SELECT
+        NODES.*,
+        NODES.NODES_ID AS ROW_ID, NODES.NODES_NAME AS ROW_NAME,
+        PEOPLE_NAME_LAST, PEOPLE_NAME_FIRST,
+        ASSETS_NAME
+        FROM NODES
+        LEFT OUTER JOIN PEOPLE ON NODES_PEOPLE_ID=PEOPLE_ID
+        LEFT OUTER JOIN ASSETS ON NODES_ASSETS_ID=ASSETS_ID
+        )
+        """
+
+        return apis["NODES"].list_call(table=table, output_format="CSV")
+
     @haxdb.app.route("/NODES/view", methods=["POST", "GET"])
     @haxdb.app.route("/NODES/view/<int:rowid>", methods=["POST", "GET"])
     @haxdb.require_auth

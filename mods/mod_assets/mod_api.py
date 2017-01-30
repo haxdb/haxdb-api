@@ -37,6 +37,10 @@ def run():
             return row
         return apis["ASSETS"].list_call(calc_row_function=calc_row)
 
+    @haxdb.app.route("/ASSETS/csv", methods=["POST", "GET"])
+    def mod_assets_csv():
+        return apis["ASSETS"].list_call(output_format="CSV")
+
     @haxdb.app.route("/ASSETS/view", methods=["POST", "GET"])
     @haxdb.app.route("/ASSETS/view/<int:rowid>", methods=["POST", "GET"])
     def mod_assets_view(rowid=None):
@@ -72,7 +76,7 @@ def run():
 
     @haxdb.app.route("/ASSET_LINKS/list", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_LINKS/list/<int:ASSETS_ID>", methods=["POST", "GET"])
-    def mod_asset_links_asset(ASSETS_ID=None):
+    def mod_asset_links_list(ASSETS_ID=None):
         ASSETS_ID = ASSETS_ID or haxdb.data.var.get("ASSETS_ID")
 
         meta = {"name": get_assets_name(ASSETS_ID)}
@@ -89,6 +93,25 @@ def run():
         params = (ASSETS_ID,)
 
         return apis["ASSET_LINKS"].list_call(table=t, params=params, meta=meta)
+
+    @haxdb.app.route("/ASSET_LINKS/csv", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSET_LINKS/csv/<int:ASSETS_ID>", methods=["POST", "GET"])
+    def mod_asset_links_csv(ASSETS_ID=None):
+        ASSETS_ID = ASSETS_ID or haxdb.data.var.get("ASSETS_ID")
+
+        t = """
+        (
+        select A.*, B.ASSETS_NAME
+        FROM ASSET_LINKS A
+        JOIN ASSETS B ON ASSETS_ID=ASSET_LINKS_ASSETS_ID
+        WHERE
+        ASSET_LINKS_ASSETS_ID=%s
+        )
+        """
+        p = (ASSETS_ID,)
+
+        return apis["ASSET_LINKS"].list_call(table=t, params=p,
+                                             output_format="CSV")
 
     @haxdb.app.route("/ASSET_LINKS/new", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_LINKS/new/<int:ASSETS_ID>", methods=["POST", "GET"])
@@ -120,7 +143,7 @@ def run():
 
     @haxdb.app.route("/ASSET_AUTHS/list", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_AUTHS/list/<int:ASSETS_ID>", methods=["POST", "GET"])
-    def mod_ASSET_AUTHS_asset(ASSETS_ID=None):
+    def mod_ASSET_AUTHS_list(ASSETS_ID=None):
         ASSETS_ID = ASSETS_ID or haxdb.data.var.get("ASSETS_ID")
 
         meta = {"name": get_assets_name(ASSETS_ID)}
@@ -140,6 +163,28 @@ def run():
         params = (ASSETS_ID,)
 
         return apis["ASSET_AUTHS"].list_call(table=t, params=params, meta=meta)
+
+    @haxdb.app.route("/ASSET_AUTHS/csv", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSET_AUTHS/csv/<int:ASSETS_ID>", methods=["POST", "GET"])
+    def mod_ASSET_AUTHS_csv(ASSETS_ID=None):
+        ASSETS_ID = ASSETS_ID or haxdb.data.var.get("ASSETS_ID")
+
+        t = """
+        (
+        select A.*,
+        B.ASSETS_NAME,
+        C.PEOPLE_NAME_FIRST, C.PEOPLE_NAME_LAST, C.PEOPLE_EMAIL
+        FROM ASSET_AUTHS A
+        JOIN ASSETS B ON ASSETS_ID=ASSET_AUTHS_ASSETS_ID
+        JOIN PEOPLE C ON ASSET_AUTHS_PEOPLE_ID=PEOPLE_ID
+        WHERE
+        ASSET_AUTHS_ASSETS_ID=%s
+        )
+        """
+        p = (ASSETS_ID,)
+
+        return apis["ASSET_AUTHS"].list_call(table=t, params=p,
+                                             output_format="CSV")
 
     @haxdb.app.route("/ASSET_AUTHS/new", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_AUTHS/new/<int:ASSETS_ID>", methods=["POST", "GET"])
