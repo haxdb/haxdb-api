@@ -7,6 +7,7 @@ mod_def["ASSETS"] = {
     "CONTEXT_ROW": None,
     "COLS": [
         {
+         "CATEGORY": "ROW",
          "NAME": "ASSETS_ID",
          "HEADER": "ID",
          "TYPE": "INT",
@@ -17,6 +18,17 @@ mod_def["ASSETS"] = {
          "NEW": 0,
         },
         {
+         "CATEGORY": "ROW",
+         "NAME": "ASSETS_INSERTED",
+         "HEADER": "CREATED",
+         "TYPE": "STR",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 1,
+         "REQUIRED": 0,
+        },
+        {
+         "CATEGORY": "ASSET",
          "NAME": "ASSETS_NAME",
          "HEADER": "NAME",
          "TYPE": "STR",
@@ -28,6 +40,7 @@ mod_def["ASSETS"] = {
          "DEFAULT": 1,
         },
         {
+         "CATEGORY": "ASSET",
          "NAME": "ASSETS_TYPE",
          "HEADER": "TYPE",
          "TYPE": "STR",
@@ -39,6 +52,7 @@ mod_def["ASSETS"] = {
          "DEFAULT": 1,
         },
         {
+         "CATEGORY": "ASSET",
          "NAME": "ASSETS_MANUFACTURER",
          "HEADER": "MANUFACTURER",
          "TYPE": "STR",
@@ -48,6 +62,7 @@ mod_def["ASSETS"] = {
          "REQUIRED": 0,
         },
         {
+         "CATEGORY": "ASSET",
          "NAME": "ASSETS_MODEL",
          "HEADER": "MODEL",
          "TYPE": "STR",
@@ -57,6 +72,7 @@ mod_def["ASSETS"] = {
          "REQUIRED": 0,
         },
         {
+         "CATEGORY": "ASSET",
          "NAME": "ASSETS_PRODUCT_ID",
          "HEADER": "PRODUCT ID",
          "TYPE": "STR",
@@ -66,6 +82,7 @@ mod_def["ASSETS"] = {
          "REQUIRED": 0,
         },
         {
+         "CATEGORY": "ASSET",
          "NAME": "ASSETS_SERIAL_NUMBER",
          "HEADER": "SERIAL NUMBER",
          "TYPE": "STR",
@@ -75,6 +92,7 @@ mod_def["ASSETS"] = {
          "REQUIRED": 0,
         },
         {
+         "CATEGORY": "ASSET",
          "NAME": "ASSETS_QUANTITY",
          "HEADER": "QTY",
          "TYPE": "INT",
@@ -85,6 +103,7 @@ mod_def["ASSETS"] = {
          "NEW": 1,
         },
         {
+         "CATEGORY": "ASSET",
          "NAME": "ASSETS_LOCATION",
          "HEADER": "LOCATION",
          "TYPE": "LIST",
@@ -97,6 +116,7 @@ mod_def["ASSETS"] = {
          "DEFAULT": 1,
         },
         {
+         "CATEGORY": "ASSET",
          "NAME": "ASSETS_DESCRIPTION",
          "HEADER": "DESCRIPTION",
          "TYPE": "STR",
@@ -116,6 +136,7 @@ mod_def["ASSET_LINKS"] = {
     "CONTEXT_ROW": "ASSET_LINKS_ASSETS_ID",
     "COLS": [
         {
+         "CATEGORY": "ROW",
          "NAME": "ASSET_LINKS_ID",
          "HEADER": "ID",
          "TYPE": "INT",
@@ -127,6 +148,17 @@ mod_def["ASSET_LINKS"] = {
          "DEFAULT": 0,
         },
         {
+         "CATEGORY": "ROW",
+         "NAME": "ASSET_LINKS_INSERTED",
+         "HEADER": "CREATED",
+         "TYPE": "STR",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 1,
+         "REQUIRED": 0,
+        },
+        {
+         "CATEGORY": "ASSET LINK",
          "NAME": "ASSET_LINKS_ASSETS_ID",
          "HEADER": "ASSET",
          "TYPE": "ID",
@@ -139,6 +171,7 @@ mod_def["ASSET_LINKS"] = {
          "DEFAULT": 0,
         },
         {
+         "CATEGORY": "ASSET LINK",
          "NAME": "ASSET_LINKS_NAME",
          "HEADER": "NAME",
          "TYPE": "STR",
@@ -150,6 +183,7 @@ mod_def["ASSET_LINKS"] = {
          "DEFAULT": 1,
         },
         {
+         "CATEGORY": "ASSET LINK",
          "NAME": "ASSET_LINKS_LINK",
          "HEADER": "URL",
          "TYPE": "STR",
@@ -161,6 +195,7 @@ mod_def["ASSET_LINKS"] = {
          "DEFAULT": 1,
         },
         {
+         "CATEGORY": "ASSET LINK",
          "NAME": "ASSET_LINKS_ORDER",
          "HEADER": "ORDER",
          "TYPE": "FLOAT",
@@ -190,6 +225,15 @@ mod_def["ASSET_AUTHS"] = {
          "QUERY": 1,
          "SEARCH": 0,
          "REQUIRED": 1,
+        },
+        {
+         "NAME": "ASSET_AUTHS_INSERTED",
+         "HEADER": "CREATED",
+         "TYPE": "STR",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 1,
+         "REQUIRED": 0,
         },
         {
          "NAME": "ASSET_AUTHS_PEOPLE_ID",

@@ -71,7 +71,8 @@ class api_call:
         self.COLS = api_def["COLS"]
         self.ORDER = api_def["ORDER"]
         for col in self.COLS:
-            col["CATEGORY"] = "PRIMARY"
+            if "CATEGORY" not in col:
+                col["CATEGORY"] = "PRIMARY"
             self._COLS[col["NAME"]] = col
 
     def get_meta(self, action=None):

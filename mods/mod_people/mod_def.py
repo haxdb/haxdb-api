@@ -7,6 +7,7 @@ mod_def["PEOPLE"] = {
     "CONTEXT_ROW": None,
     "COLS": [
         {
+         "CATEGORY": "ROW",
          "NAME": "PEOPLE_ID",
          "HEADER": "ID",
          "TYPE": "INT",
@@ -18,6 +19,17 @@ mod_def["PEOPLE"] = {
          "NEW": 0,
         },
         {
+         "CATEGORY": "ROW",
+         "NAME": "PEOPLE_INSERTED",
+         "HEADER": "CREATED",
+         "TYPE": "STR",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 1,
+         "REQUIRED": 0,
+        },
+        {
+         "CATEGORY": "PERSON",
          "NAME": "PEOPLE_NAME_FIRST",
          "HEADER": "FIRST",
          "TYPE": "STR",
@@ -30,6 +42,7 @@ mod_def["PEOPLE"] = {
          "DEFAULT": 1,
         },
         {
+         "CATEGORY": "PERSON",
          "NAME": "PEOPLE_NAME_LAST",
          "HEADER": "LAST",
          "TYPE": "STR",
@@ -42,6 +55,7 @@ mod_def["PEOPLE"] = {
          "DEFAULT": 1,
         },
         {
+         "CATEGORY": "PERSON",
          "NAME": "PEOPLE_EMAIL",
          "HEADER": "EMAIL",
          "TYPE": "STR",
@@ -54,6 +68,7 @@ mod_def["PEOPLE"] = {
          "DEFAULT": 1,
         },
         {
+         "CATEGORY": "PERSON",
          "NAME": "PEOPLE_DBA",
          "HEADER": "DBA",
          "TYPE": "BOOL",
@@ -66,6 +81,7 @@ mod_def["PEOPLE"] = {
          "DEFAULT_VALUE": 0,
         },
         {
+         "CATEGORY": "PERSON",
          "NAME": "PEOPLE_MEMBERSHIP",
          "HEADER": "MEMBERSHIP",
          "TYPE": "LIST",

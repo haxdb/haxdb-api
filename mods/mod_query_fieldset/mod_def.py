@@ -7,6 +7,7 @@ mod_def["QUERY"] = {
     "CONTEXT_ROW": "QUERY_CONTEXT_ID",
     "COLS": [
         {
+         "CATEGORY": "ROW",
          "NAME": "QUERY_ID",
          "HEADER": "ID",
          "TYPE": "INT",
@@ -17,6 +18,17 @@ mod_def["QUERY"] = {
          "INTERNAL": 0,
         },
         {
+         "CATEGORY": "ROW",
+         "NAME": "QUERY_INSERTED",
+         "HEADER": "CREATED",
+         "TYPE": "STR",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 1,
+         "REQUIRED": 0,
+        },
+        {
+         "CATEGORY": "QUERY",
          "NAME": "QUERY_NAME",
          "HEADER": "NAME",
          "TYPE": "STR",
@@ -28,6 +40,7 @@ mod_def["QUERY"] = {
          "INTERNAL": 0,
         },
         {
+         "CATEGORY": "QUERY",
          "NAME": "QUERY_PEOPLE_ID",
          "HEADER": "OWNER",
          "TYPE": "ID",
@@ -39,6 +52,7 @@ mod_def["QUERY"] = {
          "INTERNAL": 1,
         },
         {
+         "CATEGORY": "QUERY",
          "NAME": "QUERY_CONTEXT",
          "HEADER": "CONTEXT",
          "TYPE": "STR",
@@ -50,6 +64,7 @@ mod_def["QUERY"] = {
          "INTERNAL": 1,
         },
         {
+         "CATEGORY": "QUERY",
          "NAME": "QUERY_CONTEXT_ID",
          "HEADER": "CONTEXT_ID",
          "TYPE": "INT",
@@ -60,6 +75,7 @@ mod_def["QUERY"] = {
          "INTERNAL": 1,
         },
         {
+         "CATEGORY": "QUERY",
          "NAME": "QUERY_QUERY",
          "HEADER": "QUERY",
          "TYPE": "STR",
@@ -70,6 +86,7 @@ mod_def["QUERY"] = {
          "INTERNAL": 0,
         },
         {
+         "CATEGORY": "QUERY",
          "NAME": "QUERY_ORDER",
          "HEADER": "ORDER",
          "TYPE": "FLOAT",
@@ -90,6 +107,7 @@ mod_def["FIELDSET"] = {
     "CONTEXT_ROW": "FIELDSET_CONTEXT_ID",
     "COLS": [
         {
+         "CATEGORY": "ROW",
          "NAME": "FIELDSET_ID",
          "HEADER": "ID",
          "TYPE": "INT",
@@ -100,6 +118,17 @@ mod_def["FIELDSET"] = {
          "INTERNAL": 0,
         },
         {
+         "CATEGORY": "ROW",
+         "NAME": "FIELDSET_INSERTED",
+         "HEADER": "CREATED",
+         "TYPE": "STR",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 1,
+         "REQUIRED": 0,
+        },
+        {
+         "CATEGORY": "FIELDSET",
          "NAME": "FIELDSET_NAME",
          "HEADER": "NAME",
          "TYPE": "STR",
@@ -111,6 +140,7 @@ mod_def["FIELDSET"] = {
          "INTERNAL": 0,
         },
         {
+         "CATEGORY": "FIELDSET",
          "NAME": "FIELDSET_PEOPLE_ID",
          "HEADER": "OWNER",
          "TYPE": "ID",
@@ -122,6 +152,7 @@ mod_def["FIELDSET"] = {
          "INTERNAL": 1,
         },
         {
+         "CATEGORY": "FIELDSET",
          "NAME": "FIELDSET_CONTEXT",
          "HEADER": "CONTEXT",
          "TYPE": "CHAR",
@@ -133,6 +164,7 @@ mod_def["FIELDSET"] = {
          "INTERNAL": 1,
         },
         {
+         "CATEGORY": "FIELDSET",
          "NAME": "FIELDSET_CONTEXT_ID",
          "HEADER": "CONTEXT_ID",
          "TYPE": "INT",
@@ -143,6 +175,7 @@ mod_def["FIELDSET"] = {
          "INTERNAL": 1,
         },
         {
+         "CATEGORY": "FIELDSET",
          "NAME": "FIELDSET_ORDER",
          "HEADER": "ORDER",
          "TYPE": "FLOAT",

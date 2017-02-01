@@ -7,6 +7,7 @@ mod_def["PEOPLE_RFID"] = {
     "CONTEXT_ROW": "PEOPLE_RFID_PEOPLE_ID",
     "COLS": [
         {
+         "CATEGORY": "ROW",
          "NAME": "PEOPLE_RFID_ID",
          "HEADER": "ID",
          "TYPE": "INT",
@@ -19,6 +20,17 @@ mod_def["PEOPLE_RFID"] = {
          "NEW": 0,
         },
         {
+         "CATEGORY": "ROW",
+         "NAME": "PEOPLE_RFID_INSERTED",
+         "HEADER": "CREATED",
+         "TYPE": "STR",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 1,
+         "REQUIRED": 0,
+        },
+        {
+         "CATEGORY": "PERSON RFID",
          "NAME": "PEOPLE_RFID_NAME",
          "HEADER": "NAME",
          "TYPE": "STR",
@@ -32,6 +44,7 @@ mod_def["PEOPLE_RFID"] = {
          "NEW": 1,
         },
         {
+         "CATEGORY": "PERSON RFID",
          "NAME": "PEOPLE_RFID_PEOPLE_ID",
          "HEADER": "OWNER",
          "TYPE": "ID",
@@ -43,6 +56,7 @@ mod_def["PEOPLE_RFID"] = {
          "INTERNAL": 1,
         },
         {
+         "CATEGORY": "PERSON RFID",
          "NAME": "PEOPLE_RFID_RFID",
          "HEADER": "RFID",
          "TYPE": "ASCII",
@@ -56,6 +70,7 @@ mod_def["PEOPLE_RFID"] = {
          "NEW": 1,
         },
         {
+         "CATEGORY": "PERSON RFID",
          "NAME": "PEOPLE_RFID_ENABLED",
          "HEADER": "ENABLED",
          "TYPE": "BOOL",

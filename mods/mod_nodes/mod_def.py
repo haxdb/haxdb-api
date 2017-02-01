@@ -7,6 +7,28 @@ mod_def["NODES"] = {
     "CONTEXT_ROW": None,
     "COLS": [
         {
+         "CATEGORY": "ROW",
+         "NAME": "NODES_ID",
+         "HEADER": "ID",
+         "TYPE": "INT",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 0,
+         "REQUIRED": 0,
+         "NEW": 0,
+        },
+        {
+         "CATEGORY": "ROW",
+         "NAME": "NODES_INSERTED",
+         "HEADER": "CREATED",
+         "TYPE": "STR",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 1,
+         "REQUIRED": 0,
+        },
+        {
+         "CATEGORY": "NODE",
          "NAME": "NODES_API_KEY",
          "HEADER": "API_KEY",
          "TYPE": "ASCII",
@@ -16,6 +38,7 @@ mod_def["NODES"] = {
          "REQUIRED": 0,
         },
         {
+         "CATEGORY": "NODE",
          "NAME": "NODES_NAME",
          "HEADER": "NAME",
          "TYPE": "STR",
@@ -27,6 +50,7 @@ mod_def["NODES"] = {
          "NEW": 1,
         },
         {
+         "CATEGORY": "NODE",
          "NAME": "NODES_DESCRIPTION",
          "HEADER": "DESCRIPTION",
          "TYPE": "STR",
@@ -36,6 +60,7 @@ mod_def["NODES"] = {
          "REQUIRED": 0,
         },
         {
+         "CATEGORY": "NODE",
          "NAME": "NODES_READONLY",
          "HEADER": "READONLY",
          "TYPE": "BOOL",
@@ -47,6 +72,7 @@ mod_def["NODES"] = {
          "NEW": 1,
         },
         {
+         "CATEGORY": "NODE",
          "NAME": "NODES_DBA",
          "HEADER": "DBA",
          "TYPE": "BOOL",
@@ -58,6 +84,7 @@ mod_def["NODES"] = {
          "NEW": 1,
         },
         {
+         "CATEGORY": "NODE",
          "NAME": "NODES_IP",
          "HEADER": "IP",
          "TYPE": "STR",
@@ -69,6 +96,7 @@ mod_def["NODES"] = {
          "NEW": 1,
         },
         {
+         "CATEGORY": "NODE",
          "NAME": "NODES_EXPIRE",
          "HEADER": "EXPIRE",
          "TYPE": "TIMESTAMP",
@@ -79,6 +107,7 @@ mod_def["NODES"] = {
          "DEFAULT": 1,
         },
         {
+         "CATEGORY": "NODE",
          "NAME": "NODES_ENABLED",
          "HEADER": "ENABLED",
          "TYPE": "BOOL",
@@ -91,15 +120,7 @@ mod_def["NODES"] = {
          "DEFAULT_VALUE": 1,
         },
         {
-         "NAME": "NODES_QUEUED",
-         "HEADER": "QUEUED",
-         "TYPE": "BOOL",
-         "EDIT": 1,
-         "QUERY": 1,
-         "SEARCH": 0,
-         "REQUIRED": 0,
-        },
-        {
+         "CATEGORY": "RELATIONSHIP",
          "NAME": "NODES_PEOPLE_ID",
          "HEADER": "PERSON",
          "TYPE": "ID",
@@ -113,6 +134,7 @@ mod_def["NODES"] = {
          "DEFAULT": 0,
         },
         {
+         "CATEGORY": "RELATIONSHIP",
          "NAME": "NODES_ASSETS_ID",
          "HEADER": "ASSET",
          "TYPE": "ID",

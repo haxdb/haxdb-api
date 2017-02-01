@@ -7,6 +7,7 @@ mod_def["LISTS"] = {
     "CONTEXT_ROW": None,
     "COLS": [
         {
+         "CATEGORY": "ROW",
          "NAME": "LISTS_ID",
          "HEADER": "ID",
          "TYPE": "INT",
@@ -17,6 +18,27 @@ mod_def["LISTS"] = {
          "NEW": 0,
         },
         {
+         "CATEGORY": "ROW",
+         "NAME": "LISTS_INSERTED",
+         "HEADER": "CREATED",
+         "TYPE": "STR",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 1,
+         "REQUIRED": 0,
+        },
+        {
+         "CATEGORY": "ROW",
+         "NAME": "LISTS_INTERNAL",
+         "HEADER": "INTERNAL",
+         "TYPE": "BOOL",
+         "EDIT": 0,
+         "QUERY": 0,
+         "SEARCH": 0,
+         "REQUIRED": 0,
+        },
+        {
+         "CATEGORY": "LIST",
          "NAME": "LISTS_NAME",
          "HEADER": "NAME",
          "TYPE": "STR",
@@ -26,15 +48,6 @@ mod_def["LISTS"] = {
          "REQUIRED": 1,
          "NEW": 1,
          "DEFAULT": 1,
-        },
-        {
-         "NAME": "LISTS_INTERNAL",
-         "HEADER": "INTERNAL",
-         "TYPE": "BOOL",
-         "EDIT": 0,
-         "QUERY": 0,
-         "SEARCH": 0,
-         "REQUIRED": 0,
         },
     ],
     "ORDER": ["LISTS_NAME"]
@@ -47,6 +60,7 @@ mod_def["LIST_ITEMS"] = {
     "CONTEXT_ROW": "LIST_ITEMS_LISTS_ID",
     "COLS": [
         {
+         "CATEGORY": "ROW",
          "NAME": "LIST_ITEMS_ID",
          "HEADER": "ID",
          "TYPE": "INT",
@@ -57,6 +71,17 @@ mod_def["LIST_ITEMS"] = {
          "NEW": 0,
         },
         {
+         "CATEGORY": "ROW",
+         "NAME": "LIST_ITEMS_INSERTED",
+         "HEADER": "CREATED",
+         "TYPE": "STR",
+         "EDIT": 0,
+         "QUERY": 1,
+         "SEARCH": 1,
+         "REQUIRED": 0,
+        },
+        {
+         "CATEGORY": "LIST ITEM",
          "NAME": "LIST_ITEMS_LISTS_ID",
          "HEADER": "LIST",
          "TYPE": "ID",
@@ -68,6 +93,7 @@ mod_def["LIST_ITEMS"] = {
          "NEW": 0,
         },
         {
+         "CATEGORY": "LIST ITEM",
          "NAME": "LIST_ITEMS_VALUE",
          "HEADER": "VALUE",
          "TYPE": "STR",
@@ -79,6 +105,7 @@ mod_def["LIST_ITEMS"] = {
          "DEFAULT": 1,
         },
         {
+         "CATEGORY": "LIST ITEM",
          "NAME": "LIST_ITEMS_DESCRIPTION",
          "HEADER": "DESCRIPTION",
          "TYPE": "STR",
@@ -90,6 +117,7 @@ mod_def["LIST_ITEMS"] = {
          "DEFAULT": 1,
         },
         {
+         "CATEGORY": "LIST ITEM",
          "NAME": "LIST_ITEMS_ENABLED",
          "HEADER": "ENABLED",
          "TYPE": "BOOL",
@@ -102,6 +130,7 @@ mod_def["LIST_ITEMS"] = {
          "DEFAULT_VALUE": 1,
         },
         {
+         "CATEGORY": "LIST ITEM",
          "NAME": "LIST_ITEMS_ORDER",
          "HEADER": "ORDER",
          "TYPE": "FLOAT",
@@ -114,6 +143,7 @@ mod_def["LIST_ITEMS"] = {
          "DEFAULT_VALUE": 999,
         },
         {
+         "CATEGORY": "LIST ITEM",
          "NAME": "LIST_ITEMS_INTERNAL",
          "HEADER": "INTERNAL",
          "TYPE": "BOOL",
