@@ -72,7 +72,7 @@ mod_def["NODES"] = {
          "NAME": "NODES_EXPIRE",
          "HEADER": "EXPIRE",
          "TYPE": "TIMESTAMP",
-         "EDIT": 0,
+         "EDIT": 1,
          "QUERY": 1,
          "SEARCH": 0,
          "REQUIRED": 0,

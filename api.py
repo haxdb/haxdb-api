@@ -33,7 +33,7 @@ def valid_value(col, val):
         except:
             return False
 
-    if col_type == "INT" or col_type == "ID":
+    if col_type == "INT" or col_type == "ID" or col_type == "TIMESTAMP":
         try:
             int(val)
         except:
@@ -117,7 +117,7 @@ class api_call:
              AND LIST_ITEMS_ENABLED=1
         WHERE
         LISTS_ID IN ({})
-        """.format(",".join( ("%s",) * len(list_ids)))
+        """.format(",".join(("%s",) * len(list_ids)))
 
         sql += " ORDER BY LIST_ITEMS_ORDER"
         row = db.qaf(sql, list_ids)
@@ -325,7 +325,7 @@ class api_call:
         sql += query_sql
         params += query_params
 
-        sql += " GROUP BY {}, HAXDB_UDF_NAME".format(self.API_ROWID)
+        sql += " GROUP BY HDB_LIST.{}, HAXDB_UDF_NAME".format(self.API_ROWID)
         if len(self.ORDER) > 0:
             sql += " ORDER BY {}, {}".format(",".join(self.ORDER),
                                              self.API_ROWID)
