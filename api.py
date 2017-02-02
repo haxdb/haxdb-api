@@ -529,8 +529,11 @@ class api_call:
                     if valid_value(col, val):
                         if col["NAME"] in self._COLS:
                             meta["updated"].append(col["NAME"])
-                            col_names.append("{}=%s".format(col["NAME"]))
-                            col_params += (val,)
+                            if val:
+                                col_names.append("{}=%s".format(col["NAME"]))
+                                col_params += (val,)
+                            else:
+                                col_names.append("{}=NULL".format(col["NAME"]))
                         else:
                             meta["updated"].append(col["NAME"])
                             udf_cols.append(col)
@@ -542,7 +545,9 @@ class api_call:
             return output(success=0, meta=meta, message=errors)
 
         if col_names:
-            sql = "UPDATE {} SET {} WHERE {}=%s".format(self.API_NAME, ",".join(col_names), self.API_ROWID)
+            sql = """
+            UPDATE {} SET {} WHERE {}=%s
+            """.format(self.API_NAME, ",".join(col_names), self.API_ROWID)
             col_params += (rowid,)
             db.query(sql, col_params)
             if db.error:
@@ -552,10 +557,17 @@ class api_call:
         if udf_cols:
             for idx, udf_col in enumerate(udf_cols):
                 udf_val = udf_params[idx]
-                sql = "DELETE FROM UDF_DATA WHERE UDF_DATA_UDF_ID=%s and UDF_DATA_ROWID=%s"
+                sql = """
+                DELETE FROM UDF_DATA
+                WHERE UDF_DATA_UDF_ID=%s and UDF_DATA_ROWID=%s
+                """
                 db.query(sql, (udf_col["UDF_ID"], rowid))
                 if udf_val:
-                    sql = "INSERT INTO UDF_DATA (UDF_DATA_UDF_ID, UDF_DATA_VALUE, UDF_DATA_ROWID) VALUES (%s, %s, %s)"
+                    sql = """
+                    INSERT INTO UDF_DATA
+                    (UDF_DATA_UDF_ID, UDF_DATA_VALUE, UDF_DATA_ROWID)
+                    VALUES (%s, %s, %s)
+                    """
                     db.query(sql, (udf_col["UDF_ID"], udf_val, rowid))
                     if db.error:
                         return output(success=0, meta=meta, message=db.error)
