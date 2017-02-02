@@ -92,6 +92,30 @@ def run():
 
         return apis["LIST_ITEMS"].list_call(table=t, params=params, meta=meta)
 
+    @haxdb.app.route("/LIST_ITEMS/view", methods=["POST", "GET"])
+    @haxdb.app.route("/LIST_ITEMS/view/<int:rowid>", methods=["POST", "GET"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    def mod_list_items_view(rowid=None):
+        def c_row(row):
+            row["ROW_ID"] = row["LIST_ITEMS_ID"]
+            row["ROW_NAME"] = "{}: {}".format(row["LISTS_NAME"],
+                                              row["LIST_ITEMS_VALUE"])
+            return row
+
+        t = """
+            (
+            select
+            LIST_ITEMS.*, LISTS_NAME
+            FROM LISTS
+            JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID = LISTS_ID
+            )
+        """
+
+        return apis["LIST_ITEMS"].view_call(table=t,
+                                        rowid=rowid,
+                                        calc_row_function=c_row)
+
     @haxdb.app.route("/LIST_ITEMS/csv", methods=["POST", "GET"])
     @haxdb.app.route("/LIST_ITEMS/csv/<int:LISTS_ID>", methods=["POST", "GET"])
     @haxdb.require_auth

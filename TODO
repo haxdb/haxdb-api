@@ -1,9 +1,8 @@
 mod_rfid
-  - Expand asset status
-  - Log asset usage based on pulse
+  - Log logging
 
-mod_files
-  - Refactor uploading/downloading files
+mod_udf
+  - add file type
 
 mod_permissions
   - Add permission context beyond dba
