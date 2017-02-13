@@ -30,20 +30,20 @@ def valid_value(col, val):
                 return True
             else:
                 return False
-        except:
+        except ValueError:
             return False
 
     if col_type == "INT" or col_type == "ID" or col_type == "TIMESTAMP":
         try:
             int(val)
-        except:
+        except ValueError:
             return False
         return True
 
     if col_type == "FLOAT":
         try:
             float(val)
-        except:
+        except ValueError:
             return False
         return True
 
@@ -99,7 +99,7 @@ class api_call:
                 if "LIST" in col:
                     try:
                         list_id = int(col["LIST"])
-                    except:
+                    except ValueError:
                         list_id = 0
                     if list_id not in list_ids:
                         list_ids += (list_id, )
@@ -126,7 +126,7 @@ class api_call:
             lname = row["LISTS_NAME"]
             lid = row["LISTS_ID"]
             if lid not in lists:
-                lists[lid] = { "name": lname, "items": [] }
+                lists[lid] = {"name": lname, "items": []}
             list_item = {
                 "ID": row["LIST_ITEMS_ID"],
                 "VALUE": row["LIST_ITEMS_VALUE"],
@@ -210,21 +210,62 @@ class api_call:
                             if valcount > 0:
                                 sql += " OR "
                             if val == "NULL" and op == "=":
-                                sql += "("
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_DATA_ROWID={} and UDF_ENABLED=1) < 1".format(self.API_ROWID)
-                                sql += " OR "
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_VALUE IS NULL and UDF_DATA_ROWID={}) > 0".format(self.API_ROWID)
-                                sql += ")"
+                                sql += """
+                                (
+                                    (SELECT COUNT(*)
+                                    FROM UDF, UDF_DATA
+                                    WHERE UDF_CONTEXT=%s
+                                    AND UDF_CONTEXT_ID=%s
+                                    and UDF_ENABLED=1
+                                    and UDF_ID=UDF_DATA_UDF_ID
+                                    and UDF_NAME=%s
+                                    and UDF_DATA_ROWID={}
+                                    and UDF_ENABLED=1) < 1
+                                OR
+                                    (SELECT COUNT(*)
+                                    FROM UDF, UDF_DATA
+                                    WHERE UDF_CONTEXT=%s
+                                    AND UDF_CONTEXT_ID=%s
+                                    and UDF_ENABLED=1
+                                    and UDF_ID=UDF_DATA_UDF_ID
+                                    and UDF_NAME=%s
+                                    and UDF_ENABLED=1
+                                    and UDF_DATA_VALUE IS NULL
+                                    and UDF_DATA_ROWID={}) > 0
+                                )""".format(self.API_ROWID, self.API_ROWID)
                                 params += (self.API_NAME, self.API_CONTEXT_ID)
                                 params += (col,)
                                 params += (self.API_NAME, self.API_CONTEXT_ID)
                                 params += (col,)
                             elif val == "NULL" and op == "!=":
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_ROWID={}) > 0".format(self.API_ROWID)
+                                sql += """
+                                    (
+                                    SELECT COUNT(*)
+                                    FROM UDF, UDF_DATA
+                                    WHERE UDF_CONTEXT=%s
+                                    AND UDF_CONTEXT_ID=%s
+                                    and UDF_ENABLED=1
+                                    and UDF_ID=UDF_DATA_UDF_ID
+                                    and UDF_NAME=%s
+                                    and UDF_ENABLED=1
+                                    and UDF_DATA_ROWID={}) > 0
+                                """.format(self.API_ROWID)
                                 params += (self.API_NAME, self.API_CONTEXT_ID)
                                 params += (col,)
                             else:
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_VALUE {} %s and UDF_DATA_ROWID={}) > 0".format(op, self.API_ROWID)
+                                sql += """
+                                 (
+                                 SELECT COUNT(*)
+                                 FROM UDF, UDF_DATA
+                                 WHERE UDF_CONTEXT=%s
+                                 AND UDF_CONTEXT_ID=%s
+                                 and UDF_ENABLED=1
+                                 and UDF_ID=UDF_DATA_UDF_ID
+                                 and UDF_NAME=%s
+                                 and UDF_ENABLED=1
+                                 and UDF_DATA_VALUE {} %s
+                                 and UDF_DATA_ROWID={}) > 0
+                                 """.format(op, self.API_ROWID)
                                 params += (self.API_NAME, self.API_CONTEXT_ID)
                                 params += (col, val,)
                             valcount += 1
@@ -243,7 +284,17 @@ class api_call:
                             valcount += 1
                     if valcount > 0:
                         sql += " OR "
-                    sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_ENABLED=1 and UDF_DATA_VALUE LIKE %s and UDF_DATA_ROWID={}) > 0".format(self.API_ROWID)
+                    sql += """
+                    (SELECT COUNT(*)
+                    FROM UDF, UDF_DATA
+                    WHERE UDF_CONTEXT=%s
+                    AND UDF_CONTEXT_ID=%s
+                    and UDF_ENABLED=1
+                    and UDF_ID=UDF_DATA_UDF_ID
+                    and UDF_ENABLED=1
+                    and UDF_DATA_VALUE LIKE %s
+                    and UDF_DATA_ROWID={}) > 0
+                    """.format(self.API_ROWID)
                     params += (self.API_NAME, self.API_CONTEXT_ID, query)
                     sql += ")"
         return sql, params
@@ -319,7 +370,7 @@ class api_call:
                     sql += """
                         AND {} in ({})
                         """.format(self.API_ROWID, rowids)
-                except:
+                except ValueError:
                     pass
 
         query_sql, query_params = self.build_query(query)
@@ -452,7 +503,8 @@ class api_call:
         sql = """
         INSERT INTO {} ({})
         VALUES ({})
-        """.format(self.API_NAME, ",".join(col_names), ",".join(("%s",)*len(col_names)))
+        """.format(self.API_NAME,
+                   ",".join(col_names), ",".join(("%s",)*len(col_names)))
         db.query(sql, col_params)
 
         if db.error:
@@ -462,17 +514,34 @@ class api_call:
         if meta["rowcount"] > 0:
             meta["rowid"] = db.lastrowid
             if udf_names:
-                sql = "DELETE FROM UDF WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ROWID=%s"
-                db.query(sql, (self.API_NAME, self.API_CONTEXT_ID, meta["rowid"]))
+                sql = """
+                DELETE FROM UDF
+                WHERE UDF_CONTEXT=%s
+                AND UDF_CONTEXT_ID=%s
+                and UDF_ROWID=%s
+                """
+                db.query(sql, (self.API_NAME,
+                               self.API_CONTEXT_ID,
+                               meta["rowid"]))
                 for udf_key in udf_names.keys():
                     udf_name = udf_names[udf_key]
                     udf_val = udf_params[udf_key]
-                    sql = "INSERT INTO UDF (UDF_CONTEXT, UDF_CONTEXT_ID, UDF_NAME, UDF_ROWID) VALUES (%s, %s, %s, %s)"
-                    db.query(sql, (self.API_NAME, self.API_CONTEXT_ID, udf_name, udf_val))
+                    sql = """
+                    INSERT INTO UDF
+                    (UDF_CONTEXT, UDF_CONTEXT_ID, UDF_NAME, UDF_ROWID)
+                    VALUES (%s, %s, %s, %s)
+                    """
+                    db.query(sql, (self.API_NAME,
+                                   self.API_CONTEXT_ID,
+                                   udf_name,
+                                   udf_val))
                     if db.error:
                         return output(success=0, meta=meta, message=db.error)
             db.commit()
-            return output(success=1, meta=meta, message="{} ROWS CREATED".format(meta["rowcount"]), value=db.lastrowid)
+            return output(success=1,
+                          meta=meta,
+                          message="{} ROWS CREATED".format(meta["rowcount"]),
+                          value=db.lastrowid)
 
         return output(success=0, meta=meta, message="NO ROWS CREATED")
 
@@ -523,13 +592,10 @@ class api_call:
         meta.update(self.get_meta("save"))
         meta["rowid"] = rowid
 
-        try:
-            meta["updated"] = meta["updated"]
-        except:
+        if "updated" not in meta:
             meta["updated"] = []
-        try:
-            meta["rowcount"] = meta["rowcount"]
-        except:
+
+        if "rowcount" not in meta:
             meta["rowcount"] = 0
 
         col_names = []
@@ -597,3 +663,18 @@ class api_call:
             return output(success=1, meta=meta, message="SAVED")
 
         return output(success=0, meta=meta, message="NOTHING UPDATED")
+
+    def download_call(self, rowid=None, field_name=None):
+        return True
+
+    def upload_call(self, rowid=None):
+        rowid = rowid or var.get("rowid")
+        cols = self.get_cols()
+
+        for col in cols:
+            if col["NAME"] in request.files:
+                file = request.files[col["NAME"]]
+                
+
+
+        return True

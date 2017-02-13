@@ -109,8 +109,8 @@ def run():
         """
 
         return apis["LIST_ITEMS"].view_call(table=t,
-                                        rowid=rowid,
-                                        calc_row_function=c_row)
+                                            rowid=rowid,
+                                            calc_row_function=c_row)
 
     @haxdb.app.route("/LIST_ITEMS/csv", methods=["POST", "GET"])
     @haxdb.app.route("/LIST_ITEMS/csv/<int:LISTS_ID>", methods=["POST", "GET"])
