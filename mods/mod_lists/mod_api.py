@@ -48,11 +48,7 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_lists_new(name=None):
-        def calc_row(row):
-            row["ROW_NAME"] = row["LISTS_NAME"]
-            row["ROW_ID"] = row["LISTS_ID"]
-            return row
-        return apis["LISTS"].new_call(calc_row_function=calc_row)
+        return apis["LISTS"].new_call()
 
     @haxdb.app.route("/LISTS/delete", methods=["GET", "POST"])
     @haxdb.app.route("/LISTS/delete/<int:rowid>", methods=["GET", "POST"])
