@@ -113,7 +113,7 @@ def get_node(api_key=None):
 def register_node(ip=None, node_name=None):
     ip = ip or ""
     node_name = node_name or "NEWLY REGISTERED NODE"
-    api_key = base64.urlsafe_b64encode(os.urandom(500))[5:260]
+    api_key = base64.urlsafe_b64encode(os.urandom(500))[5:39]
 
     sql = """
         INSERT INTO NODES (NODES_API_KEY, NODES_NAME, NODES_IP, NODES_ENABLED)

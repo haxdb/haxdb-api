@@ -123,7 +123,7 @@ def run():
         expire = haxdb.data.var.get("expire")
 
         defaults = {
-            "NODES_API_KEY": base64.urlsafe_b64encode(os.urandom(500))[5:260]
+            "NODES_API_KEY": base64.urlsafe_b64encode(os.urandom(500))[5:39]
         }
 
         if expire:

@@ -45,7 +45,7 @@ def run():
             return haxdb.data.output(success=0, value=1, message="NEW USER", meta=meta)
 
         # CREATE TOKEN
-        token = base64.urlsafe_b64encode(os.urandom(500))[5:260]
+        token = base64.urlsafe_b64encode(os.urandom(500))[5:39]
         expire = time.time() + int(config["AUTH"]["TOKEN_EXPIRE"])
         sql = "INSERT INTO AUTH_TOKEN (AUTH_TOKEN_TOKEN, AUTH_TOKEN_PEOPLE_ID, AUTH_TOKEN_EXPIRE) VALUES (%s,%s,%s)"
         db.query(sql, (token, people["PEOPLE_ID"], expire))
@@ -88,7 +88,7 @@ def run():
         people_id = db.lastrowid
         db.commit()
 
-        token = base64.urlsafe_b64encode(os.urandom(500))[5:260]
+        token = base64.urlsafe_b64encode(os.urandom(500))[5:39]
         expire = int(time.time()) + int(config["AUTH"]["TOKEN_EXPIRE"])
         sql = "INSERT INTO AUTH_TOKEN (AUTH_TOKEN_TOKEN, AUTH_TOKEN_PEOPLE_ID, AUTH_TOKEN_EXPIRE) VALUES (%s,%s,%s)"
         db.query(sql, (token, people_id, expire))
@@ -137,7 +137,7 @@ def run():
             return haxdb.data.output(success=0, message="TOKEN IS INVALID OR EXPIRED.\nLOG IN AGAIN.", meta=meta)
 
         # CREATE SESSION NODE
-        api_key = base64.urlsafe_b64encode(os.urandom(500))[5:260]
+        api_key = base64.urlsafe_b64encode(os.urandom(500))[5:39]
         expire = int(time.time() + 1800)  # 30 minutes
         node_name = "%s %s TOKEN AUTH" % (row["PEOPLE_NAME_FIRST"], row["PEOPLE_NAME_LAST"],)
         dba = row["PEOPLE_DBA"]
