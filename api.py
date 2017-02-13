@@ -481,9 +481,28 @@ class api_call:
         meta.update(self.get_meta("delete"))
         meta["rowid"] = rowid
 
+        udf_sql = """
+            DELETE
+            FROM UDF_DATA
+            WHERE
+            UDF_DATA_ROWID=%s
+            AND UDF_DATA_UDF_ID IN
+            (
+            SELECT UDF_ID
+            FROM UDF
+            WHERE
+            UDF_CONTEXT=%s
+            AND UDF_CONTEXT_ID=%s
+            )
+        """
+        db.query(udf_sql, (rowid, self.API_NAME, self.API_CONTEXT_ID))
+        if db.error:
+            return output(success=0, meta=meta, message=db.error)
+
         if not sql:
             rowid = rowid or var.get("rowid")
-            sql = "DELETE FROM {} WHERE {}=%s".format(self.API_NAME, self.API_ROWID)
+            sql = "DELETE FROM {} WHERE {}=%s".format(self.API_NAME,
+                                                      self.API_ROWID)
             params = (rowid,)
 
         db.query(sql, params)
