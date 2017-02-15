@@ -14,6 +14,7 @@ def init(app_db, app_config):
     t.add("FILES_CONTEXT", "CHAR", col_size=50)
     t.add("FILES_CONTEXT_ID", "INT")
     t.add("FILES_ROWID", "INT")
+    t.add("FILES_EXT", "CHAR", col_size=5)
     t.add("FILES_MIMETYPE", "CHAR", col_size=50)
     t.add("FILES_DATA", "BLOB")
     tables.append(t)
