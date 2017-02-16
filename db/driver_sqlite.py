@@ -17,7 +17,7 @@ class db:
         return sqlite3.Binary(data)
 
     def _FROMBLOB(self, data):
-        return data[0]
+        return str(data)
 
     def get_datatype(self, datatype):
         if datatype == "INT":
