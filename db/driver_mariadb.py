@@ -14,27 +14,42 @@ class db:
                                     database=config["DB"])
         self.cur = self.conn.cursor(dictionary=True)
 
+    def _TOBLOB(self, filedata):
+        return filedata
+
+    def _FROMBLOB(self, filedata):
+        return filedata
+
     def get_datatype(self, datatype, datasize):
         if datatype == "INT":
             return "INT" if not datasize else "INT(%s)" % str(datasize)
 
         if datatype == "VARCHAR" or datatype == "CHAR":
-            return "VARCHAR(50)" if not datasize else "VARCHAR(%s)" % str(datasize)
+            if not datasize:
+                return "VARCHAR(50)"
+            else:
+                return "VARCHAR({})".format(datasize)
 
         if datatype == "ASCII":
-            return "VARCHAR(50) CHARSET ASCII" if not datasize else "VARCHAR(%s) CHARSET ASCII" % str(datasize)
+            if not datasize:
+                return "VARCHAR(50) CHARSET ASCII"
+            else:
+                return "VARCHAR({}) CHARSET ASCII".format(datasize)
 
         if datatype == "BOOL":
             return "INT(1)"
 
         if datatype == "FLOAT":
-            return "FLOAT(10,4)" if not datasize else "FLOAT(%s,4)" % str(datasize)
+            if not datasize:
+                return "FLOAT(10,4)"
+            else:
+                return "FLOAT({},4)".format(datasize)
 
         if datatype == "TEXT":
             return "TEXT"
 
         if datatype == "BLOB":
-            return "BLOB"
+            return "MEDIUMBLOB"
 
         if datatype == "DATETIME":
             return "INTEGER"

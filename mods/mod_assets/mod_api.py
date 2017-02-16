@@ -74,6 +74,20 @@ def run():
     def mod_assets_save(rowid=None):
         return apis["ASSETS"].save_call(rowid=rowid)
 
+    @haxdb.app.route("/ASSETS/upload", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_ASSETS_upload():
+        return apis["ASSETS"].upload_call()
+
+    @haxdb.app.route("/ASSETS/download", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_assets_download(rowid=None):
+        return apis["ASSETS"].download_call()
+
     @haxdb.app.route("/ASSET_LINKS/list", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_LINKS/list/<int:ASSETS_ID>", methods=["POST", "GET"])
     def mod_asset_links_list(ASSETS_ID=None):
@@ -140,6 +154,20 @@ def run():
     @haxdb.no_readonly
     def mod_asset_links_delete(rowid=None):
         return apis["ASSET_LINKS"].delete_call(rowid=rowid)
+
+    @haxdb.app.route("/ASSET_LINKS/upload", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_ASSET_LINKS_upload():
+        return apis["ASSET_LINKS"].upload_call()
+
+    @haxdb.app.route("/ASSET_LINKS/download", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_ASSET_LINKS_download(rowid=None):
+        return apis["ASSET_LINKS"].download_call()
 
     @haxdb.app.route("/ASSET_AUTHS/list", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_AUTHS/list/<int:ASSETS_ID>", methods=["POST", "GET"])
@@ -214,3 +242,17 @@ def run():
     @haxdb.no_readonly
     def mod_asset_auths_save(rowid=None):
         return apis["ASSET_AUTHS"].save_call(rowid=rowid)
+
+    @haxdb.app.route("/ASSET_AUTHS/upload", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_ASSET_AUTHS_upload():
+        return apis["ASSET_AUTHS"].upload_call()
+
+    @haxdb.app.route("/ASSET_AUTHS/download", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_ASSET_AUTHS_download(rowid=None):
+        return apis["ASSET_AUTHS"].download_call()

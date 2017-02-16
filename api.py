@@ -1,6 +1,8 @@
+from flask import make_response
 from data import *
 import shlex
 import re
+import os.path
 
 db = None
 
@@ -30,20 +32,20 @@ def valid_value(col, val):
                 return True
             else:
                 return False
-        except:
+        except (ValueError, TypeError) as e:
             return False
 
     if col_type == "INT" or col_type == "ID" or col_type == "TIMESTAMP":
         try:
             int(val)
-        except:
+        except (ValueError, TypeError) as e:
             return False
         return True
 
     if col_type == "FLOAT":
         try:
             float(val)
-        except:
+        except (ValueError, TypeError) as e:
             return False
         return True
 
@@ -75,6 +77,11 @@ class api_call:
                 col["CATEGORY"] = "PRIMARY"
             self._COLS[col["NAME"]] = col
 
+    def is_udf(self, col):
+        if "UDF" in col and col["UDF"] == 1:
+            return True
+        return False
+
     def get_meta(self, action=None):
         meta = {}
         meta["api"] = self.API_NAME
@@ -99,7 +106,7 @@ class api_call:
                 if "LIST" in col:
                     try:
                         list_id = int(col["LIST"])
-                    except:
+                    except (ValueError, TypeError) as e:
                         list_id = 0
                     if list_id not in list_ids:
                         list_ids += (list_id, )
@@ -126,7 +133,7 @@ class api_call:
             lname = row["LISTS_NAME"]
             lid = row["LISTS_ID"]
             if lid not in lists:
-                lists[lid] = { "name": lname, "items": [] }
+                lists[lid] = {"name": lname, "items": []}
             list_item = {
                 "ID": row["LIST_ITEMS_ID"],
                 "VALUE": row["LIST_ITEMS_VALUE"],
@@ -151,6 +158,7 @@ class api_call:
         row = db.qaf(sql, (self.API_NAME, self.API_CONTEXT_ID, ))
         while row:
             col = {
+                    "UDF": 1,
                     "UDF_ID": row["UDF_ID"],
                     "NAME": row["UDF_NAME"],
                     "CATEGORY": row["UDF_CATEGORY"],
@@ -210,21 +218,62 @@ class api_call:
                             if valcount > 0:
                                 sql += " OR "
                             if val == "NULL" and op == "=":
-                                sql += "("
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_DATA_ROWID={} and UDF_ENABLED=1) < 1".format(self.API_ROWID)
-                                sql += " OR "
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_VALUE IS NULL and UDF_DATA_ROWID={}) > 0".format(self.API_ROWID)
-                                sql += ")"
+                                sql += """
+                                (
+                                    (SELECT COUNT(*)
+                                    FROM UDF, UDF_DATA
+                                    WHERE UDF_CONTEXT=%s
+                                    AND UDF_CONTEXT_ID=%s
+                                    and UDF_ENABLED=1
+                                    and UDF_ID=UDF_DATA_UDF_ID
+                                    and UDF_NAME=%s
+                                    and UDF_DATA_ROWID={}
+                                    and UDF_ENABLED=1) < 1
+                                OR
+                                    (SELECT COUNT(*)
+                                    FROM UDF, UDF_DATA
+                                    WHERE UDF_CONTEXT=%s
+                                    AND UDF_CONTEXT_ID=%s
+                                    and UDF_ENABLED=1
+                                    and UDF_ID=UDF_DATA_UDF_ID
+                                    and UDF_NAME=%s
+                                    and UDF_ENABLED=1
+                                    and UDF_DATA_VALUE IS NULL
+                                    and UDF_DATA_ROWID={}) > 0
+                                )""".format(self.API_ROWID, self.API_ROWID)
                                 params += (self.API_NAME, self.API_CONTEXT_ID)
                                 params += (col,)
                                 params += (self.API_NAME, self.API_CONTEXT_ID)
                                 params += (col,)
                             elif val == "NULL" and op == "!=":
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_ROWID={}) > 0".format(self.API_ROWID)
+                                sql += """
+                                    (
+                                    SELECT COUNT(*)
+                                    FROM UDF, UDF_DATA
+                                    WHERE UDF_CONTEXT=%s
+                                    AND UDF_CONTEXT_ID=%s
+                                    and UDF_ENABLED=1
+                                    and UDF_ID=UDF_DATA_UDF_ID
+                                    and UDF_NAME=%s
+                                    and UDF_ENABLED=1
+                                    and UDF_DATA_ROWID={}) > 0
+                                """.format(self.API_ROWID)
                                 params += (self.API_NAME, self.API_CONTEXT_ID)
                                 params += (col,)
                             else:
-                                sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_NAME=%s and UDF_ENABLED=1 and UDF_DATA_VALUE {} %s and UDF_DATA_ROWID={}) > 0".format(op, self.API_ROWID)
+                                sql += """
+                                 (
+                                 SELECT COUNT(*)
+                                 FROM UDF, UDF_DATA
+                                 WHERE UDF_CONTEXT=%s
+                                 AND UDF_CONTEXT_ID=%s
+                                 and UDF_ENABLED=1
+                                 and UDF_ID=UDF_DATA_UDF_ID
+                                 and UDF_NAME=%s
+                                 and UDF_ENABLED=1
+                                 and UDF_DATA_VALUE {} %s
+                                 and UDF_DATA_ROWID={}) > 0
+                                 """.format(op, self.API_ROWID)
                                 params += (self.API_NAME, self.API_CONTEXT_ID)
                                 params += (col, val,)
                             valcount += 1
@@ -243,7 +292,17 @@ class api_call:
                             valcount += 1
                     if valcount > 0:
                         sql += " OR "
-                    sql += " (SELECT COUNT(*) FROM UDF, UDF_DATA WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ENABLED=1 and UDF_ID=UDF_DATA_UDF_ID and UDF_ENABLED=1 and UDF_DATA_VALUE LIKE %s and UDF_DATA_ROWID={}) > 0".format(self.API_ROWID)
+                    sql += """
+                    (SELECT COUNT(*)
+                    FROM UDF, UDF_DATA
+                    WHERE UDF_CONTEXT=%s
+                    AND UDF_CONTEXT_ID=%s
+                    and UDF_ENABLED=1
+                    and UDF_ID=UDF_DATA_UDF_ID
+                    and UDF_ENABLED=1
+                    and UDF_DATA_VALUE LIKE %s
+                    and UDF_DATA_ROWID={}) > 0
+                    """.format(self.API_ROWID)
                     params += (self.API_NAME, self.API_CONTEXT_ID, query)
                     sql += ")"
         return sql, params
@@ -252,7 +311,6 @@ class api_call:
         import csv
         from datetime import datetime
         from StringIO import StringIO
-        from flask import make_response
 
         if not headers:
             cols = self.get_cols()
@@ -319,7 +377,7 @@ class api_call:
                     sql += """
                         AND {} in ({})
                         """.format(self.API_ROWID, rowids)
-                except:
+                except (ValueError, TypeError) as e:
                     pass
 
         query_sql, query_params = self.build_query(query)
@@ -415,8 +473,9 @@ class api_call:
             row = calc_row_function(dict(row))
         return output(success=1, meta=meta, data=row)
 
-    def new_call(self, meta=None, defaults=None):
+    def new_call(self, table=None, meta=None, defaults=None):
         defaults = defaults or {}
+        table = table or self.API_NAME
 
         meta = meta or {}
         meta.update(self.get_meta("new"))
@@ -452,7 +511,8 @@ class api_call:
         sql = """
         INSERT INTO {} ({})
         VALUES ({})
-        """.format(self.API_NAME, ",".join(col_names), ",".join(("%s",)*len(col_names)))
+        """.format(table,
+                   ",".join(col_names), ",".join(("%s",)*len(col_names)))
         db.query(sql, col_params)
 
         if db.error:
@@ -462,21 +522,40 @@ class api_call:
         if meta["rowcount"] > 0:
             meta["rowid"] = db.lastrowid
             if udf_names:
-                sql = "DELETE FROM UDF WHERE UDF_CONTEXT=%s AND UDF_CONTEXT_ID=%s and UDF_ROWID=%s"
-                db.query(sql, (self.API_NAME, self.API_CONTEXT_ID, meta["rowid"]))
+                sql = """
+                DELETE FROM UDF
+                WHERE UDF_CONTEXT=%s
+                AND UDF_CONTEXT_ID=%s
+                and UDF_ROWID=%s
+                """
+                db.query(sql, (self.API_NAME,
+                               self.API_CONTEXT_ID,
+                               meta["rowid"]))
                 for udf_key in udf_names.keys():
                     udf_name = udf_names[udf_key]
                     udf_val = udf_params[udf_key]
-                    sql = "INSERT INTO UDF (UDF_CONTEXT, UDF_CONTEXT_ID, UDF_NAME, UDF_ROWID) VALUES (%s, %s, %s, %s)"
-                    db.query(sql, (self.API_NAME, self.API_CONTEXT_ID, udf_name, udf_val))
+                    sql = """
+                    INSERT INTO UDF
+                    (UDF_CONTEXT, UDF_CONTEXT_ID, UDF_NAME, UDF_ROWID)
+                    VALUES (%s, %s, %s, %s)
+                    """
+                    db.query(sql, (self.API_NAME,
+                                   self.API_CONTEXT_ID,
+                                   udf_name,
+                                   udf_val))
                     if db.error:
                         return output(success=0, meta=meta, message=db.error)
             db.commit()
-            return output(success=1, meta=meta, message="{} ROWS CREATED".format(meta["rowcount"]), value=db.lastrowid)
+            return output(success=1,
+                          meta=meta,
+                          message="{} ROWS CREATED".format(meta["rowcount"]),
+                          value=db.lastrowid)
 
         return output(success=0, meta=meta, message="NO ROWS CREATED")
 
-    def delete_call(self, sql=None, params=None, meta=None, rowid=None):
+    def delete_call(self, table=None, sql=None, params=None,
+                    meta=None, rowid=None):
+        table = table or self.API_NAME
         meta = meta or {}
         meta.update(self.get_meta("delete"))
         meta["rowid"] = rowid
@@ -501,8 +580,7 @@ class api_call:
 
         if not sql:
             rowid = rowid or var.get("rowid")
-            sql = "DELETE FROM {} WHERE {}=%s".format(self.API_NAME,
-                                                      self.API_ROWID)
+            sql = "DELETE FROM {} WHERE {}=%s".format(table, self.API_ROWID)
             params = (rowid,)
 
         db.query(sql, params)
@@ -516,20 +594,18 @@ class api_call:
 
         return output(success=0, meta=meta, message="NO ROWS DELETED")
 
-    def save_call(self, meta=None, rowid=None):
+    def save_call(self, table=None, meta=None, rowid=None):
         rowid = rowid or var.get("rowid")
+        table = table or self.API_NAME
 
         meta = meta or {}
         meta.update(self.get_meta("save"))
         meta["rowid"] = rowid
 
-        try:
-            meta["updated"] = meta["updated"]
-        except:
+        if "updated" not in meta:
             meta["updated"] = []
-        try:
-            meta["rowcount"] = meta["rowcount"]
-        except:
+
+        if "rowcount" not in meta:
             meta["rowcount"] = 0
 
         col_names = []
@@ -545,6 +621,16 @@ class api_call:
                 if "EDIT" in col and col["EDIT"] != 1:
                     errors += "{} IS NOT EDITABLE".format(col["NAME"])
                 else:
+                    if col["TYPE"] == "FILE":
+                        sql = """
+                            DELETE FROM FILES WHERE
+                            FILES_CONTEXT=%s
+                            AND FILES_CONTEXT_ID=%s
+                            AND FILES_ROWID=%s
+                        """
+                        db.query(sql, (self.API_NAME,
+                                       self.API_CONTEXT_ID,
+                                       rowid))
                     if valid_value(col, val):
                         if col["NAME"] in self._COLS:
                             meta["updated"].append(col["NAME"])
@@ -566,7 +652,7 @@ class api_call:
         if col_names:
             sql = """
             UPDATE {} SET {} WHERE {}=%s
-            """.format(self.API_NAME, ",".join(col_names), self.API_ROWID)
+            """.format(table, ",".join(col_names), self.API_ROWID)
             col_params += (rowid,)
             db.query(sql, col_params)
             if db.error:
@@ -597,3 +683,104 @@ class api_call:
             return output(success=1, meta=meta, message="SAVED")
 
         return output(success=0, meta=meta, message="NOTHING UPDATED")
+
+    def download_call(self, rowid=None, field_name=None):
+        rowid = rowid or var.get("rowid")
+        field_name = field_name or var.get("field_name")
+        sql = """
+            SELECT * FROM FILES
+            WHERE FILES_CONTEXT=%s
+            AND FILES_CONTEXT_ID=%s
+            AND FILES_FIELD_NAME=%s
+            AND FILES_ROWID=%s
+        """
+        row = db.qaf(sql, (self.API_NAME, self.API_CONTEXT_ID,
+                           field_name, rowid))
+        if not row:
+            msg = "UNKNOWN FIELD: {}".format(field_name)
+            return output(success=0, message=msg)
+
+        r = make_response(db._FROMBLOB(row["FILES_DATA"]))
+
+        cd = "attachment; filename={}.{}{}".format(self.API_NAME,
+                                                   field_name,
+                                                   row["FILES_EXT"])
+        r.headers["Content-Disposition"] = cd
+
+        return r
+
+    def upload_call(self, table=None, rowid=None):
+        rowid = rowid or var.get("rowid")
+        table = table or self.API_NAME
+        field_name = var.get("field_name")
+        cols = self.get_cols()
+
+        found = False
+        for col in cols:
+            if col["NAME"] == field_name:
+                found = True
+                break
+
+        if not found:
+            msg = "UNKNOWN FIELD: {}".field_name
+            return output(success=0, message=msg)
+
+        if "file" not in request.files:
+            return output(success=0, message="NO FILE UPLOADED")
+
+        file = request.files["file"]
+        if file.filename == '':
+            return output(success=0, message="NOTHING UPDATED")
+
+        fext = os.path.splitext(file.filename)[1]
+
+        filedata = file.read()
+        file.close()
+
+        sql = """
+            DELETE FROM FILES
+            WHERE FILES_CONTEXT=%s
+            AND FILES_CONTEXT_ID=%s
+            AND FILES_FIELD_NAME=%s
+            AND FILES_ROWID=%s
+        """
+        db.query(sql, (self.API_NAME, self.API_CONTEXT_ID, field_name, rowid))
+        sql = """
+            INSERT INTO FILES
+            (FILES_CONTEXT, FILES_CONTEXT_ID, FILES_FIELD_NAME, FILES_MIMETYPE,
+             FILES_ROWID, FILES_EXT, FILES_DATA)
+            VALUES
+            (%s, %s, %s, %s, %s, %s, %s)
+        """
+        db.query(sql, (self.API_NAME, self.API_CONTEXT_ID, field_name,
+                       file.mimetype, rowid, fext, db._TOBLOB(filedata)))
+        if db.error:
+            return output(success=0, message=db.error)
+
+        file_rowid = db.lastrowid
+
+        if self.is_udf(col):
+            sql = """
+                DELETE FROM UDF_DATA
+                WHERE
+                UDF_DATA_ROWID=%s
+                AND UDF_DATA_UDF_ID=%s
+            """
+            db.query(sql, (rowid, col["UDF_ID"]))
+            sql = """
+                INSERT INTO UDF_DATA
+                (UDF_DATA_UDF_ID, UDF_DATA_ROWID, UDF_DATA_VALUE)
+                VALUES (%s, %s, %s)
+            """
+            db.query(sql, (col["UDF_ID"], rowid, file_rowid))
+        else:
+            sql = """
+                UPDATE {} SET {}=%s WHERE {}=%s
+            """.format(table, field_name, self.API_ROWID)
+            db.query(sql, (file_rowid, rowid))
+
+        if db.error:
+            return output(success=0, message=db.error)
+
+        db.commit()
+        return output(success=1, message="FILE UPLOADED")

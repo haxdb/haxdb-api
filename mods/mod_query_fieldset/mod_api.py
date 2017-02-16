@@ -31,6 +31,7 @@ def get_fieldset_cols(rowid=None):
         row = db.next()
     return FIELDSET_COLS
 
+
 def init(app_haxdb, mod_def):
     global haxdb, db, config, tools, apis
     haxdb = app_haxdb
@@ -193,6 +194,20 @@ def run():
     def mod_FIELDSET_delete(rowid=None):
         return apis["FIELDSET"].delete_call(rowid=rowid)
 
+    @haxdb.app.route("/FIELDSET/upload", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_FIELDSET_upload():
+        return apis["FIELDSET"].upload_call()
+
+    @haxdb.app.route("/FIELDSET/download", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_FIELDSET_download(rowid=None):
+        return apis["FIELDSET"].download_call()
+
     @haxdb.app.route("/QUERY/list", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
@@ -264,3 +279,17 @@ def run():
     @haxdb.no_readonly
     def mod_QUERY_delete(rowid=None):
         return apis["QUERY"].delete_call(rowid=rowid)
+
+    @haxdb.app.route("/QUERY/upload", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_QUERY_upload():
+        return apis["QUERY"].upload_call()
+
+    @haxdb.app.route("/QUERY/download", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_QUERY_download(rowid=None):
+        return apis["QUERY"].download_call()
