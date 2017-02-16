@@ -13,6 +13,7 @@ def init(app_db, app_config):
     t = db.tables.table("FILES")
     t.add("FILES_CONTEXT", "CHAR", col_size=50)
     t.add("FILES_CONTEXT_ID", "INT")
+    t.add("FILES_FIELD_NAME", "CHAR", col_size=50)
     t.add("FILES_ROWID", "INT")
     t.add("FILES_EXT", "CHAR", col_size=5)
     t.add("FILES_MIMETYPE", "CHAR", col_size=50)
@@ -22,6 +23,7 @@ def init(app_db, app_config):
     indexes = []
     indexes.append(db.tables.index("FILES", ["FILES_CONTEXT",
                                              "FILES_CONTEXT_ID",
+                                             "FILES_FIELD_NAME",
                                              "FILES_ROWID"], unique=True))
 
     db.create(tables=tables, indexes=indexes)

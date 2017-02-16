@@ -686,14 +686,16 @@ class api_call:
 
     def download_call(self, rowid=None, field_name=None):
         rowid = rowid or var.get("rowid")
-        field_name = var.get("field_name")
+        field_name = field_name or var.get("field_name")
         sql = """
             SELECT * FROM FILES
             WHERE FILES_CONTEXT=%s
             AND FILES_CONTEXT_ID=%s
+            AND FILES_FIELD_NAME=%s
             AND FILES_ROWID=%s
         """
-        row = db.qaf(sql, (self.API_NAME, self.API_CONTEXT_ID, rowid))
+        row = db.qaf(sql, (self.API_NAME, self.API_CONTEXT_ID,
+                           field_name, rowid))
         if not row:
             msg = "UNKNOWN FIELD: {}".format(field_name)
             return output(success=0, message=msg)
@@ -739,18 +741,19 @@ class api_call:
             DELETE FROM FILES
             WHERE FILES_CONTEXT=%s
             AND FILES_CONTEXT_ID=%s
+            AND FILES_FIELD_NAME=%s
             AND FILES_ROWID=%s
         """
-        db.query(sql, (self.API_NAME, self.API_CONTEXT_ID, rowid))
+        db.query(sql, (self.API_NAME, self.API_CONTEXT_ID, field_name, rowid))
         sql = """
             INSERT INTO FILES
-            (FILES_CONTEXT, FILES_CONTEXT_ID, FILES_MIMETYPE,
+            (FILES_CONTEXT, FILES_CONTEXT_ID, FILES_FIELD_NAME, FILES_MIMETYPE,
              FILES_ROWID, FILES_EXT, FILES_DATA)
             VALUES
-            (%s, %s, %s, %s, %s, %s)
+            (%s, %s, %s, %s, %s, %s, %s)
         """
-        db.query(sql, (self.API_NAME, self.API_CONTEXT_ID, file.mimetype,
-                       rowid, fext, db._TOBLOB(filedata)))
+        db.query(sql, (self.API_NAME, self.API_CONTEXT_ID, field_name,
+                       file.mimetype, rowid, fext, db._TOBLOB(filedata)))
         if db.error:
             return output(success=0, message=db.error)
 

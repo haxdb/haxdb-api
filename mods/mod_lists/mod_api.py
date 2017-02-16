@@ -66,6 +66,20 @@ def run():
     def mod_lists_save(rowid=None):
         return apis["LISTS"].save_call(rowid=rowid)
 
+    @haxdb.app.route("/LISTS/upload", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_LISTS_upload():
+        return apis["LISTS"].upload_call()
+
+    @haxdb.app.route("/LISTS/download", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_LISTS_download(rowid=None):
+        return apis["LISTS"].download_call()
+
     @haxdb.app.route("/LIST_ITEMS/list", methods=["POST", "GET"])
     @haxdb.app.route("/LIST_ITEMS/list/<int:LISTS_ID>", methods=["POST", "GET"])
     @haxdb.require_auth
@@ -86,6 +100,7 @@ def run():
         """
         params = (LISTS_ID,)
 
+        apis["LIST_ITEMS"].API_CONTEXT_ID = LISTS_ID
         return apis["LIST_ITEMS"].list_call(table=t, params=params, meta=meta)
 
     @haxdb.app.route("/LIST_ITEMS/view", methods=["POST", "GET"])
@@ -98,6 +113,16 @@ def run():
             row["ROW_NAME"] = "{}: {}".format(row["LISTS_NAME"],
                                               row["LIST_ITEMS_VALUE"])
             return row
+
+        rowid = rowid or haxdb.data.var.get("rowid")
+
+        sql = """
+        SELECT LIST_ITEMS_LISTS_ID FROM LIST_ITEMS
+        WHERE LIST_ITEMS_ID=%s
+        """
+        row = db.qaf(sql, (rowid,))
+        if row:
+            apis["LIST_ITEMS"].API_CONTEXT_ID = LISTS_ID
 
         t = """
             (
@@ -164,3 +189,33 @@ def run():
     @haxdb.no_readonly
     def mod_list_items_delete(rowid=None):
         return apis["LIST_ITEMS"].delete_call(rowid=rowid)
+
+    @haxdb.app.route("/LIST_ITEMS/upload", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_LIST_ITEMS_upload():
+        rowid = rowid or haxdb.data.var.get("rowid")
+        sql = """
+        SELECT LIST_ITEMS_LISTS_ID FROM LIST_ITEMS
+        WHERE LIST_ITEMS_ID=%s
+        """
+        row = db.qaf(sql, (rowid,))
+        if row:
+            apis["LIST_ITEMS"].API_CONTEXT_ID = LISTS_ID
+        return apis["LIST_ITEMS"].upload_call()
+
+    @haxdb.app.route("/LIST_ITEMS/download", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_LIST_ITEMS_download(rowid=None):
+        rowid = rowid or haxdb.data.var.get("rowid")
+        sql = """
+        SELECT LIST_ITEMS_LISTS_ID FROM LIST_ITEMS
+        WHERE LIST_ITEMS_ID=%s
+        """
+        row = db.qaf(sql, (rowid,))
+        if row:
+            apis["LIST_ITEMS"].API_CONTEXT_ID = LISTS_ID
+        return apis["LIST_ITEMS"].download_call()

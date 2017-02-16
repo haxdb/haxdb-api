@@ -166,3 +166,24 @@ def run():
             return haxdb.data.output(success=0, meta=meta, message=message)
 
         return apis["NODES"].delete_call(rowid=rowid)
+
+    @haxdb.app.route("/NODES/upload", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_NODES_upload():
+        key_id = haxdb.session.get("nodes_id")
+
+        if int(key_id) == int(rowid):
+            message = "CANNOT UPDATE KEY YOU ARE CURRENTLY USING"
+            meta = apis["NODES"].get_meta("upload")
+            return haxdb.data.output(success=0, meta=meta, message=message)
+
+        return apis["NODES"].upload_call()
+
+    @haxdb.app.route("/NODES/download", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_NODES_download():
+        return apis["NODES"].download_call()

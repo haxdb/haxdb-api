@@ -98,6 +98,24 @@ def run():
     @haxdb.no_readonly
     @haxdb.require_dba
     def mod_udf_def_delete(rowid=None):
+        rowid = rowid or haxdb.data.var.get("rowid")
+
+        sql = """
+        SELECT UDF_CONTEXT, UDF_CONTEXT_ID, UDF_NAME FROM UDF
+        WHERE UDF_ID=%s
+        """
+        row = db.qaf(sql, (rowid,))
+        if row:
+            sql = """
+                DELETE FROM FILES WHERE
+                FILES_CONTEXT=%s
+                AND FILES_CONTEXT_ID=%s
+                AND FILES_FIELD_NAME=%s
+            """
+            db.query(sql, (row["UDF_CONTEXT"],
+                           row["UDF_CONTEXT_ID"],
+                           row["UDF_NAME"]))
+
         return apis["UDF"].delete_call(rowid=rowid)
 
     @haxdb.app.route("/UDF/save", methods=["GET", "POST"])

@@ -278,3 +278,17 @@ def run():
     @haxdb.no_readonly
     def mod_PEOPLE_RFID_delete(rowid=None):
         return apis["PEOPLE_RFID"].delete_call(rowid=rowid)
+
+    @haxdb.app.route("/PEOPLE_RFID/upload", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_PEOPLE_RFID_upload():
+        return apis["PEOPLE_RFID"].upload_call()
+
+    @haxdb.app.route("/PEOPLE_RFID/download", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_PEOPLE_RFID_download(rowid=None):
+        return apis["PEOPLE_RFID"].download_call()
