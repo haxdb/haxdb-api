@@ -32,20 +32,20 @@ def valid_value(col, val):
                 return True
             else:
                 return False
-        except ValueError:
+        except (ValueError, TypeError) as e:
             return False
 
     if col_type == "INT" or col_type == "ID" or col_type == "TIMESTAMP":
         try:
             int(val)
-        except ValueError:
+        except (ValueError, TypeError) as e:
             return False
         return True
 
     if col_type == "FLOAT":
         try:
             float(val)
-        except ValueError:
+        except (ValueError, TypeError) as e:
             return False
         return True
 
@@ -106,7 +106,7 @@ class api_call:
                 if "LIST" in col:
                     try:
                         list_id = int(col["LIST"])
-                    except ValueError:
+                    except (ValueError, TypeError) as e:
                         list_id = 0
                     if list_id not in list_ids:
                         list_ids += (list_id, )
@@ -377,7 +377,7 @@ class api_call:
                     sql += """
                         AND {} in ({})
                         """.format(self.API_ROWID, rowids)
-                except ValueError:
+                except (ValueError, TypeError) as e:
                     pass
 
         query_sql, query_params = self.build_query(query)
