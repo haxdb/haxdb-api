@@ -14,7 +14,10 @@ class db:
                                     database=config["DB"])
         self.cur = self.conn.cursor(dictionary=True)
 
-    def _FILETYPE(self, filedata):
+    def _TOBLOB(self, filedata):
+        return filedata
+
+    def _FROMBLOB(self, filedata):
         return filedata
 
     def get_datatype(self, datatype, datasize):
@@ -40,13 +43,13 @@ class db:
             if not datasize:
                 return "FLOAT(10,4)"
             else:
-                reutrn "FLOAT({},4)".format(datasize)
+                return "FLOAT({},4)".format(datasize)
 
         if datatype == "TEXT":
             return "TEXT"
 
         if datatype == "BLOB":
-            return "BLOB"
+            return "MEDIUMBLOB"
 
         if datatype == "DATETIME":
             return "INTEGER"

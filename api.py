@@ -698,7 +698,7 @@ class api_call:
             msg = "UNKNOWN FIELD: {}".format(field_name)
             return output(success=0, message=msg)
 
-        r = make_response(row["FILES_DATA"][0])
+        r = make_response(db._FROMBLOB(row["FILES_DATA"]))
 
         cd = "attachment; filename={}.{}{}".format(self.API_NAME,
                                                    field_name,
@@ -733,7 +733,6 @@ class api_call:
         fext = os.path.splitext(file.filename)[1]
 
         filedata = file.read()
-        print filedata
         file.close()
 
         sql = """
@@ -751,7 +750,7 @@ class api_call:
             (%s, %s, %s, %s, %s, %s)
         """
         db.query(sql, (self.API_NAME, self.API_CONTEXT_ID, file.mimetype,
-                       rowid, fext, db._FILETYPE(filedata)))
+                       rowid, fext, db._TOBLOB(filedata)))
         if db.error:
             return output(success=0, message=db.error)
 

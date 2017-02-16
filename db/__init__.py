@@ -11,8 +11,11 @@ class db:
         self.config = config
         self.logger = logger
 
-    def _FILETYPE(self, filedata):
-        return self.db._FILETYPE(filedata)
+    def _TOBLOB(self, filedata):
+        return self.db._TOBLOB(filedata)
+
+    def _FROMBLOB(self, blobdata):
+        return self.db._FROMBLOB(blobdata)
 
     def open(self):
         if self.config["TYPE"] == "SQLITE":

@@ -13,8 +13,11 @@ class db:
         self.cur.execute("PRAGMA journal_mode=WAL")
         self.cur.execute("PRAGMA foreign_keys=ON")
 
-    def _FILETYPE(self, data):
+    def _TOBLOB(self, data):
         return sqlite3.Binary(data)
+
+    def _FROMBLOB(self, data):
+        return data[0]
 
     def get_datatype(self, datatype):
         if datatype == "INT":
