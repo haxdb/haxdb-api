@@ -722,7 +722,7 @@ class api_call:
                 break
 
         if not found:
-            msg = "UNKNOWN FIELD: {}".field_name
+            msg = "UNKNOWN FIELD: {}".format(field_name)
             return output(success=0, message=msg)
 
         if "file" not in request.files:
