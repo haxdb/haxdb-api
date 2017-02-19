@@ -17,7 +17,7 @@ Clone repo and then set up environment
 ```
 mkdir www
 cd www
-git clone https://github.com/jondale/haxdb.git haxdb-api
+git clone https://github.com/haxdb/haxdb-api.git haxdb-api
 cd haxdb-api
 virtualenv haxdb-env
 source haxdb-env/bin/activate

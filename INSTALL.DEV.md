@@ -8,7 +8,7 @@ production.
 
 ```
 sudo dnf install python-pip python-devel git python2-virtualen
-git clone https://github.com/jondale/haxdb.git haxdb
+git clone https://github.com/haxdb/haxdb-api.git haxdb
 cd haxdb
 virtualenv env
 source env/bin/activate
