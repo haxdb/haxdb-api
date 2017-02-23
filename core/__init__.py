@@ -29,23 +29,23 @@ def read_mod_config(config_file):
     return config
 
 
-def init(app_config, app_haxdb, app_db):
+def init(hdb):
     global config, haxdb, db
-    config = app_config
-    haxdb = app_haxdb
-    db = app_db
+    haxdb = hdb
+    config = haxdb.config
+    db = haxdb.db
 
 
 def run():
     global mods, config, haxdb, db
-    sys.path.insert(0, config["MOD"]["PATH"])
-    mod_names = [name for name in os.listdir(config["MOD"]["PATH"])
-                 if os.path.isdir(os.path.join(config["MOD"]["PATH"], name))]
+    sys.path.insert(0, config["CORE"]["PATH"])
+    mod_names = [name for name in os.listdir(config["CORE"]["PATH"])
+                 if os.path.isdir(os.path.join(config["CORE"]["PATH"], name))]
 
     db.open()
 
     for mod_name in mod_names:
-        mod_config_file = os.path.join(config["MOD"]["PATH"], mod_name, "mod.cfg")
+        mod_config_file = os.path.join(config["CORE"]["PATH"], mod_name, "mod.cfg")
         mod_config = read_mod_config(mod_config_file)
         if int(mod_config["MOD"]["ENABLED"]) == 1:
             haxdb.logger.info("{}.init()".format(mod_name))

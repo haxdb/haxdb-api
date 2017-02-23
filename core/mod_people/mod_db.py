@@ -34,7 +34,7 @@ def run():
 
     db.query(insert_list, ("MEMBERSHIPS",), squelch=True)
 
-    row = db.qaf(find_list, ("MEMBERSHIPS",))
+    row = db.qaf(find_list, ("MEMBERSHIPS",), squelch=True)
     if row:
         db.query(insert_list_item, (row["LISTS_ID"], "TRIAL", "TRIAL",), squelch=True)
         db.query(insert_list_item, (row["LISTS_ID"], "MEMBER", "MEMBER",), squelch=True)

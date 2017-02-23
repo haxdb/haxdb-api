@@ -39,7 +39,7 @@ class db:
         self.rowcount = self.db.rowcount
         self.lastrowid = self.db.lastrowid
         self.error = self.db.error
-        if int(self.config["DEBUG"]) == 1:
+        if int(self.config["DEBUG"]) == 1 and not squelch:
             sep = "##########################################################"
             sep += "#####################"
             self.logger.debug(sep)
@@ -53,8 +53,8 @@ class db:
 
         return result
 
-    def qaf(self, sql, data=None):
-        self.query(sql, data)
+    def qaf(self, sql, data=None, squelch=False):
+        self.query(sql, data, squelch=squelch)
         if self.error:
             return False
         return self.next()
