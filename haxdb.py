@@ -1,8 +1,6 @@
 from functools import wraps
 from flask import Flask, session
 import os
-import time
-import shlex
 from datetime import timedelta
 from flask_cors import CORS
 import data
@@ -15,6 +13,7 @@ VERSION = "v1"
 config = None
 db = None
 logger = None
+output = None
 
 
 def init(app_config, app_db, app_logger):
@@ -23,12 +22,14 @@ def init(app_config, app_db, app_logger):
     db = app_db
     logger = app_logger
     api.init(db)
+    output = api.output
 
 
 def run():
     debug = (int(config["DEBUG"]) == 1)
     CORS(app, origin=config["ORIGINS"])
-    app.permanent_session_lifetime = timedelta(seconds=int(config["SESSION_TIMEOUT"]))
+    timeout = config["SESSION_TIMEOUT"]
+    app.permanent_session_lifetime = timedelta(seconds=int(timeout))
     app.run(config["HOST"], int(config["PORT"]), debug=debug)
 
 
@@ -50,7 +51,8 @@ def require_auth(view_function):
         authenticated = data.session.get("api_authenticated")
 
         if not (key and authenticated == 1):
-            return data.output(success=0, message="NOT AUTHENTICATED", authenticated=False)
+            msg = "NOT AUTHENTICATED"
+            return output(success=0, message=msg, authenticated=False)
         return view_function(*args, **kwargs)
 
     return decorated_function
@@ -62,7 +64,7 @@ def require_dba(view_function):
         session.permanent = True
         dba = data.session.get("api_dba")
         if (not dba or (dba and int(dba) != 1)):
-            return data.output(success=0, message="INVALID PERMISSION")
+            return output(success=0, message="INVALID PERMISSION")
         return view_function(*args, **kwargs)
 
     return decorated_function
@@ -75,7 +77,7 @@ def no_readonly(view_function):
         readonly = data.session.get("api_readonly")
 
         if (readonly and readonly == 1):
-            return data.output(success=0, message="INVALID PERMISSION")
+            return output(success=0, message="INVALID PERMISSION")
         return view_function(*args, **kwargs)
 
     return decorated_function

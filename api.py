@@ -12,6 +12,31 @@ def init(app_db):
     db = app_db
 
 
+def output(success=0, message=None, value=None, data=None,
+           meta=None, authenticated=True):
+    output_format = var.get("format")
+    include_meta = var.get("meta")
+
+    out = {}
+    if include_meta:
+        out["meta"] = meta
+    out["success"] = success
+    out["value"] = value
+    out["message"] = message
+
+    if output_format and output_format in ("min"):
+        return json.dumps(out)
+
+    if output_format and output_format == "msgpack":
+        return msgpack.packb(out)
+
+    out["timestamp"] = time.time()
+    out["authenticated"] = 1 if authenticated else 0
+    out["data"] = None if not data else data
+
+    return json.dumps(out)
+
+
 def valid_value(col, val):
     if val == '':
         return True

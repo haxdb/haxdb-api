@@ -157,42 +157,42 @@ def run():
             if not rfid:
                 # NO API KEY OR RFID SENT
                 msg = "UNREGISTERED"
-                return haxdb.data.output(success=0, message=msg)
+                return haxdb.output(success=0, message=msg)
 
             if not person:
                 # UNKNOWN OR DISABLED RFID
                 msg = "INVALID RFID"
-                return haxdb.data.output(success=0, message=msg)
+                return haxdb.output(success=0, message=msg)
 
             if not boolval(person["PEOPLE_DBA"]):
                 # RFID MATCHES BUT NOT A DBA
                 msg = "MUST BE DBA TO REGISTER"
-                return haxdb.data.output(success=0, message=msg)
+                return haxdb.output(success=0, message=msg)
 
             # RFID MATCHES WITH DBA
             new_api_key = register_node(ip=ip)
             msg = "NODE REGISTERED\n"
             msg += "ACTIVATION REQUIRED."
-            return haxdb.data.output(success=0, value=new_api_key, message=msg)
+            return haxdb.output(success=0, value=new_api_key, message=msg)
 
         else:
             # API KEY MATCHES NODE
 
             if not boolval(node["NODES_ENABLED"]):
                 msg = "NODE REGISTERED\nNOT ACTIVE"
-                return haxdb.data.output(success=0, message=msg)
+                return haxdb.output(success=0, message=msg)
 
             asset = get_asset(node["NODES_ASSETS_ID"])
 
             if not asset:
                 # NO ASSET ASSIGNED TO NODE
                 msg = "NO ASSET ASSIGNED"
-                return haxdb.data.output(success=0, message=msg)
+                return haxdb.output(success=0, message=msg)
 
             if not boolval(asset["REQUIRE_RFID"]):
                 # NO RFID REQUIRED TO ACTIVATE
                 msg = "{}\nACTIVATED".format(asset["ASSETS_NAME"])
-                return haxdb.data.output(success=1, message=msg)
+                return haxdb.output(success=1, message=msg)
 
             # VALID RFID REQUIRED
             if not person:
@@ -201,24 +201,24 @@ def run():
                     msg = "{}".format(asset["ASSETS_NAME"])
                 else:
                     msg = "{}\nINVALID RFID".format(asset["ASSETS_NAME"])
-                return haxdb.data.output(success=0, message=msg)
+                return haxdb.output(success=0, message=msg)
 
             if not boolval(asset["REQUIRE_AUTH"]):
                 # ONLY VALID RFID REQUIRED
                 msg = "{}\n{} {}".format(asset["ASSETS_NAME"],
                                          person["PEOPLE_NAME_FIRST"],
                                          person["PEOPLE_NAME_LAST"])
-                return haxdb.data.output(success=1, message=msg)
+                return haxdb.output(success=1, message=msg)
 
             # VALID RFID AND ASSET AUTH REQUIRED
             if not is_person_authed(asset["ASSETS_ID"], person["PEOPLE_ID"]):
                 msg = "{}\nREQUIRES PRIOR AUTH".format(asset["ASSETS_NAME"])
-                return haxdb.data.output(success=0, message=msg)
+                return haxdb.output(success=0, message=msg)
 
             msg = "{}\n{} {}".format(asset["ASSETS_NAME"],
                                      person["PEOPLE_NAME_FIRST"],
                                      person["PEOPLE_NAME_LAST"])
-            return haxdb.data.output(success=1, message=msg)
+            return haxdb.output(success=1, message=msg)
 
 
 ##############################################################################

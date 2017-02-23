@@ -109,7 +109,7 @@ def run():
             """
             db.query(sql, (rowid,))
             if db.error:
-                return haxdb.data.output(success=0, meta=m, message=db.error)
+                return haxdb.output(success=0, meta=m, message=db.error)
 
             sql = """
             INSERT INTO FIELDSET_COLS
@@ -122,7 +122,7 @@ def run():
                 order += 1
                 db.query(sql, (rowid, col, order))
                 if db.error:
-                    return haxdb.data.output(success=0, meta=m, message=db.error)
+                    return haxdb.output(success=0, meta=m, message=db.error)
                 total += db.rowcount
             m["rowcount"] = total
             db.commit()
@@ -160,7 +160,7 @@ def run():
         p = (FIELDSET_NAME, FIELDSET_CONTEXT, FIELDSET_CONTEXT_ID, people_id)
         db.query(sql, p)
         if db.error:
-            return haxdb.data.output(success=0, message=db.error, meta=m)
+            return haxdb.output(success=0, message=db.error, meta=m)
         rowid = db.lastrowid
         m["rowid"] = rowid
 
@@ -184,7 +184,7 @@ def run():
 
         m["rowcount"] = total
         db.commit()
-        return haxdb.data.output(success=1, meta=m, message="SAVED")
+        return haxdb.output(success=1, meta=m, message="SAVED")
 
     @haxdb.app.route("/FIELDSET/delete", methods=["GET", "POST"])
     @haxdb.app.route("/FIELDSET/delete/<int:rowid>", methods=["GET", "POST"])

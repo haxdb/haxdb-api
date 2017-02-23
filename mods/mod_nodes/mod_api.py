@@ -132,7 +132,7 @@ def run():
             except:
                 message = "expire should be a valid integer (seconds)"
                 meta = apis["NODES"].get_meta("new")
-                return haxdb.data.output(success=0, meta=meta, message=message)
+                return haxdb.output(success=0, meta=meta, message=message)
 
         return apis["NODES"].new_call(defaults=defaults)
 
@@ -148,7 +148,7 @@ def run():
         if int(key_id) == int(rowid):
             message = "CANNOT UPDATE KEY YOU ARE CURRENTLY USING"
             meta = apis["NODES"].get_meta("save")
-            return haxdb.data.output(success=0, meta=meta, message=message)
+            return haxdb.output(success=0, meta=meta, message=message)
         return apis["NODES"].save_call(rowid=rowid)
 
     @haxdb.app.route("/NODES/delete", methods=["GET", "POST"])
@@ -163,7 +163,7 @@ def run():
         if int(key_id) == int(rowid):
             message = "CANNOT DELETE KEY YOU ARE CURRENTLY USING"
             meta = apis["NODES"].get_meta("delete")
-            return haxdb.data.output(success=0, meta=meta, message=message)
+            return haxdb.output(success=0, meta=meta, message=message)
 
         return apis["NODES"].delete_call(rowid=rowid)
 
@@ -177,7 +177,7 @@ def run():
         if int(key_id) == int(rowid):
             message = "CANNOT UPDATE KEY YOU ARE CURRENTLY USING"
             meta = apis["NODES"].get_meta("upload")
-            return haxdb.data.output(success=0, meta=meta, message=message)
+            return haxdb.output(success=0, meta=meta, message=message)
 
         return apis["NODES"].upload_call()
 
