@@ -1,9 +1,0 @@
-* mod_rfid
-    - Add logging to pulse
-
-* mod_permissions
-    - Add permission context beyond dba
-
-* postgresql support
-
-* Split mods into core/user
