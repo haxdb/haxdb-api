@@ -119,6 +119,7 @@ sudo apt install mariadb-server
 Create haxdb database and user
 ```
 sudo mysql
+create database haxdb;
 create user haxdb;
 grant all privileges on haxdb.* to 'haxdb'@'localhost' identified by 'supersecretpassword';
 flush privileges;

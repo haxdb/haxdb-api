@@ -1,17 +1,25 @@
 #!/usr/bin/python
 
+import logging
 from config import config
 import db
 import haxdb
-import mods
-import logging
+import core
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("gunicorn.error")
 
-haxdb.init(config["API"], db.db(config["DB"], logger), logger)
-mods.init(config, haxdb, haxdb.db)
-mods.run()
+haxdb.init(config, db.db(config["DB"], logger), logger)
+
+core.init(haxdb)
+core.run()
+
+try:
+    import mods
+    mods.init(haxdb)
+    mods.run()
+except ImportError:
+    pass
 
 app = haxdb.app
 

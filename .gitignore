@@ -1,3 +1,4 @@
+mods/haxdb_*/
 *.tsv
 *.csv
 *.swp
@@ -9,7 +10,6 @@
 *.wpu
 
 env/
-uploads/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -100,4 +100,3 @@ ENV/
 
 # Rope project settings
 .ropeproject
-

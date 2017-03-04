@@ -26,11 +26,11 @@ def init(app_config, app_db, app_logger):
 
 
 def run():
-    debug = (int(config["DEBUG"]) == 1)
-    CORS(app, origin=config["ORIGINS"])
-    timeout = config["SESSION_TIMEOUT"]
+    debug = (int(config["API"]["DEBUG"]) == 1)
+    CORS(app, origin=config["API"]["ORIGINS"])
+    timeout = config["API"]["SESSION_TIMEOUT"]
     app.permanent_session_lifetime = timedelta(seconds=int(timeout))
-    app.run(config["HOST"], int(config["PORT"]), debug=debug)
+    app.run(config["API"]["HOST"], int(config["API"]["PORT"]), debug=debug)
 
 
 @app.before_request
