@@ -40,8 +40,8 @@ def init(hdb):
 
 def run():
     global mods, config, haxdb, db
-    sys.path.insert(0, config["CORE"]["PATH"])
-    modpattern = "{}/haxdb_*".format(config["CORE"]["PATH"])
+    sys.path.insert(0, config["MOD"]["PATH"])
+    modpattern = "{}/haxdb_*".format(config["MOD"]["PATH"])
     mod_names = []
     for name in glob.glob(modpattern):
         mod_names.append(os.path.basename(name))
@@ -49,7 +49,7 @@ def run():
     db.open()
 
     for mod_name in mod_names:
-        mod_config_file = os.path.join(config["CORE"]["PATH"],
+        mod_config_file = os.path.join(config["MOD"]["PATH"],
                                        mod_name,
                                        "mod.cfg")
         mod_config = read_mod_config(mod_config_file)

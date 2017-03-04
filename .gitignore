@@ -1,4 +1,4 @@
-mods/*
+mods/haxdb_*/
 *.tsv
 *.csv
 *.swp
@@ -10,7 +10,6 @@ mods/*
 *.wpu
 
 env/
-uploads/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
