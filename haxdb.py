@@ -14,6 +14,39 @@ config = None
 db = None
 logger = None
 output = None
+saved_functions = {}
+saved_triggers = {}
+
+
+def save_function(name, ref):
+    saved_functions[name] = ref
+
+
+def get_function(name):
+    if name in saved_functions:
+        return saved_functions[name]
+    return None
+
+
+def save_trigger(name, action, ref):
+    if name not in saved_triggers:
+        saved_triggers[name] = {}
+    if action not in saved_triggers[name]:
+        saved_triggers[name][action] = []
+    saved_triggers[name][action].append(ref)
+
+
+def trigger(name, action, context=None):
+    try:
+        funcs = saved_triggers[name][action]
+    except KeyError:
+        return False
+    for func in funcs:
+        try:
+            func(context)
+        except TypeError:
+            msg = "INVALID TRIGGER FUNCTION FOR: {} {} ".format(name, action)
+            logger.error(msg)
 
 
 def init(app_config, app_db, app_logger):
