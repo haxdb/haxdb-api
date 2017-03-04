@@ -1,5 +1,7 @@
-Core Modules
+User Modules
 ========
+
+User Modules are loaded after the core modules have been intiialized and run.
 
 Each haxdb module is an actual python module.  Each module should be importable and have at least two functions: init() and run()
 
