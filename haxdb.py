@@ -28,7 +28,7 @@ def get_function(name):
     return None
 
 
-def save_trigger(name, action, ref):
+def on(name, action, ref):
     if name not in saved_triggers:
         saved_triggers[name] = {}
     if action not in saved_triggers[name]:
@@ -37,6 +37,7 @@ def save_trigger(name, action, ref):
 
 
 def trigger(name, action, context=None):
+    logger.debug("TRIGGER: {}: {} ({})".format(name, action, context))
     try:
         funcs = saved_triggers[name][action]
     except KeyError:
