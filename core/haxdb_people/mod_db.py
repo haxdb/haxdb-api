@@ -11,6 +11,7 @@ def init(app_db, app_config):
     tables = []
 
     t = db.tables.table("PEOPLE")
+    t.add("PEOPLE_IMAGE", "CHAR", col_size=50)
     t.add("PEOPLE_NAME_FIRST", "CHAR", col_size=50)
     t.add("PEOPLE_NAME_LAST", "CHAR", col_size=50)
     t.add("PEOPLE_EMAIL", "CHAR", col_size=100)
