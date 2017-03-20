@@ -18,15 +18,6 @@ def init(app_db, app_config):
     tables.append(t)
 
     indexes = []
-    idx = db.tables.index("ASSETS_RFID",
-                          ["ASSETS_RFID_ASSETS_ID"],
-                          unique=True)
-    indexes.append(idx)
-
-    idx = db.tables.index("ASSETS_RFID",
-                          ["ASSETS_RFID_AUTH_PEOPLE_ID"])
-    indexes.append(idx)
-
     idx = db.tables.index("PEOPLE_RFID",
                           ["PEOPLE_RFID_PEOPLE_ID", "PEOPLE_RFID_RFID"],
                           unique=True)
