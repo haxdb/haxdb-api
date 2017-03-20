@@ -32,14 +32,14 @@ def get_fieldset_cols(rowid=None):
     return FIELDSET_COLS
 
 
-def init(app_haxdb, mod_def):
+def init(app_haxdb, api, mod_config, mod_def):
     global haxdb, db, config, tools, apis
     haxdb = app_haxdb
     db = haxdb.db
-    config = haxdb.config
+    config = mod_config
 
     for api_name in mod_def.keys():
-        apis[api_name] = haxdb.api.api_call(mod_def[api_name])
+        apis[api_name] = api.api_call(mod_def[api_name])
 
 
 def run():
@@ -58,9 +58,9 @@ def run():
             row["ROW_NAME"] = row["FIELDSET_NAME"]
             return row
 
-        FIELDSET_CONTEXT = haxdb.data.var.get("FIELDSET_CONTEXT")
-        FIELDSET_CONTEXT_ID = haxdb.data.var.get("FIELDSET_CONTEXT_ID") or 0
-        people_id = haxdb.data.session.get("api_people_id")
+        FIELDSET_CONTEXT = haxdb.get("FIELDSET_CONTEXT")
+        FIELDSET_CONTEXT_ID = haxdb.get("FIELDSET_CONTEXT_ID") or 0
+        people_id = haxdb.session("api_people_id")
 
         m = {
             "FIELDSET_CONTEXT": FIELDSET_CONTEXT,
@@ -99,8 +99,8 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_FIELDSET_save(rowid=None):
-        rowid = rowid or haxdb.data.var.get("rowid")
-        cols = haxdb.data.var.getlist("COLS")
+        rowid = rowid or haxdb.get("rowid")
+        cols = haxdb.getlist("COLS")
 
         if cols:
             m = apis["FIELDSET"].get_meta("save")
@@ -136,16 +136,16 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_FIELDSET_new():
-        FIELDSET_CONTEXT = haxdb.data.var.get("FIELDSET_CONTEXT")
-        FIELDSET_CONTEXT_ID = haxdb.data.var.get("FIELDSET_CONTEXT_ID") or 0
-        FIELDSET_NAME = haxdb.data.var.get("FIELDSET_NAME")
-        user = haxdb.data.var.get("user") or 0
-        cols = haxdb.data.var.getlist("COLS")
+        FIELDSET_CONTEXT = haxdb.get("FIELDSET_CONTEXT")
+        FIELDSET_CONTEXT_ID = haxdb.get("FIELDSET_CONTEXT_ID") or 0
+        FIELDSET_NAME = haxdb.get("FIELDSET_NAME")
+        user = haxdb.get("user") or 0
+        cols = haxdb.getlist("COLS")
         people_id = 0
 
         try:
             if int(user) == 1:
-                people_id = haxdb.data.session.get("api_people_id")
+                people_id = haxdb.session("api_people_id")
         except:
             pass
 
@@ -212,9 +212,9 @@ def run():
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_QUERY_list():
-        QUERY_CONTEXT = haxdb.data.var.get("QUERY_CONTEXT")
-        QUERY_CONTEXT_ID = haxdb.data.var.get("QUERY_CONTEXT_ID") or 0
-        people_id = haxdb.data.session.get("api_people_id")
+        QUERY_CONTEXT = haxdb.get("QUERY_CONTEXT")
+        QUERY_CONTEXT_ID = haxdb.get("QUERY_CONTEXT_ID") or 0
+        people_id = haxdb.session("api_people_id")
 
         m = {
             "QUERY_CONTEXT": QUERY_CONTEXT,
@@ -257,13 +257,13 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_QUERY_new():
-        QUERY_CONTEXT = haxdb.data.var.get("QUERY_CONTEXT")
-        QUERY_CONTEXT_ID = haxdb.data.var.get("QUERY_CONTEXT_ID") or 0
-        user = haxdb.data.var.get("user") or 0
+        QUERY_CONTEXT = haxdb.get("QUERY_CONTEXT")
+        QUERY_CONTEXT_ID = haxdb.get("QUERY_CONTEXT_ID") or 0
+        user = haxdb.get("user") or 0
 
         people_id = 0
         if user == 1:
-            people_id = haxdb.data.session.get("api_people_id")
+            people_id = haxdb.session("api_people_id")
 
         defaults = {
             "QUERY_CONTEXT": QUERY_CONTEXT,

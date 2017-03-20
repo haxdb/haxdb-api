@@ -18,14 +18,14 @@ def get_assets_name(rowid):
         return row["ASSETS_NAME"]
 
 
-def init(app_haxdb, mod_config, mod_def):
+def init(app_haxdb, api, mod_config, mod_def):
     global haxdb, db, config, apis
     haxdb = app_haxdb
     db = haxdb.db
     config = mod_config
 
     for api_name in mod_def.keys():
-        apis[api_name] = haxdb.api.api_call(mod_def[api_name])
+        apis[api_name] = api.api_call(mod_def[api_name])
 
 
 def run():
@@ -91,7 +91,7 @@ def run():
     @haxdb.app.route("/ASSET_LINKS/list", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_LINKS/list/<int:ASSETS_ID>", methods=["POST", "GET"])
     def mod_asset_links_list(ASSETS_ID=None):
-        ASSETS_ID = ASSETS_ID or haxdb.data.var.get("ASSETS_ID")
+        ASSETS_ID = ASSETS_ID or haxdb.get("ASSETS_ID")
 
         meta = {"name": get_assets_name(ASSETS_ID)}
 
@@ -111,7 +111,7 @@ def run():
     @haxdb.app.route("/ASSET_LINKS/csv", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_LINKS/csv/<int:ASSETS_ID>", methods=["POST", "GET"])
     def mod_asset_links_csv(ASSETS_ID=None):
-        ASSETS_ID = ASSETS_ID or haxdb.data.var.get("ASSETS_ID")
+        ASSETS_ID = ASSETS_ID or haxdb.get("ASSETS_ID")
 
         t = """
         (
@@ -133,7 +133,7 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_asset_links_new(ASSETS_ID=None):
-        ASSETS_ID = ASSETS_ID or haxdb.data.var.get("ASSETS_ID")
+        ASSETS_ID = ASSETS_ID or haxdb.get("ASSETS_ID")
         defaults = {
             "ASSET_LINKS_ASSETS_ID": ASSETS_ID,
         }
@@ -172,7 +172,7 @@ def run():
     @haxdb.app.route("/ASSET_AUTHS/list", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_AUTHS/list/<int:ASSETS_ID>", methods=["POST", "GET"])
     def mod_ASSET_AUTHS_list(ASSETS_ID=None):
-        ASSETS_ID = ASSETS_ID or haxdb.data.var.get("ASSETS_ID")
+        ASSETS_ID = ASSETS_ID or haxdb.get("ASSETS_ID")
 
         meta = {"name": get_assets_name(ASSETS_ID)}
 
@@ -195,7 +195,7 @@ def run():
     @haxdb.app.route("/ASSET_AUTHS/csv", methods=["POST", "GET"])
     @haxdb.app.route("/ASSET_AUTHS/csv/<int:ASSETS_ID>", methods=["POST", "GET"])
     def mod_ASSET_AUTHS_csv(ASSETS_ID=None):
-        ASSETS_ID = ASSETS_ID or haxdb.data.var.get("ASSETS_ID")
+        ASSETS_ID = ASSETS_ID or haxdb.get("ASSETS_ID")
 
         t = """
         (
@@ -220,7 +220,7 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_ASSET_AUTHS_new(ASSETS_ID=None):
-        ASSETS_ID = ASSETS_ID or haxdb.data.var.get("ASSETS_ID")
+        ASSETS_ID = ASSETS_ID or haxdb.get("ASSETS_ID")
         defaults = {
             "ASSET_AUTHS_ASSETS_ID": ASSETS_ID,
             "ASSET_AUTHS_ENABLED": 1,

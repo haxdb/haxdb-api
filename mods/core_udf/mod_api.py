@@ -8,14 +8,14 @@ config = None
 apis = {}
 
 
-def init(app_haxdb, mod_def):
+def init(app_haxdb, api, mod_config, mod_def):
     global haxdb, db, config, apis
     haxdb = app_haxdb
     db = haxdb.db
-    config = haxdb.config
+    config = mod_config
 
     for api_name in mod_def.keys():
-        apis[api_name] = haxdb.api.api_call(mod_def[api_name])
+        apis[api_name] = api.api_call(mod_def[api_name])
 
 
 def run():
@@ -26,9 +26,9 @@ def run():
     @haxdb.no_readonly
     @haxdb.require_dba
     def mod_udf_def_list(UDF_CONTEXT=None, UDF_CONTEXT_ID=None):
-        UDF_CONTEXT = UDF_CONTEXT or haxdb.data.var.get("UDF_CONTEXT")
-        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.data.var.get("UDF_CONTEXT_ID") or 0
-        disabled = haxdb.data.var.get("disabled")
+        UDF_CONTEXT = UDF_CONTEXT or haxdb.get("UDF_CONTEXT")
+        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.get("UDF_CONTEXT_ID") or 0
+        disabled = haxdb.get("disabled")
         meta = {"name": UDF_CONTEXT}
 
         t = """
@@ -55,9 +55,9 @@ def run():
     @haxdb.no_readonly
     @haxdb.require_dba
     def mod_udf_def_csv(UDF_CONTEXT=None, UDF_CONTEXT_ID=None):
-        UDF_CONTEXT = UDF_CONTEXT or haxdb.data.var.get("UDF_CONTEXT")
-        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.data.var.get("UDF_CONTEXT_ID") or 0
-        disabled = haxdb.data.var.get("disabled")
+        UDF_CONTEXT = UDF_CONTEXT or haxdb.get("UDF_CONTEXT")
+        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.get("UDF_CONTEXT_ID") or 0
+        disabled = haxdb.get("disabled")
 
         t = """
         (
@@ -83,8 +83,8 @@ def run():
     @haxdb.no_readonly
     @haxdb.require_dba
     def mod_udf_def_new(UDF_CONTEXT=None, UDF_CONTEXT_ID=None):
-        UDF_CONTEXT = UDF_CONTEXT or haxdb.data.var.get("UDF_CONTEXT")
-        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.data.var.get("UDF_CONTEXT_ID") or 0
+        UDF_CONTEXT = UDF_CONTEXT or haxdb.get("UDF_CONTEXT")
+        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.get("UDF_CONTEXT_ID") or 0
 
         defaults = {
             "UDF_CONTEXT": UDF_CONTEXT,
@@ -98,7 +98,7 @@ def run():
     @haxdb.no_readonly
     @haxdb.require_dba
     def mod_udf_def_delete(rowid=None):
-        rowid = rowid or haxdb.data.var.get("rowid")
+        rowid = rowid or haxdb.get("rowid")
 
         sql = """
         SELECT UDF_CONTEXT, UDF_CONTEXT_ID, UDF_NAME FROM UDF

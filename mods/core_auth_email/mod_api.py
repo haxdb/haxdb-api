@@ -25,9 +25,9 @@ def run():
     @haxdb.app.route("/AUTH/email/login", methods=["GET", "POST"])
     @haxdb.app.route("/AUTH/email/login/<email>", methods=["GET", "POST"])
     def mod_auth_email(email=None):
-        email = email or haxdb.data.var.get("email")
-        subject = haxdb.data.var.get("subject")
-        message = haxdb.data.var.get("message")
+        email = email or haxdb.get("email")
+        subject = haxdb.get("subject")
+        message = haxdb.get("message")
         email = email.upper()
 
         meta = {}
@@ -63,9 +63,9 @@ def run():
     @haxdb.app.route("/AUTH/email/register", methods=["GET", "POST"])
     @haxdb.app.route("/AUTH/email/register/<email>", methods=["GET", "POST"])
     def mod_auth_register(email=None):
-        email = email or haxdb.data.var.get("email")
-        subject = haxdb.data.var.get("subject")
-        message = haxdb.data.var.get("message")
+        email = email or haxdb.get("email")
+        subject = haxdb.get("subject")
+        message = haxdb.get("message")
 
         meta = {}
         meta["api"] = "AUTH/email"
@@ -107,7 +107,7 @@ def run():
     @haxdb.app.route("/AUTH/token", methods=["GET", "POST"])
     @haxdb.app.route("/AUTH/token/<token>", methods=["GET", "POST"])
     def mod_auth_token(token=None):
-        token = token or haxdb.data.var.get("token")
+        token = token or haxdb.get("token")
         config_dbas = [x.strip().upper() for x in config["AUTH"]["DBA"].split(',')]
         now = int(time.time())
 

@@ -20,14 +20,14 @@ def get_people_name(rowid):
                               row["PEOPLE_NAME_LAST"])
 
 
-def init(app_haxdb, mod_def):
+def init(app_haxdb, api, mod_config, mod_def):
     global haxdb, db, config, apis
     haxdb = app_haxdb
     db = haxdb.db
-    config = haxdb.config
+    config = mod_config
 
     for api_name in mod_def.keys():
-        apis[api_name] = haxdb.api.api_call(mod_def[api_name])
+        apis[api_name] = api.api_call(mod_def[api_name])
 
 
 def get_person(rfid=None):
@@ -141,9 +141,9 @@ def run():
     @haxdb.app.route("/ASSETS_RFID/pulse/<rfid>", methods=["POST", "GET"])
     @haxdb.app.route("/ASSETS_RFID/pulse/<rfid>/<status>", methods=["POST", "GET"])
     def mod_rfid_asset_pulse(rfid=None, status=None):
-        api_key = haxdb.data.var.get("api_key")
-        rfid = rfid or haxdb.data.var.get("rfid")
-        status = status or haxdb.data.var.get("status")
+        api_key = haxdb.get("api_key")
+        rfid = rfid or haxdb.get("rfid")
+        status = status or haxdb.get("status")
         ip = str(request.access_route[-1])
 
         node = get_node(api_key)
@@ -228,7 +228,7 @@ def run():
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_PEOPLE_RFID_list(PEOPLE_ID=None):
-        PEOPLE_ID = PEOPLE_ID or haxdb.data.var.get("PEOPLE_ID")
+        PEOPLE_ID = PEOPLE_ID or haxdb.get("PEOPLE_ID")
 
         m = {
             "name": get_people_name(PEOPLE_ID),
@@ -252,7 +252,7 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_PEOPLE_RFID_new(PEOPLE_ID=None):
-        PEOPLE_ID = PEOPLE_ID or haxdb.data.var.get("PEOPLE_ID")
+        PEOPLE_ID = PEOPLE_ID or haxdb.get("PEOPLE_ID")
 
         m = {
             "name": get_people_name(PEOPLE_ID),

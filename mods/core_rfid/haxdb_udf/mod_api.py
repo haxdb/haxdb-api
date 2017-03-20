@@ -26,9 +26,9 @@ def run():
     @haxdb.no_readonly
     @haxdb.require_dba
     def mod_udf_def_list(UDF_CONTEXT=None, UDF_CONTEXT_ID=None):
-        UDF_CONTEXT = UDF_CONTEXT or haxdb.data.var.get("UDF_CONTEXT")
-        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.data.var.get("UDF_CONTEXT_ID") or 0
-        disabled = haxdb.data.var.get("disabled")
+        UDF_CONTEXT = UDF_CONTEXT or haxdb.get("UDF_CONTEXT")
+        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.get("UDF_CONTEXT_ID") or 0
+        disabled = haxdb.get("disabled")
         meta = {"name": UDF_CONTEXT}
 
         t = """
@@ -55,9 +55,9 @@ def run():
     @haxdb.no_readonly
     @haxdb.require_dba
     def mod_udf_def_csv(UDF_CONTEXT=None, UDF_CONTEXT_ID=None):
-        UDF_CONTEXT = UDF_CONTEXT or haxdb.data.var.get("UDF_CONTEXT")
-        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.data.var.get("UDF_CONTEXT_ID") or 0
-        disabled = haxdb.data.var.get("disabled")
+        UDF_CONTEXT = UDF_CONTEXT or haxdb.get("UDF_CONTEXT")
+        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.get("UDF_CONTEXT_ID") or 0
+        disabled = haxdb.get("disabled")
 
         t = """
         (
@@ -83,8 +83,8 @@ def run():
     @haxdb.no_readonly
     @haxdb.require_dba
     def mod_udf_def_new(UDF_CONTEXT=None, UDF_CONTEXT_ID=None):
-        UDF_CONTEXT = UDF_CONTEXT or haxdb.data.var.get("UDF_CONTEXT")
-        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.data.var.get("UDF_CONTEXT_ID") or 0
+        UDF_CONTEXT = UDF_CONTEXT or haxdb.get("UDF_CONTEXT")
+        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.get("UDF_CONTEXT_ID") or 0
 
         defaults = {
             "UDF_CONTEXT": UDF_CONTEXT,
@@ -98,7 +98,7 @@ def run():
     @haxdb.no_readonly
     @haxdb.require_dba
     def mod_udf_def_delete(rowid=None):
-        rowid = rowid or haxdb.data.var.get("rowid")
+        rowid = rowid or haxdb.get("rowid")
 
         sql = """
         SELECT UDF_CONTEXT, UDF_CONTEXT_ID, UDF_NAME FROM UDF

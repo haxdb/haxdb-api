@@ -18,14 +18,14 @@ def get_lists_name(rowid):
         return row["LISTS_NAME"]
 
 
-def init(app_haxdb, mod_def):
+def init(app_haxdb, api, mod_config, mod_def):
     global haxdb, db, config, tools
     haxdb = app_haxdb
     db = haxdb.db
-    config = haxdb.config
+    config = mod_config
 
     for api_name in mod_def.keys():
-        apis[api_name] = haxdb.api.api_call(mod_def[api_name])
+        apis[api_name] = api.api_call(mod_def[api_name])
 
 
 def run():
@@ -84,7 +84,7 @@ def run():
     @haxdb.app.route("/LIST_ITEMS/list/<int:LISTS_ID>", methods=["POST", "GET"])
     @haxdb.require_auth
     def mod_list_items_list(LISTS_ID=None):
-        LISTS_ID = LISTS_ID or haxdb.data.var.get("LISTS_ID")
+        LISTS_ID = LISTS_ID or haxdb.get("LISTS_ID")
 
         meta = {"name": get_lists_name(LISTS_ID)}
 
@@ -114,7 +114,7 @@ def run():
                                               row["LIST_ITEMS_VALUE"])
             return row
 
-        rowid = rowid or haxdb.data.var.get("rowid")
+        rowid = rowid or haxdb.get("rowid")
 
         sql = """
         SELECT LIST_ITEMS_LISTS_ID FROM LIST_ITEMS
@@ -141,7 +141,7 @@ def run():
     @haxdb.app.route("/LIST_ITEMS/csv/<int:LISTS_ID>", methods=["POST", "GET"])
     @haxdb.require_auth
     def mod_list_items_csv(LISTS_ID=None):
-        LISTS_ID = LISTS_ID or haxdb.data.var.get("LISTS_ID")
+        LISTS_ID = LISTS_ID or haxdb.get("LISTS_ID")
 
         meta = {"name": get_lists_name(LISTS_ID)}
 
@@ -166,7 +166,7 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_list_items_new(LISTS_ID=None):
-        LISTS_ID = LISTS_ID or haxdb.data.var.get("LISTS_ID")
+        LISTS_ID = LISTS_ID or haxdb.get("LISTS_ID")
         defaults = {
             "LIST_ITEMS_LISTS_ID": LISTS_ID,
             "LIST_ITEMS_ENABLED": 1,
@@ -195,7 +195,7 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_LIST_ITEMS_upload():
-        rowid = rowid or haxdb.data.var.get("rowid")
+        rowid = rowid or haxdb.get("rowid")
         sql = """
         SELECT LIST_ITEMS_LISTS_ID FROM LIST_ITEMS
         WHERE LIST_ITEMS_ID=%s
@@ -210,7 +210,7 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_LIST_ITEMS_download(rowid=None):
-        rowid = rowid or haxdb.data.var.get("rowid")
+        rowid = rowid or haxdb.get("rowid")
         sql = """
         SELECT LIST_ITEMS_LISTS_ID FROM LIST_ITEMS
         WHERE LIST_ITEMS_ID=%s

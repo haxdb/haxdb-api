@@ -31,11 +31,12 @@ def read_mod_config(config_file):
     return config
 
 
-def init(hdb):
-    global config, haxdb, db
+def init(hdb, app_api):
+    global config, haxdb, db, api
     haxdb = hdb
     config = haxdb.config
     db = haxdb.db
+    api = app_api
 
 
 def run():
@@ -61,7 +62,7 @@ def run():
         if int(mod_config["MOD"]["ENABLED"]) == 1:
             haxdb.logger.info("{}.init()".format(mod_name))
             mod = __import__(mod_name)
-            mod.init(haxdb, mod_config)
+            mod.init(haxdb, api, mod_config)
             mods[mod_name] = mod
         else:
             haxdb.logger.info("{} DISABLED".format(mod_name))

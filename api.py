@@ -1,40 +1,18 @@
 from flask import make_response
-from data import *
 import shlex
 import re
 import os.path
 
+haxdb = None
 db = None
+output = None
 
 
-def init(app_db):
-    global db
-    db = app_db
-
-
-def output(success=0, message=None, value=None, data=None,
-           meta=None, authenticated=True):
-    output_format = var.get("format")
-    include_meta = var.get("meta")
-
-    out = {}
-    if include_meta:
-        out["meta"] = meta
-    out["success"] = success
-    out["value"] = value
-    out["message"] = message
-
-    if output_format and output_format in ("min"):
-        return json.dumps(out)
-
-    if output_format and output_format == "msgpack":
-        return msgpack.packb(out)
-
-    out["timestamp"] = time.time()
-    out["authenticated"] = 1 if authenticated else 0
-    out["data"] = None if not data else data
-
-    return json.dumps(out)
+def init(app_haxdb):
+    global haxdb, db, output
+    haxdb = app_haxdb
+    db = haxdb.db
+    output = haxdb.output
 
 
 def valid_value(col, val):
@@ -362,7 +340,7 @@ class api_call:
                   output_format=None):
 
         table = table or self.API_NAME
-        query = var.get("query")
+        query = haxdb.get("query")
 
         params = params or ()
         params += (self.API_NAME, self.API_CONTEXT_ID)
@@ -387,13 +365,13 @@ class api_call:
             1=1
             """.format(table, self.API_ROWID)
 
-        rowid = var.get("rowid")
+        rowid = haxdb.get("rowid")
         if rowid:
             sql += """
                 AND {} = {}
             """.format(self.API_ROWID, rowid)
         else:
-            rowid = var.getlist("rowid")
+            rowid = haxdb.getlist("rowid")
             if rowid:
                 try:
                     rowid = list(rowid)
@@ -447,12 +425,14 @@ class api_call:
         if output_format == "CSV":
             return self.csv_out(rows)
 
+        evt = "list"
+
         return output(success=1, data=rows, meta=meta)
 
     def view_call(self, table=None, where=None,
                   params=None, calc_row_function=None,
                   rowid=None, meta=None):
-        rowid = rowid or var.get("rowid")
+        rowid = rowid or haxdb.get("rowid")
 
         table = table or self.API_NAME
         where = where or "1=1"
@@ -513,7 +493,7 @@ class api_call:
 
         errors = ""
         for col in cols:
-            val = var.get(col["NAME"])
+            val = haxdb.get(col["NAME"])
             if val is not None:
                 if valid_value(col, val):
                     if col["NAME"] in self._COLS:
@@ -604,7 +584,7 @@ class api_call:
             return output(success=0, meta=meta, message=db.error)
 
         if not sql:
-            rowid = rowid or var.get("rowid")
+            rowid = rowid or haxdb.get("rowid")
             sql = "DELETE FROM {} WHERE {}=%s".format(table, self.API_ROWID)
             params = (rowid,)
 
@@ -620,7 +600,7 @@ class api_call:
         return output(success=0, meta=meta, message="NO ROWS DELETED")
 
     def save_call(self, table=None, meta=None, rowid=None):
-        rowid = rowid or var.get("rowid")
+        rowid = rowid or haxdb.get("rowid")
         table = table or self.API_NAME
 
         meta = meta or {}
@@ -641,7 +621,7 @@ class api_call:
 
         errors = ""
         for col in cols:
-            val = var.get(col["NAME"])
+            val = haxdb.get(col["NAME"])
             if val is not None:
                 if "EDIT" in col and col["EDIT"] != 1:
                     errors += "{} IS NOT EDITABLE".format(col["NAME"])
@@ -710,8 +690,8 @@ class api_call:
         return output(success=0, meta=meta, message="NOTHING UPDATED")
 
     def download_call(self, rowid=None, field_name=None):
-        rowid = rowid or var.get("rowid")
-        field_name = field_name or var.get("field_name")
+        rowid = rowid or haxdb.get("rowid")
+        field_name = field_name or haxdb.get("field_name")
         sql = """
             SELECT * FROM FILES
             WHERE FILES_CONTEXT=%s
@@ -735,9 +715,9 @@ class api_call:
         return r
 
     def upload_call(self, table=None, rowid=None):
-        rowid = rowid or var.get("rowid")
+        rowid = rowid or haxdb.get("rowid")
         table = table or self.API_NAME
-        field_name = var.get("field_name")
+        field_name = haxdb.get("field_name")
         cols = self.get_cols()
 
         found = False

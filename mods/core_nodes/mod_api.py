@@ -11,14 +11,14 @@ config = None
 apis = {}
 
 
-def init(app_haxdb, mod_def):
+def init(app_haxdb, api, mod_config, mod_def):
     global haxdb, db, config
     haxdb = app_haxdb
     db = haxdb.db
-    config = haxdb.config
+    config = mod_config
 
     for api_name in mod_def.keys():
-        apis[api_name] = haxdb.api.api_call(mod_def[api_name])
+        apis[api_name] = api.api_call(mod_def[api_name])
 
 
 def run():
@@ -27,7 +27,7 @@ def run():
     @haxdb.app.before_request
     def mod_api_keys_before_request():
         session.permanent = True
-        key = haxdb.data.var.get("api_key", use_session=True)
+        key = haxdb.get("api_key", use_session=True)
 
         if key:
             ip = str(request.access_route[-1])
@@ -44,14 +44,14 @@ def run():
             db.query(sql, (key, now, ip,))
             row = db.next()
             if row and row["NODES_API_KEY"] == key:
-                haxdb.data.session.set("api_authenticated", 1)
-                haxdb.data.session.set("api_people_id", row["NODES_PEOPLE_ID"])
-                haxdb.data.session.set("nodes_id", row["NODES_ID"])
-                haxdb.data.session.set("api_key", row["NODES_API_KEY"])
-                haxdb.data.session.set("api_readonly", row["NODES_READONLY"])
-                haxdb.data.session.set("api_dba", row["NODES_DBA"])
+                haxdb.session("api_authenticated", 1)
+                haxdb.session("api_people_id", row["NODES_PEOPLE_ID"])
+                haxdb.session("nodes_id", row["NODES_ID"])
+                haxdb.session("api_key", row["NODES_API_KEY"])
+                haxdb.session("api_readonly", row["NODES_READONLY"])
+                haxdb.session("api_dba", row["NODES_DBA"])
             else:
-                haxdb.data.session.set("api_authenticated", 0)
+                haxdb.session("api_authenticated", 0)
 
     @haxdb.app.route("/NODES/list", methods=["POST", "GET"])
     @haxdb.require_auth
@@ -100,7 +100,7 @@ def run():
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_NODES_view(rowid=None):
-        rowid = rowid or haxdb.data.var.get("rowid")
+        rowid = rowid or haxdb.get("rowid")
         table = """
         (
         SELECT
@@ -120,7 +120,7 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_nodes_create():
-        expire = haxdb.data.var.get("expire")
+        expire = haxdb.get("expire")
 
         defaults = {
             "NODES_API_KEY": base64.urlsafe_b64encode(os.urandom(500))[5:39]
@@ -142,7 +142,7 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_nodes_save(rowid=None):
-        rowid = rowid or haxdb.data.var.get("rowid")
+        rowid = rowid or haxdb.get("rowid")
         key_id = haxdb.session.get("nodes_id")
 
         if int(key_id) == int(rowid):
@@ -157,7 +157,7 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_nodes_delete(rowid=None):
-        rowid = rowid or haxdb.data.var.get("rowid")
+        rowid = rowid or haxdb.get("rowid")
         key_id = haxdb.session.get("nodes_id")
 
         if int(key_id) == int(rowid):
