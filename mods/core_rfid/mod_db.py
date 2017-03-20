@@ -28,7 +28,7 @@ def init(app_db, app_config):
 
 def get_list(name):
     sql = "SELECT * FROM LISTS WHERE LISTS_NAME = ?"
-    db.query(sql, (name,))
+    db.query(sql, (name,), squelch=True)
     row = db.next()
     if row:
         return row["LISTS_ID"]

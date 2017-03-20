@@ -5,6 +5,7 @@ from datetime import timedelta
 from flask_cors import CORS
 import data
 import api
+from api import output
 
 app = Flask("hdbapi")
 app.secret_key = os.urandom(24)
@@ -13,7 +14,6 @@ VERSION = "v1"
 config = None
 db = None
 logger = None
-output = None
 saved_functions = {}
 saved_triggers = {}
 
@@ -56,7 +56,6 @@ def init(app_config, app_db, app_logger):
     db = app_db
     logger = app_logger
     api.init(db)
-    output = api.output
 
 
 def run():

@@ -21,7 +21,9 @@ def init(app_db, app_config):
     tables.append(t)
 
     indexes = []
-    indexes.append(db.tables.index("PEOPLE", ["PEOPLE_EMAIL"], unique=True))
+    indexes.append(db.tables.index("PEOPLE", ["PEOPLE_NAME_FIRST",
+                                              "PEOPLE_NAME_LAST",
+                                              "PEOPLE_EMAIL"], unique=True))
 
     db.create(tables=tables, indexes=indexes)
 

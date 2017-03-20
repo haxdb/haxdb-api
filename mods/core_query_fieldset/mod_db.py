@@ -24,7 +24,7 @@ def init(app_db, app_config):
     t.add("FIELDSET_PEOPLE_ID", "INT")
     t.add("FIELDSET_CONTEXT", "CHAR", col_size=50)
     t.add("FIELDSET_CONTEXT_ID", "INT")
-    t.add("FIELDSET_ORDER","INT")
+    t.add("FIELDSET_ORDER", "INT")
     tables.append(t)
 
     t = db.tables.table("FIELDSET_COLS")
@@ -73,7 +73,7 @@ def run():
 
     db.query(insert_list, ("MEMBERSHIPS",), squelch=True)
 
-    row = db.qaf(find_list, ("MEMBERSHIPS",))
+    row = db.qaf(find_list, ("MEMBERSHIPS",), squelch=True)
     if row:
         db.query(insert_list_item, (row["LISTS_ID"], "TRIAL", "TRIAL",), squelch=True)
         db.query(insert_list_item, (row["LISTS_ID"], "MEMBER", "MEMBER",), squelch=True)
