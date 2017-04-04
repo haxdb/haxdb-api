@@ -19,5 +19,13 @@ mods.run()
 app = haxdb.app
 
 
+def trig_test(data):
+    print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    print "trig_test: {}".format(data)
+    print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+
+
+haxdb.on("^api\..*\.list$", trig_test)
+
 if __name__ == "__main__":
     haxdb.run()

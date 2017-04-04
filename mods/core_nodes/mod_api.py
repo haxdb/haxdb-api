@@ -47,6 +47,7 @@ def run():
                 haxdb.session("api_authenticated", 1)
                 haxdb.session("api_people_id", row["NODES_PEOPLE_ID"])
                 haxdb.session("nodes_id", row["NODES_ID"])
+                haxdb.session("nodes_name", row["NODES_NAME"])
                 haxdb.session("api_key", row["NODES_API_KEY"])
                 haxdb.session("api_readonly", row["NODES_READONLY"])
                 haxdb.session("api_dba", row["NODES_DBA"])

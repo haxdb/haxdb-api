@@ -6,6 +6,7 @@ import time
 from datetime import timedelta
 from flask_cors import CORS
 import haxdb_data
+import re
 
 app = Flask("hdbapi")
 app.secret_key = os.urandom(24)
@@ -15,7 +16,7 @@ config = None
 db = None
 logger = None
 saved_functions = {}
-saved_triggers = {}
+saved_triggers = []
 
 
 def get(key, use_session=False):
@@ -68,24 +69,24 @@ def get_function(name):
     return None
 
 
-def on(event, func):
-    if event not in saved_triggers:
-        saved_triggers[event] = {}
-    saved_triggers[event].append(ref)
+def on(event_regex, func):
+    e = re.compile(event_regex, re.IGNORECASE)
+    trigger = (e, func)
+    saved_triggers.append(trigger)
 
 
 def trigger(event, data):
+    data["NODE"] = session("nodes_name")
     logger.debug("TRIGGER: {}: {}".format(event, data))
-    try:
-        funcs = saved_triggers[event]
-    except KeyError:
-        return False
-    for func in funcs:
-        try:
-            func(data)
-        except TypeError:
-            msg = "INVALID TRIGGER FUNCTION FOR: {} ".format(event)
-            logger.error(msg)
+    for trigger in saved_triggers:
+        e = trigger[0]
+        if e.search(event):
+            f = trigger[1]
+            try:
+                f(data)
+            except TypeError:
+                msg = "INVALID TRIGGER FUNCTION FOR: {} ".format(event)
+                logger.error(msg)
 
 
 def init(app_config, app_db, app_logger):
