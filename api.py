@@ -500,6 +500,8 @@ class api_call:
             "call": "view",
             "rowid": rowid,
         }
+        if "ROW_NAME" in row:
+            event_data["name"] = row["ROW_NAME"]
         haxdb.trigger("API.{}.VIEW".format(self.API_NAME), event_data)
 
         return output(success=1, meta=meta, data=row)
