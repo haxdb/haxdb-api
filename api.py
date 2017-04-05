@@ -1,40 +1,18 @@
-from flask import make_response
-from data import *
+from flask import make_response, request
 import shlex
 import re
 import os.path
 
+haxdb = None
 db = None
+output = None
 
 
-def init(app_db):
-    global db
-    db = app_db
-
-
-def output(success=0, message=None, value=None, data=None,
-           meta=None, authenticated=True):
-    output_format = var.get("format")
-    include_meta = var.get("meta")
-
-    out = {}
-    if include_meta:
-        out["meta"] = meta
-    out["success"] = success
-    out["value"] = value
-    out["message"] = message
-
-    if output_format and output_format in ("min"):
-        return json.dumps(out)
-
-    if output_format and output_format == "msgpack":
-        return msgpack.packb(out)
-
-    out["timestamp"] = time.time()
-    out["authenticated"] = 1 if authenticated else 0
-    out["data"] = None if not data else data
-
-    return json.dumps(out)
+def init(app_haxdb):
+    global haxdb, db, output
+    haxdb = app_haxdb
+    db = haxdb.db
+    output = haxdb.output
 
 
 def valid_value(col, val):
@@ -348,12 +326,25 @@ class api_call:
                                 fieldnames=headers,
                                 extrasaction='ignore')
         writer.writeheader()
+        numrows = 0
         for row in rows:
+            numrows += 1
             writer.writerow(row)
 
         r = make_response(csvfile.getvalue())
         now = datetime.now().strftime("%Y%m%d%H%M")
-        cd = "attachment; filename={}.{}.csv".format(self.API_NAME, now)
+        filename = "{}.{}.csv".format(self.API_NAME, now)
+
+        event_data = {
+            "api": self.API_NAME,
+            "call": "csv",
+            "headers": headers,
+            "rowcount": numrows,
+            "filename": filename,
+        }
+        haxdb.trigger("API.{}.CSV".format(self.API_NAME), event_data)
+
+        cd = "attachment; filename={}".format(filename)
         r.headers["Content-Disposition"] = cd
         return r
 
@@ -362,7 +353,7 @@ class api_call:
                   output_format=None):
 
         table = table or self.API_NAME
-        query = var.get("query")
+        query = haxdb.get("query")
 
         params = params or ()
         params += (self.API_NAME, self.API_CONTEXT_ID)
@@ -387,13 +378,13 @@ class api_call:
             1=1
             """.format(table, self.API_ROWID)
 
-        rowid = var.get("rowid")
+        rowid = haxdb.get("rowid")
         if rowid:
             sql += """
                 AND {} = {}
             """.format(self.API_ROWID, rowid)
         else:
-            rowid = var.getlist("rowid")
+            rowid = haxdb.getlist("rowid")
             if rowid:
                 try:
                     rowid = list(rowid)
@@ -447,12 +438,19 @@ class api_call:
         if output_format == "CSV":
             return self.csv_out(rows)
 
+        event_data = {
+            "api": self.API_NAME,
+            "call": "list",
+            "rowcount": len(rows),
+        }
+        haxdb.trigger("API.{}.LIST".format(self.API_NAME), event_data)
+
         return output(success=1, data=rows, meta=meta)
 
     def view_call(self, table=None, where=None,
                   params=None, calc_row_function=None,
                   rowid=None, meta=None):
-        rowid = rowid or var.get("rowid")
+        rowid = rowid or haxdb.get("rowid")
 
         table = table or self.API_NAME
         where = where or "1=1"
@@ -496,6 +494,16 @@ class api_call:
 
         if calc_row_function:
             row = calc_row_function(dict(row))
+
+        event_data = {
+            "api": self.API_NAME,
+            "call": "view",
+            "rowid": rowid,
+        }
+        if "ROW_NAME" in row:
+            event_data["name"] = row["ROW_NAME"]
+        haxdb.trigger("API.{}.VIEW".format(self.API_NAME), event_data)
+
         return output(success=1, meta=meta, data=row)
 
     def new_call(self, table=None, meta=None, defaults=None):
@@ -513,7 +521,7 @@ class api_call:
 
         errors = ""
         for col in cols:
-            val = var.get(col["NAME"])
+            val = haxdb.get(col["NAME"])
             if val is not None:
                 if valid_value(col, val):
                     if col["NAME"] in self._COLS:
@@ -571,6 +579,15 @@ class api_call:
                     if db.error:
                         return output(success=0, meta=meta, message=db.error)
             db.commit()
+
+            event_data = {
+                "api": self.API_NAME,
+                "call": "new",
+                "rowcount": meta["rowcount"],
+                "rowid": meta["rowid"]
+            }
+            haxdb.trigger("API.{}.NEW".format(self.API_NAME), event_data)
+
             return output(success=1,
                           meta=meta,
                           message="{} ROWS CREATED".format(meta["rowcount"]),
@@ -604,7 +621,7 @@ class api_call:
             return output(success=0, meta=meta, message=db.error)
 
         if not sql:
-            rowid = rowid or var.get("rowid")
+            rowid = rowid or haxdb.get("rowid")
             sql = "DELETE FROM {} WHERE {}=%s".format(table, self.API_ROWID)
             params = (rowid,)
 
@@ -615,12 +632,19 @@ class api_call:
         meta["rowcount"] = db.rowcount
         if meta["rowcount"] > 0:
             db.commit()
+            event_data = {
+                "api": self.API_NAME,
+                "call": "delete",
+                "rowcount": meta["rowcount"],
+                "rowid": rowid,
+            }
+            haxdb.trigger("API.{}.DELETE".format(self.API_NAME), event_data)
             return output(success=1, meta=meta, message="DELETED")
 
         return output(success=0, meta=meta, message="NO ROWS DELETED")
 
     def save_call(self, table=None, meta=None, rowid=None):
-        rowid = rowid or var.get("rowid")
+        rowid = rowid or haxdb.get("rowid")
         table = table or self.API_NAME
 
         meta = meta or {}
@@ -629,6 +653,9 @@ class api_call:
 
         if "updated" not in meta:
             meta["updated"] = []
+
+        if "savedata" not in meta:
+            meta["savedata"] = {}
 
         if "rowcount" not in meta:
             meta["rowcount"] = 0
@@ -640,8 +667,9 @@ class api_call:
         cols = self.get_cols()
 
         errors = ""
+        saves = {}
         for col in cols:
-            val = var.get(col["NAME"])
+            val = haxdb.get(col["NAME"])
             if val is not None:
                 if "EDIT" in col and col["EDIT"] != 1:
                     errors += "{} IS NOT EDITABLE".format(col["NAME"])
@@ -658,6 +686,7 @@ class api_call:
                                        rowid))
                     if valid_value(col, val):
                         if col["NAME"] in self._COLS:
+                            meta["savedata"][col["NAME"]] = val
                             meta["updated"].append(col["NAME"])
                             if val:
                                 col_names.append("{}=%s".format(col["NAME"]))
@@ -705,13 +734,22 @@ class api_call:
 
         if meta["rowcount"] > 0:
             db.commit()
+            event_data = {
+                "api": self.API_NAME,
+                "call": "save",
+                "values": meta["savedata"],
+                "rowcount": meta["rowcount"],
+                "rowid": rowid,
+            }
+            haxdb.trigger("API.{}.SAVE".format(self.API_NAME), event_data)
+
             return output(success=1, meta=meta, message="SAVED")
 
         return output(success=0, meta=meta, message="NOTHING UPDATED")
 
     def download_call(self, rowid=None, field_name=None):
-        rowid = rowid or var.get("rowid")
-        field_name = field_name or var.get("field_name")
+        rowid = rowid or haxdb.get("rowid")
+        field_name = field_name or haxdb.get("field_name")
         sql = """
             SELECT * FROM FILES
             WHERE FILES_CONTEXT=%s
@@ -726,18 +764,27 @@ class api_call:
             return output(success=0, message=msg)
 
         r = make_response(db._FROMBLOB(row["FILES_DATA"]))
-
-        cd = "attachment; filename={}.{}{}".format(self.API_NAME,
-                                                   field_name,
-                                                   row["FILES_EXT"])
+        filename = "{}.{}{}".format(self.API_NAME,
+                                    field_name,
+                                    row["FILES_EXT"])
+        cd = "attachment; filename={}".format(filename)
         r.headers["Content-Disposition"] = cd
+
+        event_data = {
+            "api": self.API_NAME,
+            "call": "download",
+            "field_name": field_name,
+            "rowid": rowid,
+            "filename": filename
+        }
+        haxdb.trigger("API.{}.DOWNLOAD".format(self.API_NAME), event_data)
 
         return r
 
     def upload_call(self, table=None, rowid=None):
-        rowid = rowid or var.get("rowid")
+        rowid = rowid or haxdb.get("rowid")
         table = table or self.API_NAME
-        field_name = var.get("field_name")
+        field_name = haxdb.get("field_name")
         cols = self.get_cols()
 
         found = False
@@ -808,4 +855,13 @@ class api_call:
             return output(success=0, message=db.error)
 
         db.commit()
+
+        event_data = {
+            "api": self.API_NAME,
+            "call": "upload",
+            "field_name": field_name,
+            "rowid": rowid,
+        }
+        haxdb.trigger("API.{}.UPLOAD".format(self.API_NAME), event_data)
+
         return output(success=1, message="FILE UPLOADED")

@@ -1,4 +1,4 @@
-mods/haxdb_*/
+mods/user_*/
 *.tsv
 *.csv
 *.swp
