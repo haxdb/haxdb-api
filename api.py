@@ -1,4 +1,4 @@
-from flask import make_response
+from flask import make_response, request
 import shlex
 import re
 import os.path
