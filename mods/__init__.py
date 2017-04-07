@@ -48,7 +48,7 @@ def run():
     for name in glob.glob(core_pattern):
         mod_names.append(os.path.basename(name))
 
-    core_pattern = "{}/haxdb_*".format(config["MOD"]["PATH"])
+    core_pattern = "{}/user_*".format(config["MOD"]["PATH"])
     for name in glob.glob(core_pattern):
         mod_names.append(os.path.basename(name))
 
