@@ -37,7 +37,7 @@ mod_def["PEOPLE"] = {
          "QUERY": 1,
          "SEARCH": 1,
          "REQUIRED": 0,
-         "INTERNAL": 0,
+         "INTERNAL": 1,
          "NEW": 0,
          "DEFAULT": 0,
         },
