@@ -781,10 +781,10 @@ class api_call:
 
         return r
 
-    def upload_call(self, table=None, rowid=None):
+    def upload_call(self, table=None, rowid=None, field_name=None):
         rowid = rowid or haxdb.get("rowid")
         table = table or self.API_NAME
-        field_name = haxdb.get("field_name")
+        field_name = field_name or haxdb.get("field_name")
         cols = self.get_cols()
 
         found = False
