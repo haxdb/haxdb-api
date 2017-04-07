@@ -3,6 +3,8 @@ import time
 import base64
 import os
 
+methods = ["GET", "POST"]
+
 haxdb = None
 db = None
 config = None
@@ -129,7 +131,7 @@ def register_node(ip=None, node_name=None):
 def boolval(val):
     try:
         val = int(val)
-    except:
+    except (ValueError, TypeError) as e:
         return False
     if val == 1:
         return True
@@ -137,9 +139,9 @@ def boolval(val):
 
 
 def run():
-    @haxdb.app.route("/ASSETS_RFID/pulse", methods=["POST", "GET"])
-    @haxdb.app.route("/ASSETS_RFID/pulse/<rfid>", methods=["POST", "GET"])
-    @haxdb.app.route("/ASSETS_RFID/pulse/<rfid>/<status>", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS_RFID/pulse", methods=methods)
+    @haxdb.app.route("/ASSETS_RFID/pulse/<rfid>", methods=methods)
+    @haxdb.app.route("/ASSETS_RFID/pulse/<rfid>/<status>", methods=methods)
     def mod_rfid_asset_pulse(rfid=None, status=None):
         api_key = haxdb.get("api_key")
         rfid = rfid or haxdb.get("rfid")
@@ -148,7 +150,6 @@ def run():
 
         node = get_node(api_key)
         person = get_person(rfid)
-        print person
 
         if not node:
             # API KEY DOES NOT MATCH A NODE.
@@ -171,6 +172,11 @@ def run():
 
             # RFID MATCHES WITH DBA
             new_api_key = register_node(ip=ip)
+            edata = {
+                "ip": ip,
+                "person": dict(person),
+            }
+            haxdb.trigger("API.RFID.NODE_REGISTRATION", edata)
             msg = "NODE REGISTERED\n"
             msg += "ACTIVATION REQUIRED."
             return haxdb.output(success=0, value=new_api_key, message=msg)
@@ -205,6 +211,12 @@ def run():
 
             if not boolval(asset["REQUIRE_AUTH"]):
                 # ONLY VALID RFID REQUIRED
+                edata = {
+                    "person": dict(person),
+                    "asset": dict(asset),
+                }
+                haxdb.trigger("API.RFID.AUTH", edata)
+
                 msg = "{}\n{} {}".format(asset["ASSETS_NAME"],
                                          person["PEOPLE_NAME_FIRST"],
                                          person["PEOPLE_NAME_LAST"])
@@ -212,8 +224,20 @@ def run():
 
             # VALID RFID AND ASSET AUTH REQUIRED
             if not is_person_authed(asset["ASSETS_ID"], person["PEOPLE_ID"]):
+                edata = {
+                    "person": dict(person),
+                    "asset": dict(asset),
+                }
+                haxdb.trigger("API.RFID.NO_AUTH", edata)
+
                 msg = "{}\nREQUIRES PRIOR AUTH".format(asset["ASSETS_NAME"])
                 return haxdb.output(success=0, message=msg)
+
+            edata = {
+                "person": dict(person),
+                "asset": dict(asset),
+            }
+            haxdb.trigger("API.RFID.AUTH", edata)
 
             msg = "{}\n{} {}".format(asset["ASSETS_NAME"],
                                      person["PEOPLE_NAME_FIRST"],
@@ -223,8 +247,8 @@ def run():
 
 ##############################################################################
 
-    @haxdb.app.route("/PEOPLE_RFID/list", methods=["POST", "GET"])
-    @haxdb.app.route("/PEOPLE_RFID/list/<int:PEOPLE_ID>", methods=["POST", "GET"])
+    @haxdb.app.route("/PEOPLE_RFID/list", methods=methods)
+    @haxdb.app.route("/PEOPLE_RFID/list/<int:PEOPLE_ID>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_PEOPLE_RFID_list(PEOPLE_ID=None):
@@ -246,8 +270,8 @@ def run():
         p = (PEOPLE_ID,)
         return apis["PEOPLE_RFID"].list_call(table=t, params=p, meta=m)
 
-    @haxdb.app.route("/PEOPLE_RFID/new", methods=["POST", "GET"])
-    @haxdb.app.route("/PEOPLE_RFID/new/<int:PEOPLE_ID>", methods=["POST", "GET"])
+    @haxdb.app.route("/PEOPLE_RFID/new", methods=methods)
+    @haxdb.app.route("/PEOPLE_RFID/new/<int:PEOPLE_ID>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
@@ -263,30 +287,30 @@ def run():
         }
         return apis["PEOPLE_RFID"].new_call(defaults=defaults, meta=m)
 
-    @haxdb.app.route("/PEOPLE_RFID/save", methods=["GET", "POST"])
-    @haxdb.app.route("/PEOPLE_RFID/save/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.app.route("/PEOPLE_RFID/save", methods=methods)
+    @haxdb.app.route("/PEOPLE_RFID/save/<int:rowid>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_PEOPLE_RFID_save(rowid=None):
         return apis["PEOPLE_RFID"].save_call(rowid=rowid)
 
-    @haxdb.app.route("/PEOPLE_RFID/delete", methods=["GET", "POST"])
-    @haxdb.app.route("/PEOPLE_RFID/delete/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.app.route("/PEOPLE_RFID/delete", methods=methods)
+    @haxdb.app.route("/PEOPLE_RFID/delete/<int:rowid>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_PEOPLE_RFID_delete(rowid=None):
         return apis["PEOPLE_RFID"].delete_call(rowid=rowid)
 
-    @haxdb.app.route("/PEOPLE_RFID/upload", methods=["GET", "POST"])
+    @haxdb.app.route("/PEOPLE_RFID/upload", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_PEOPLE_RFID_upload():
         return apis["PEOPLE_RFID"].upload_call()
 
-    @haxdb.app.route("/PEOPLE_RFID/download", methods=["GET", "POST"])
+    @haxdb.app.route("/PEOPLE_RFID/download", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
