@@ -76,7 +76,9 @@ def on(event_regex, func):
 
 
 def trigger(event, data):
-    data["NODE"] = session("nodes_name")
+    data["EVENT"] = event
+    data["NODES_ID"] = session("nodes_id") or 0
+    data["NODES_NAME"] = session("nodes_name") or ''
     logger.debug("TRIGGER: {}: {}".format(event, data))
     for trigger in saved_triggers:
         e = trigger[0]

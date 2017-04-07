@@ -144,7 +144,7 @@ def run():
     @haxdb.no_readonly
     def mod_nodes_save(rowid=None):
         rowid = rowid or haxdb.get("rowid")
-        key_id = haxdb.session.get("nodes_id")
+        key_id = haxdb.session("nodes_id")
 
         if int(key_id) == int(rowid):
             message = "CANNOT UPDATE KEY YOU ARE CURRENTLY USING"
@@ -159,7 +159,7 @@ def run():
     @haxdb.no_readonly
     def mod_nodes_delete(rowid=None):
         rowid = rowid or haxdb.get("rowid")
-        key_id = haxdb.session.get("nodes_id")
+        key_id = haxdb.session("nodes_id")
 
         if int(key_id) == int(rowid):
             message = "CANNOT DELETE KEY YOU ARE CURRENTLY USING"
@@ -173,7 +173,7 @@ def run():
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_NODES_upload():
-        key_id = haxdb.session.get("nodes_id")
+        key_id = haxdb.session("nodes_id")
 
         if int(key_id) == int(rowid):
             message = "CANNOT UPDATE KEY YOU ARE CURRENTLY USING"
