@@ -69,6 +69,10 @@ def get_function(name):
     return None
 
 
+def func(name):
+    return get_function(name)
+
+
 def on(event_regex, func):
     e = re.compile(event_regex, re.IGNORECASE)
     trigger = (e, func)

@@ -63,8 +63,8 @@ def run():
     def mod_people_new():
         return apis["PEOPLE"].new_call()
 
-    @haxdb.app.route("/PEOPLE/delete", methods=["GET", "POST"])
     @haxdb.app.route("/PEOPLE/delete/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.app.route("/PEOPLE/delete", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
@@ -79,8 +79,15 @@ def run():
         return apis["PEOPLE"].upload_call()
 
     @haxdb.app.route("/PEOPLE/download", methods=["GET", "POST"])
+    @haxdb.app.route("/PEOPLE/download", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    def mod_people_download():
+        return apis["PEOPLE"].download_call()
+
+    @haxdb.app.route("/PEOPLE/thumbnail", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
-    def mod_people_download(rowid=None):
-        return apis["PEOPLE"].download_call()
+    def mod_people_thumbnail():
+        return apis["PEOPLE"].thumbnail_call()
