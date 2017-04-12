@@ -45,7 +45,9 @@ def send_email(receiver, subject, msg):
 
     import smtplib
     try:
-        server = smtplib.SMTP(config["EMAIL"]["HOST"], config["EMAIL"]["PORT"], None, 10)
+        host = config["EMAIL"]["HOST"]
+        port = config["EMAIL"]["PORT"]
+        server = smtplib.SMTP(host, port, None, 10)
         server.starttls()
         server.login(config["EMAIL"]["USER"], config["EMAIL"]["PASS"])
         server.sendmail(sender, receiver, msg)
