@@ -9,6 +9,7 @@ haxdb = None
 db = None
 config = None
 apis = {}
+methods = ["POST", "GET"]
 
 
 def init(app_haxdb, api, mod_config, mod_def):
@@ -54,7 +55,7 @@ def run():
             else:
                 haxdb.session("api_authenticated", 0)
 
-    @haxdb.app.route("/NODES/list", methods=["POST", "GET"])
+    @haxdb.app.route("/NODES/list", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_NODES_list():
@@ -77,7 +78,7 @@ def run():
 
         return apis["NODES"].list_call(table=table)
 
-    @haxdb.app.route("/NODES/csv", methods=["POST", "GET"])
+    @haxdb.app.route("/NODES/csv", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_NODES_csv():
@@ -96,8 +97,8 @@ def run():
 
         return apis["NODES"].list_call(table=table, output_format="CSV")
 
-    @haxdb.app.route("/NODES/view", methods=["POST", "GET"])
-    @haxdb.app.route("/NODES/view/<int:rowid>", methods=["POST", "GET"])
+    @haxdb.app.route("/NODES/view", methods=methods)
+    @haxdb.app.route("/NODES/view/<int:rowid>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_NODES_view(rowid=None):
@@ -116,7 +117,7 @@ def run():
         """
         return apis["NODES"].view_call(table=table, rowid=rowid)
 
-    @haxdb.app.route("/NODES/new", methods=["POST", "GET"])
+    @haxdb.app.route("/NODES/new", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
@@ -130,15 +131,15 @@ def run():
         if expire:
             try:
                 defaults["NODES_EXPIRE"] = int(time.time()) + int(expire)
-            except:
+            except Exception:
                 message = "expire should be a valid integer (seconds)"
                 meta = apis["NODES"].get_meta("new")
                 return haxdb.output(success=0, meta=meta, message=message)
 
         return apis["NODES"].new_call(defaults=defaults)
 
-    @haxdb.app.route("/NODES/save", methods=["GET", "POST"])
-    @haxdb.app.route("/NODES/save/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.app.route("/NODES/save", methods=methods)
+    @haxdb.app.route("/NODES/save/<int:rowid>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
@@ -152,8 +153,8 @@ def run():
             return haxdb.output(success=0, meta=meta, message=message)
         return apis["NODES"].save_call(rowid=rowid)
 
-    @haxdb.app.route("/NODES/delete", methods=["GET", "POST"])
-    @haxdb.app.route("/NODES/delete/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.app.route("/NODES/delete", methods=methods)
+    @haxdb.app.route("/NODES/delete/<int:rowid>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
@@ -168,7 +169,7 @@ def run():
 
         return apis["NODES"].delete_call(rowid=rowid)
 
-    @haxdb.app.route("/NODES/upload", methods=["GET", "POST"])
+    @haxdb.app.route("/NODES/upload", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
@@ -182,9 +183,16 @@ def run():
 
         return apis["NODES"].upload_call()
 
-    @haxdb.app.route("/NODES/download", methods=["GET", "POST"])
+    @haxdb.app.route("/NODES/download", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_NODES_download():
         return apis["NODES"].download_call()
+
+    @haxdb.app.route("/NODES/thumbnail", methods=methods)
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_nodes_thumbnail():
+        return apis["NODES"].thumbnail_call()

@@ -6,6 +6,7 @@ haxdb = None
 db = None
 config = None
 apis = {}
+methods = ["POST", "GET"]
 
 
 def get_assets_name(rowid):
@@ -29,67 +30,74 @@ def init(app_haxdb, api, mod_config, mod_def):
 
 
 def run():
-    @haxdb.app.route("/ASSETS/list", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS/list", methods=methods)
     def mod_assets_list():
         def calc_row(row):
             row["ROW_NAME"] = row["ASSETS_NAME"]
             row["ROW_ID"] = row["ASSETS_ID"]
             return row
-        return apis["ASSETS"].list_call(calc_row_function=calc_row)
+        return apis["ASSETS"].list_call(row_func=calc_row)
 
-    @haxdb.app.route("/ASSETS/csv", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS/csv", methods=methods)
     def mod_assets_csv():
         return apis["ASSETS"].list_call(output_format="CSV")
 
-    @haxdb.app.route("/ASSETS/view", methods=["POST", "GET"])
-    @haxdb.app.route("/ASSETS/view/<int:rowid>", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS/view", methods=methods)
+    @haxdb.app.route("/ASSETS/view/<int:rowid>", methods=methods)
     def mod_assets_view(rowid=None):
         def calc_row(row):
             row["ROW_NAME"] = row["ASSETS_NAME"]
             row["ROW_ID"] = row["ASSETS_ID"]
             return row
-        return apis["ASSETS"].view_call(rowid=rowid,  calc_row_function=calc_row)
+        return apis["ASSETS"].view_call(rowid=rowid,  row_func=calc_row)
 
-    @haxdb.app.route("/ASSETS/new", methods=["POST", "GET"])
-    @haxdb.app.route("/ASSETS/new/<name>", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS/new", methods=methods)
+    @haxdb.app.route("/ASSETS/new/<name>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_assets_new(name=None):
         return apis["ASSETS"].new_call()
 
-    @haxdb.app.route("/ASSETS/delete", methods=["GET", "POST"])
-    @haxdb.app.route("/ASSETS/delete/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSETS/delete", methods=methods)
+    @haxdb.app.route("/ASSETS/delete/<int:rowid>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_assets_delete(rowid=None):
         return apis["ASSETS"].delete_call(rowid=rowid)
 
-    @haxdb.app.route("/ASSETS/save", methods=["GET", "POST"])
-    @haxdb.app.route("/ASSETS/save/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSETS/save", methods=methods)
+    @haxdb.app.route("/ASSETS/save/<int:rowid>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_assets_save(rowid=None):
         return apis["ASSETS"].save_call(rowid=rowid)
 
-    @haxdb.app.route("/ASSETS/upload", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSETS/upload", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_ASSETS_upload():
         return apis["ASSETS"].upload_call()
 
-    @haxdb.app.route("/ASSETS/download", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSETS/download", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_assets_download(rowid=None):
         return apis["ASSETS"].download_call()
 
-    @haxdb.app.route("/ASSET_LINKS/list", methods=["POST", "GET"])
-    @haxdb.app.route("/ASSET_LINKS/list/<int:ASSETS_ID>", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSETS/thumbnail", methods=methods)
+    @haxdb.require_auth
+    @haxdb.require_dba
+    @haxdb.no_readonly
+    def mod_assets_thumbnail():
+        return apis["ASSETS"].thumbnail_call()
+
+    @haxdb.app.route("/ASSET_LINKS/list", methods=methods)
+    @haxdb.app.route("/ASSET_LINKS/list/<int:ASSETS_ID>", methods=methods)
     def mod_asset_links_list(ASSETS_ID=None):
         ASSETS_ID = ASSETS_ID or haxdb.get("ASSETS_ID")
 
@@ -108,8 +116,8 @@ def run():
 
         return apis["ASSET_LINKS"].list_call(table=t, params=params, meta=meta)
 
-    @haxdb.app.route("/ASSET_LINKS/csv", methods=["POST", "GET"])
-    @haxdb.app.route("/ASSET_LINKS/csv/<int:ASSETS_ID>", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSET_LINKS/csv", methods=methods)
+    @haxdb.app.route("/ASSET_LINKS/csv/<int:ASSETS_ID>", methods=methods)
     def mod_asset_links_csv(ASSETS_ID=None):
         ASSETS_ID = ASSETS_ID or haxdb.get("ASSETS_ID")
 
@@ -127,50 +135,51 @@ def run():
         return apis["ASSET_LINKS"].list_call(table=t, params=p,
                                              output_format="CSV")
 
-    @haxdb.app.route("/ASSET_LINKS/new", methods=["POST", "GET"])
-    @haxdb.app.route("/ASSET_LINKS/new/<int:ASSETS_ID>", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSET_LINKS/new", methods=methods)
+    @haxdb.app.route("/ASSET_LINKS/new/<int:ASSETS_ID>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_asset_links_new(ASSETS_ID=None):
         ASSETS_ID = ASSETS_ID or haxdb.get("ASSETS_ID")
+
         defaults = {
             "ASSET_LINKS_ASSETS_ID": ASSETS_ID,
         }
         return apis["ASSET_LINKS"].new_call(defaults=defaults)
 
-    @haxdb.app.route("/ASSET_LINKS/save", methods=["GET", "POST"])
-    @haxdb.app.route("/ASSET_LINKS/save/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSET_LINKS/save", methods=methods)
+    @haxdb.app.route("/ASSET_LINKS/save/<int:rowid>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_asset_links_save(rowid=None):
         return apis["ASSET_LINKS"].save_call(rowid=rowid)
 
-    @haxdb.app.route("/ASSET_LINKS/delete", methods=["GET", "POST"])
-    @haxdb.app.route("/ASSET_LINKS/delete/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSET_LINKS/delete", methods=methods)
+    @haxdb.app.route("/ASSET_LINKS/delete/<int:rowid>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_asset_links_delete(rowid=None):
         return apis["ASSET_LINKS"].delete_call(rowid=rowid)
 
-    @haxdb.app.route("/ASSET_LINKS/upload", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSET_LINKS/upload", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_ASSET_LINKS_upload():
         return apis["ASSET_LINKS"].upload_call()
 
-    @haxdb.app.route("/ASSET_LINKS/download", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSET_LINKS/download", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_ASSET_LINKS_download(rowid=None):
         return apis["ASSET_LINKS"].download_call()
 
-    @haxdb.app.route("/ASSET_AUTHS/list", methods=["POST", "GET"])
-    @haxdb.app.route("/ASSET_AUTHS/list/<int:ASSETS_ID>", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSET_AUTHS/list", methods=methods)
+    @haxdb.app.route("/ASSET_AUTHS/list/<int:ASSETS_ID>", methods=methods)
     def mod_ASSET_AUTHS_list(ASSETS_ID=None):
         ASSETS_ID = ASSETS_ID or haxdb.get("ASSETS_ID")
 
@@ -192,8 +201,8 @@ def run():
 
         return apis["ASSET_AUTHS"].list_call(table=t, params=params, meta=meta)
 
-    @haxdb.app.route("/ASSET_AUTHS/csv", methods=["POST", "GET"])
-    @haxdb.app.route("/ASSET_AUTHS/csv/<int:ASSETS_ID>", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSET_AUTHS/csv", methods=methods)
+    @haxdb.app.route("/ASSET_AUTHS/csv/<int:ASSETS_ID>", methods=methods)
     def mod_ASSET_AUTHS_csv(ASSETS_ID=None):
         ASSETS_ID = ASSETS_ID or haxdb.get("ASSETS_ID")
 
@@ -214,43 +223,44 @@ def run():
         return apis["ASSET_AUTHS"].list_call(table=t, params=p,
                                              output_format="CSV")
 
-    @haxdb.app.route("/ASSET_AUTHS/new", methods=["POST", "GET"])
-    @haxdb.app.route("/ASSET_AUTHS/new/<int:ASSETS_ID>", methods=["POST", "GET"])
+    @haxdb.app.route("/ASSET_AUTHS/new", methods=methods)
+    @haxdb.app.route("/ASSET_AUTHS/new/<int:ASSETS_ID>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_ASSET_AUTHS_new(ASSETS_ID=None):
         ASSETS_ID = ASSETS_ID or haxdb.get("ASSETS_ID")
+
         defaults = {
             "ASSET_AUTHS_ASSETS_ID": ASSETS_ID,
             "ASSET_AUTHS_ENABLED": 1,
         }
         return apis["ASSET_AUTHS"].new_call(defaults=defaults)
 
-    @haxdb.app.route("/ASSET_AUTHS/delete", methods=["GET", "POST"])
-    @haxdb.app.route("/ASSET_AUTHS/delete/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSET_AUTHS/delete", methods=methods)
+    @haxdb.app.route("/ASSET_AUTHS/delete/<int:rowid>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_ASSET_AUTHS_delete(rowid=None):
         return apis["ASSET_AUTHS"].delete_call(rowid=rowid)
 
-    @haxdb.app.route("/ASSET_AUTHS/save", methods=["GET", "POST"])
-    @haxdb.app.route("/ASSET_AUTHS/save/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSET_AUTHS/save", methods=methods)
+    @haxdb.app.route("/ASSET_AUTHS/save/<int:rowid>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_asset_auths_save(rowid=None):
         return apis["ASSET_AUTHS"].save_call(rowid=rowid)
 
-    @haxdb.app.route("/ASSET_AUTHS/upload", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSET_AUTHS/upload", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_ASSET_AUTHS_upload():
         return apis["ASSET_AUTHS"].upload_call()
 
-    @haxdb.app.route("/ASSET_AUTHS/download", methods=["GET", "POST"])
+    @haxdb.app.route("/ASSET_AUTHS/download", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly

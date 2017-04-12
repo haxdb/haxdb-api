@@ -28,7 +28,7 @@ def run():
                                              row["PEOPLE_NAME_LAST"])
             row["ROW_ID"] = row["PEOPLE_ID"]
             return row
-        return apis["PEOPLE"].list_call(calc_row_function=calc_row)
+        return apis["PEOPLE"].list_call(row_func=calc_row)
 
     @haxdb.app.route("/PEOPLE/view", methods=["POST", "GET"])
     @haxdb.app.route("/PEOPLE/view/<int:rowid>", methods=["POST", "GET"])
@@ -40,7 +40,7 @@ def run():
                                              row["PEOPLE_NAME_LAST"])
             row["ROW_ID"] = row["PEOPLE_ID"]
             return row
-        return apis["PEOPLE"].view_call(rowid=rowid, calc_row_function=c_row)
+        return apis["PEOPLE"].view_call(rowid=rowid, row_func=c_row)
 
     @haxdb.app.route("/PEOPLE/csv", methods=["POST", "GET"])
     @haxdb.require_auth
@@ -63,8 +63,8 @@ def run():
     def mod_people_new():
         return apis["PEOPLE"].new_call()
 
-    @haxdb.app.route("/PEOPLE/delete", methods=["GET", "POST"])
     @haxdb.app.route("/PEOPLE/delete/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.app.route("/PEOPLE/delete", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
@@ -79,8 +79,15 @@ def run():
         return apis["PEOPLE"].upload_call()
 
     @haxdb.app.route("/PEOPLE/download", methods=["GET", "POST"])
+    @haxdb.app.route("/PEOPLE/download", methods=["GET", "POST"])
+    @haxdb.require_auth
+    @haxdb.require_dba
+    def mod_people_download():
+        return apis["PEOPLE"].download_call()
+
+    @haxdb.app.route("/PEOPLE/thumbnail", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
-    def mod_people_download(rowid=None):
-        return apis["PEOPLE"].download_call()
+    def mod_people_thumbnail():
+        return apis["PEOPLE"].thumbnail_call()

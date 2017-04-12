@@ -331,7 +331,7 @@ class api_call:
             numrows += 1
             writer.writerow(row)
 
-        r = make_response(csvfile.getvalue())
+        filedata = csvfile.getvalue()
         now = datetime.now().strftime("%Y%m%d%H%M")
         filename = "{}.{}.csv".format(self.API_NAME, now)
 
@@ -344,12 +344,10 @@ class api_call:
         }
         haxdb.trigger("API.{}.CSV".format(self.API_NAME), event_data)
 
-        cd = "attachment; filename={}".format(filename)
-        r.headers["Content-Disposition"] = cd
-        return r
+        return haxdb.func("FILE_DOWNLOAD")(filename, filedata, "text/csv")
 
     def list_call(self, table=None, params=None,
-                  calc_row_function=None, meta=None,
+                  row_func=None, meta=None,
                   output_format=None):
 
         table = table or self.API_NAME
@@ -415,8 +413,8 @@ class api_call:
         lastrowid = None
         while row:
             row = dict(row)
-            if calc_row_function:
-                row = calc_row_function(dict(row))
+            if row_func:
+                row = row_func(dict(row))
 
             rowid = row[self.API_ROWID]
             if rowid != lastrowid:
@@ -448,7 +446,7 @@ class api_call:
         return output(success=1, data=rows, meta=meta)
 
     def view_call(self, table=None, where=None,
-                  params=None, calc_row_function=None,
+                  params=None, row_func=None,
                   rowid=None, meta=None):
         rowid = rowid or haxdb.get("rowid")
 
@@ -492,8 +490,8 @@ class api_call:
             row[udf["UDF_NAME"]] = udf["UDF_DATA_VALUE"]
             udf = db.next()
 
-        if calc_row_function:
-            row = calc_row_function(dict(row))
+        if row_func:
+            row = row_func(dict(row))
 
         event_data = {
             "api": self.API_NAME,
@@ -750,6 +748,7 @@ class api_call:
     def download_call(self, rowid=None, field_name=None):
         rowid = rowid or haxdb.get("rowid")
         field_name = field_name or haxdb.get("field_name")
+
         sql = """
             SELECT * FROM FILES
             WHERE FILES_CONTEXT=%s
@@ -763,12 +762,10 @@ class api_call:
             msg = "UNKNOWN FIELD: {}".format(field_name)
             return output(success=0, message=msg)
 
-        r = make_response(db._FROMBLOB(row["FILES_DATA"]))
-        filename = "{}.{}{}".format(self.API_NAME,
-                                    field_name,
-                                    row["FILES_EXT"])
-        cd = "attachment; filename={}".format(filename)
-        r.headers["Content-Disposition"] = cd
+        filedata = db._FROMBLOB(row["FILES_DATA"])
+        ext = row["FILES_EXT"]
+        filename = "{}.{}{}".format(self.API_NAME, field_name, ext)
+        mimetype = row["FILES_MIMETYPE"]
 
         event_data = {
             "api": self.API_NAME,
@@ -779,7 +776,13 @@ class api_call:
         }
         haxdb.trigger("API.{}.DOWNLOAD".format(self.API_NAME), event_data)
 
-        return r
+        download = haxdb.get("download")
+        if download and download == "dataurl":
+            meta = self.get_meta("download")
+            data = haxdb.func("FILE_DATAURL")(filedata, mimetype)
+            return haxdb.output(success=1, meta=meta, data=data)
+
+        return haxdb.func("FILE_DOWNLOAD")(filename, filedata, mimetype)
 
     def upload_call(self, table=None, rowid=None, field_name=None):
         rowid = rowid or haxdb.get("rowid")
@@ -805,7 +808,6 @@ class api_call:
             return output(success=0, message="NOTHING UPDATED")
 
         fext = os.path.splitext(file.filename)[1]
-
         filedata = file.read()
         file.close()
 
@@ -865,3 +867,101 @@ class api_call:
         haxdb.trigger("API.{}.UPLOAD".format(self.API_NAME), event_data)
 
         return output(success=1, message="FILE UPLOADED")
+
+    def thumbnail_call(self, table=None, rowid=None):
+        rowid = rowid or haxdb.get("rowid")
+        table = table or self.API_NAME
+
+        if not rowid:
+            msg = "REQUIRED INPUT MISSING: rowid"
+            return output(success=0, message=msg)
+
+        f = None
+        try:
+            f = request.files["file"]
+        except Exception as e:
+            pass
+
+        if f and f.filename and f.filename != '':
+            # upload new thumbnail
+            fext = os.path.splitext(f.filename)[1]
+            filedata = f.read()
+            thumb_big, thumb_small = haxdb.func("THUMBS_GEN")(file=f)
+            f.close()
+
+            if not thumb_big or not thumb_small:
+                msg = "INVALID IMAGE FILE"
+                return output(success=0, message=msg)
+            sql = """
+            DELETE FROM THUMBS WHERE THUMBS_TABLE=%s and THUMBS_ROWID=%s
+            """
+            db.query(sql, (table, rowid))
+
+            sql = """
+            INSERT INTO THUMBS
+            (THUMBS_TABLE, THUMBS_ROWID, THUMBS_MIMETYPE, THUMBS_EXT,
+            THUMBS_BIG, THUMBS_SMALL)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            params = (table, rowid, "image/png", ".PNG",
+                      db._TOBLOB(thumb_big), db._TOBLOB(thumb_small))
+            db.query(sql, params)
+
+            if db.error:
+                return output(success=0, message=db.error)
+
+            db.commit()
+
+            event_data = {
+                "api": self.API_NAME,
+                "call": "thumbnail",
+                "action": "upload",
+                "table": table,
+                "rowid": rowid,
+            }
+            tname = "API.{}.THUMBNAIL.UPLOAD".format(self.API_NAME)
+            haxdb.trigger(tname, event_data)
+
+            meta = self.get_meta("thumbnail")
+            return output(success=1, meta=meta, message="THUMBNAIL UPLOADED")
+
+        else:
+            # download thumbnail
+            size = haxdb.get("size")
+            download = haxdb.get("download")
+
+            sql = """
+            SELECT * FROM THUMBS WHERE THUMBS_TABLE=%s AND THUMBS_ROWID=%s
+            """
+            row = db.qaf(sql, (table, rowid))
+            if not row:
+                msg = "NO THUMBNAIL"
+                return output(success=0, message=msg)
+
+            if size and size.lower() == "big":
+                filedata = db._FROMBLOB(row["THUMBS_BIG"])
+            else:
+                filedata = db._FROMBLOB(row["THUMBS_SMALL"])
+
+            filename = "{}.{}{}".format(table, rowid, row["THUMBS_EXT"])
+            mimetype = row["THUMBS_MIMETYPE"]
+
+            event_data = {
+                "api": self.API_NAME,
+                "call": "thumbnail",
+                "download": download,
+                "rowid": rowid,
+                "filename": filename,
+                "mimetype": mimetype
+            }
+            e = "API.{}.THUMBNAIL.DOWNLOAD".format(self.API_NAME)
+            haxdb.trigger(e, event_data)
+
+            download = haxdb.get("download")
+            if download and download == "dataurl":
+                meta = self.get_meta("download")
+                value = haxdb.func("FILE_DATAURL")(filedata, mimetype)
+                return haxdb.output(success=1, meta=meta, value=value)
+
+            f = haxdb.func("FILE_DOWNLOAD")
+            return f(filename, filedata, mimetype)
