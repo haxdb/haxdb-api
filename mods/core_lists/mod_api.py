@@ -36,7 +36,7 @@ def run():
             row["ROW_NAME"] = row["LISTS_NAME"]
             row["ROW_ID"] = row["LISTS_ID"]
             return row
-        return apis["LISTS"].list_call(calc_row_function=calc_row)
+        return apis["LISTS"].list_call(row_func=calc_row)
 
     @haxdb.app.route("/LISTS/csv", methods=["POST", "GET"])
     @haxdb.require_auth
@@ -135,7 +135,7 @@ def run():
 
         return apis["LIST_ITEMS"].view_call(table=t,
                                             rowid=rowid,
-                                            calc_row_function=c_row)
+                                            row_func=c_row)
 
     @haxdb.app.route("/LIST_ITEMS/csv", methods=["POST", "GET"])
     @haxdb.app.route("/LIST_ITEMS/csv/<int:LISTS_ID>", methods=["POST", "GET"])

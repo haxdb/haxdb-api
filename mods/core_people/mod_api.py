@@ -28,7 +28,7 @@ def run():
                                              row["PEOPLE_NAME_LAST"])
             row["ROW_ID"] = row["PEOPLE_ID"]
             return row
-        return apis["PEOPLE"].list_call(calc_row_function=calc_row)
+        return apis["PEOPLE"].list_call(row_func=calc_row)
 
     @haxdb.app.route("/PEOPLE/view", methods=["POST", "GET"])
     @haxdb.app.route("/PEOPLE/view/<int:rowid>", methods=["POST", "GET"])
@@ -40,7 +40,7 @@ def run():
                                              row["PEOPLE_NAME_LAST"])
             row["ROW_ID"] = row["PEOPLE_ID"]
             return row
-        return apis["PEOPLE"].view_call(rowid=rowid, calc_row_function=c_row)
+        return apis["PEOPLE"].view_call(rowid=rowid, row_func=c_row)
 
     @haxdb.app.route("/PEOPLE/csv", methods=["POST", "GET"])
     @haxdb.require_auth

@@ -347,7 +347,7 @@ class api_call:
         return haxdb.func("FILE_DOWNLOAD")(filename, filedata, "text/csv")
 
     def list_call(self, table=None, params=None,
-                  calc_row_function=None, meta=None,
+                  row_func=None, meta=None,
                   output_format=None):
 
         table = table or self.API_NAME
@@ -413,8 +413,8 @@ class api_call:
         lastrowid = None
         while row:
             row = dict(row)
-            if calc_row_function:
-                row = calc_row_function(dict(row))
+            if row_func:
+                row = row_func(dict(row))
 
             rowid = row[self.API_ROWID]
             if rowid != lastrowid:
@@ -446,7 +446,7 @@ class api_call:
         return output(success=1, data=rows, meta=meta)
 
     def view_call(self, table=None, where=None,
-                  params=None, calc_row_function=None,
+                  params=None, row_func=None,
                   rowid=None, meta=None):
         rowid = rowid or haxdb.get("rowid")
 
@@ -490,8 +490,8 @@ class api_call:
             row[udf["UDF_NAME"]] = udf["UDF_DATA_VALUE"]
             udf = db.next()
 
-        if calc_row_function:
-            row = calc_row_function(dict(row))
+        if row_func:
+            row = row_func(dict(row))
 
         event_data = {
             "api": self.API_NAME,

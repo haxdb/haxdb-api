@@ -75,7 +75,7 @@ def run():
         )
         """
         p = (FIELDSET_CONTEXT, FIELDSET_CONTEXT_ID, people_id)
-        return apis["FIELDSET"].list_call(table=t, params=p, meta=m, calc_row_function=calc_row)
+        return apis["FIELDSET"].list_call(table=t, params=p, meta=m, row_func=calc_row)
 
     @haxdb.app.route("/FIELDSET/view", methods=["POST", "GET"])
     @haxdb.app.route("/FIELDSET/view/<int:rowid>", methods=["POST", "GET"])
@@ -91,7 +91,7 @@ def run():
             row["ROW_NAME"] = row["FIELDSET_NAME"]
             return row
 
-        return apis["FIELDSET"].view_call(rowid=rowid, calc_row_function=c)
+        return apis["FIELDSET"].view_call(rowid=rowid, row_func=c)
 
     @haxdb.app.route("/FIELDSET/save", methods=["GET", "POST"])
     @haxdb.app.route("/FIELDSET/save/<int:rowid>", methods=["GET", "POST"])
@@ -242,7 +242,7 @@ def run():
             row["ROW_NAME"] = row["QUERY_NAME"]
             row["ROW_ID"] = row["QUERY_ID"]
             return row
-        return apis["QUERY"].view_call(rowid=rowid, calc_row_function=calc_row)
+        return apis["QUERY"].view_call(rowid=rowid, row_func=calc_row)
 
     @haxdb.app.route("/QUERY/save", methods=["GET", "POST"])
     @haxdb.app.route("/QUERY/save/<int:rowid>", methods=["GET", "POST"])
