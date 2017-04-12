@@ -122,7 +122,7 @@ def run():
         """
         row = db.qaf(sql, (rowid,))
         if row:
-            apis["LIST_ITEMS"].API_CONTEXT_ID = LISTS_ID
+            apis["LIST_ITEMS"].API_CONTEXT_ID = row["LIST_ITEMS_LISTS_ID"]
 
         t = """
             (
