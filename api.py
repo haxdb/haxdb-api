@@ -923,6 +923,7 @@ class api_call:
             haxdb.trigger(tname, event_data)
 
             meta = self.get_meta("thumbnail")
+            meta["rowid"] = rowid
             return output(success=1, meta=meta, message="THUMBNAIL UPLOADED")
 
         else:
@@ -959,7 +960,8 @@ class api_call:
 
             download = haxdb.get("download")
             if download and download == "dataurl":
-                meta = self.get_meta("download")
+                meta = self.get_meta("thumbnail")
+                meta["rowid"] = rowid
                 value = haxdb.func("FILE_DATAURL")(filedata, mimetype)
                 return haxdb.output(success=1, meta=meta, value=value)
 
