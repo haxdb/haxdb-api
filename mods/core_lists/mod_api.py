@@ -173,7 +173,6 @@ def run():
         }
         return apis["LIST_ITEMS"].new_call(defaults=defaults)
 
-
     @haxdb.app.route("/LIST_ITEMS/save", methods=["GET", "POST"])
     @haxdb.app.route("/LIST_ITEMS/save/<int:rowid>", methods=["GET", "POST"])
     @haxdb.require_auth
