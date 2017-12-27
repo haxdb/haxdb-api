@@ -1,12 +1,12 @@
 import mod_db
 import mod_api
-import mod_def
+import mod_tools
 
 
 def init(haxdb):
     mod_db.init(haxdb)
-    mod_api.init(haxdb, config)
-    return mod_def.mod_def
+    mod_api.init(haxdb)
+    return {}
 
 
 def run():

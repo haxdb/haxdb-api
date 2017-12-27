@@ -6,9 +6,10 @@ import time
 from datetime import timedelta
 from flask_cors import CORS
 import haxdb_data
+import haxdb_api as api
 import re
 
-app = Flask("hdbapi")
+app = Flask("haxdb-api")
 app.secret_key = os.urandom(24)
 
 VERSION = "v1"
@@ -19,12 +20,26 @@ saved_functions = {}
 saved_triggers = []
 
 
+class error:
+    message = ""
+
+    def __init__(self, msg):
+        self.message = msg
+
+    def __bool__(self):
+        return False
+    __nonzero__ = __bool__
+
+    def __repr__(self):
+        return self.message
+    __str__ = __repr__
+
+
 def get(key, use_session=False):
+    r = haxdb_data.var.getlist(key)
+    if isinstance(r, list):
+        return r
     return haxdb_data.var.get(key, use_session)
-
-
-def getlist(key):
-    return haxdb_data.var.getlist(key)
 
 
 def session(key, val=None):
@@ -34,43 +49,29 @@ def session(key, val=None):
         return haxdb_data.session.get(key)
 
 
-def output(success=0, message=None, value=None, data=None,
-           meta=None, authenticated=True):
+def response(success=0, message=None, data=None, raw=None):
     output_format = get("format")
-    include_meta = get("meta")
 
-    out = {}
-    if include_meta:
-        out["meta"] = meta
+    out = raw or {}
     out["success"] = success
     out["value"] = value
     out["message"] = message
-
-    if output_format and output_format in ("min"):
-        return json.dumps(out)
-
-    if output_format and output_format == "msgpack":
-        return msgpack.packb(out)
-
     out["timestamp"] = time.time()
     out["authenticated"] = 1 if authenticated else 0
     out["data"] = None if not data else data
 
+    if output_format and output_format == "msgpack":
+        return msgpack.packb(out)
+
     return json.dumps(out)
 
 
-def save_function(name, func):
-    saved_functions[name] = func
-
-
-def get_function(name):
-    if name in saved_functions:
+def func(name, f=None):
+    if f:
+        saved_functions[name] = f
+    elif name in saved_functions:
         return saved_functions[name]
     return None
-
-
-def func(name):
-    return get_function(name)
 
 
 def on(event_regex, func):

@@ -1,24 +1,23 @@
 mod_def = {}
 
-mod_def["ASSETNODE"] = {
-    "NAME": "ASSETNODE",
-    "TABLE": "ASSETNODE",
+mod_def["ASSETNODES"] = {
+    "NAME": "ASSETNODES",
+    "TABLE": "ASSETNODES",
     "PARENT_TABLE": None,
-    "ROWID": None,   #remove
-    "ROW_NAME": "ASSETNODE_NAME",
-    "DEFAULT_COLS": ["ASSETNODE_NAME",
-                     "ASSETNODE_TIMEOUT",
-                     "ASSETNODE_ASSETS_ID"],
+    "ROW_NAME": "ASSETNODES_NAME",
+    "DEFAULT_COLS": ["ASSETNODES_NAME",
+                     "ASSETNODES_TIMEOUT",
+                     "ASSETNODES_ASSETS_ID"],
     "UDF": {
         "CHAR": 10,
     },
-    "ORDER": ["ASSETNODE_NAME"],
-    "INDEX": [["ASSETNODE_ASSETS_ID"]],
-    "UNIQUE": [["ASSETNODE_NODES_ID"]],
+    "ORDER": ["ASSETNODES_NAME"],
+    "INDEX": [["ASSETNODES_ASSETS_ID"]],
+    "UNIQUE": [["ASSETNODES_NODES_ID"]],
     "COLS": [
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_NAME",
+            "NAME": "ASSETNODES_NAME",
             "HEADER": "NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -36,7 +35,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_DESCRIPTION",
+            "NAME": "ASSETNODES_DESCRIPTION",
             "HEADER": "DESCRIPTION",
             "TYPE": "TEXT",
             "EDIT": 1,
@@ -53,7 +52,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_ASSETS_ID",
+            "NAME": "ASSETNODES_ASSETS_ID",
             "HEADER": "ASSET",
             "TYPE": "ID",
             "ID": "ASSETS",
@@ -71,7 +70,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_NODES_ID",
+            "NAME": "ASSETNODES_NODES_ID",
             "HEADER": "NODE",
             "TYPE": "ID",
             "ID": "NODES",
@@ -89,7 +88,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR0_NAME",
+            "NAME": "ASSETNODES_SENSOR0_NAME",
             "HEADER": "SENSOR0 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -107,7 +106,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR0_VAL",
+            "NAME": "ASSETNODES_SENSOR0_VAL",
             "HEADER": "SENSOR0 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -123,9 +122,9 @@ mod_def["ASSETNODE"] = {
                 "WRITE": 500,
             }
         },
-            {
+        {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR1_NAME",
+            "NAME": "ASSETNODES_SENSOR1_NAME",
             "HEADER": "SENSOR1 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -143,7 +142,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR1_VAL",
+            "NAME": "ASSETNODES_SENSOR1_VAL",
             "HEADER": "SENSOR1 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -161,7 +160,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR2_NAME",
+            "NAME": "ASSETNODES_SENSOR2_NAME",
             "HEADER": "SENSOR2 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -179,7 +178,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR2_VAL",
+            "NAME": "ASSETNODES_SENSOR2_VAL",
             "HEADER": "SENSOR2 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -197,7 +196,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR3_NAME",
+            "NAME": "ASSETNODES_SENSOR3_NAME",
             "HEADER": "SENSOR3 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -215,7 +214,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR3_VAL",
+            "NAME": "ASSETNODES_SENSOR3_VAL",
             "HEADER": "SENSOR3 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -233,7 +232,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR4_NAME",
+            "NAME": "ASSETNODES_SENSOR4_NAME",
             "HEADER": "SENSOR4 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -251,7 +250,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR4_VAL",
+            "NAME": "ASSETNODES_SENSOR4_VAL",
             "HEADER": "SENSOR4 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -269,7 +268,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR5_NAME",
+            "NAME": "ASSETNODES_SENSOR5_NAME",
             "HEADER": "SENSOR5 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -287,7 +286,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR5_VAL",
+            "NAME": "ASSETNODES_SENSOR5_VAL",
             "HEADER": "SENSOR5 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -305,7 +304,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR6_NAME",
+            "NAME": "ASSETNODES_SENSOR6_NAME",
             "HEADER": "SENSOR6 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -323,7 +322,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR6_VAL",
+            "NAME": "ASSETNODES_SENSOR6_VAL",
             "HEADER": "SENSOR6 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -341,7 +340,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR7_NAME",
+            "NAME": "ASSETNODES_SENSOR7_NAME",
             "HEADER": "SENSOR7 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -359,7 +358,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR7_VAL",
+            "NAME": "ASSETNODES_SENSOR7_VAL",
             "HEADER": "SENSOR7 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -377,7 +376,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR8_NAME",
+            "NAME": "ASSETNODES_SENSOR8_NAME",
             "HEADER": "SENSOR8 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -395,7 +394,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR8_VAL",
+            "NAME": "ASSETNODES_SENSOR8_VAL",
             "HEADER": "SENSOR8 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -413,7 +412,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR9_NAME",
+            "NAME": "ASSETNODES_SENSOR9_NAME",
             "HEADER": "SENSOR9 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -431,7 +430,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR9_VAL",
+            "NAME": "ASSETNODES_SENSOR9_VAL",
             "HEADER": "SENSOR9 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -449,7 +448,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR1_NAME",
+            "NAME": "ASSETNODES_SENSOR1_NAME",
             "HEADER": "SENSOR1 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -467,7 +466,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR1_VAL",
+            "NAME": "ASSETNODES_SENSOR1_VAL",
             "HEADER": "SENSOR1 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -485,7 +484,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR2_NAME",
+            "NAME": "ASSETNODES_SENSOR2_NAME",
             "HEADER": "SENSOR2 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -503,7 +502,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR2_VAL",
+            "NAME": "ASSETNODES_SENSOR2_VAL",
             "HEADER": "SENSOR2 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -521,7 +520,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR3_NAME",
+            "NAME": "ASSETNODES_SENSOR3_NAME",
             "HEADER": "SENSOR3 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -539,7 +538,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR3_VAL",
+            "NAME": "ASSETNODES_SENSOR3_VAL",
             "HEADER": "SENSOR3 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -557,7 +556,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR4_NAME",
+            "NAME": "ASSETNODES_SENSOR4_NAME",
             "HEADER": "SENSOR4 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -575,7 +574,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR4_VAL",
+            "NAME": "ASSETNODES_SENSOR4_VAL",
             "HEADER": "SENSOR4 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -593,7 +592,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR5_NAME",
+            "NAME": "ASSETNODES_SENSOR5_NAME",
             "HEADER": "SENSOR5 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -611,7 +610,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR5_VAL",
+            "NAME": "ASSETNODES_SENSOR5_VAL",
             "HEADER": "SENSOR5 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -629,7 +628,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR6_NAME",
+            "NAME": "ASSETNODES_SENSOR6_NAME",
             "HEADER": "SENSOR6 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -647,7 +646,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR6_VAL",
+            "NAME": "ASSETNODES_SENSOR6_VAL",
             "HEADER": "SENSOR6 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -665,7 +664,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR7_NAME",
+            "NAME": "ASSETNODES_SENSOR7_NAME",
             "HEADER": "SENSOR7 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -683,7 +682,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR7_VAL",
+            "NAME": "ASSETNODES_SENSOR7_VAL",
             "HEADER": "SENSOR7 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -701,7 +700,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR8_NAME",
+            "NAME": "ASSETNODES_SENSOR8_NAME",
             "HEADER": "SENSOR8 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -719,7 +718,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR8_VAL",
+            "NAME": "ASSETNODES_SENSOR8_VAL",
             "HEADER": "SENSOR8 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -737,7 +736,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR9_NAME",
+            "NAME": "ASSETNODES_SENSOR9_NAME",
             "HEADER": "SENSOR9 NAME",
             "TYPE": "CHAR",
             "SIZE": 25,
@@ -755,7 +754,7 @@ mod_def["ASSETNODE"] = {
         },
         {
             "CATEGORY": "NODE",
-            "NAME": "ASSETNODE_SENSOR9_VAL",
+            "NAME": "ASSETNODES_SENSOR9_VAL",
             "HEADER": "SENSOR9 VALUE",
             "TYPE": "CHAR",
             "SIZE": 25,

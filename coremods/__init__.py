@@ -1,26 +1,19 @@
 import os
 import sys
-from ConfigParser import ConfigParser
-from os.path import join, isfile
 import glob
 import re
 
 mods = {}
-config = None
 haxdb = None
-db = None
 
 
-def init(hdb, app_api):
-    global config, haxdb, db, api
+def init(hdb):
+    global haxdb
     haxdb = hdb
-    config = haxdb.config
-    db = haxdb.db
-    api = app_api
 
 
 def run():
-    global mods, config, haxdb, db
+    global mods, haxdb
     sys.path.insert(0, "coremods/")
     mod_names = []
 
@@ -33,9 +26,8 @@ def run():
 
     for mod_name in mod_names:
         haxdb.logger.info("CORE: {}.init()".format(mod_name))
-        mod_config = config.get("CORE_{}".format(mod_name.upper()), {})
         mod = __import__(mod_name)
-        mod.init(haxdb, api, mod_config)
+        mod.init(haxdb)
         mods[mod_name] = mod
 
     for mod in mods:
