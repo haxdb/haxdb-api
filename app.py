@@ -4,7 +4,8 @@ import logging
 from config import config
 import db
 import haxdb
-import mods
+import coremods
+import usermods
 import api
 
 logging.basicConfig(level=logging.DEBUG)
@@ -13,8 +14,11 @@ logger = logging.getLogger("gunicorn.error")
 haxdb.init(config, db.db(config["DB"], logger), logger)
 api.init(haxdb)
 
-mods.init(haxdb, api)
-mods.run()
+coremods.init(haxdb, api)
+coremods.run()
+
+usermods.init(haxdb)
+usermods.run()
 
 app = haxdb.app
 
