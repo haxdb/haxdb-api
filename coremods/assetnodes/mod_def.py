@@ -1,9 +1,13 @@
 mod_def = {}
 
 mod_def["ASSETNODES"] = {
+    "PARENT": "NODES",
+    "PRIORITY": 10,
+    "MENU": None,
+    "ICON": "wrench",
     "NAME": "ASSETNODES",
     "TABLE": "ASSETNODES",
-    "PARENT_TABLE": None,
+    "PARENT": None,
     "ROW_NAME": "ASSETNODES_NAME",
     "DEFAULT_COLS": ["ASSETNODES_NAME",
                      "ASSETNODES_TIMEOUT",
@@ -30,7 +34,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 1,
             "REQUIRED": 1,
-            "INTERNAL": 0,
             "DEFAULT": None,
             "NEW": 1,
             "AUTH": {
@@ -47,7 +50,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": None,
             "NEW": 0,
             "AUTH": {
@@ -60,12 +62,11 @@ mod_def["ASSETNODES"] = {
             "NAME": "ASSETNODES_ASSETS_ID",
             "HEADER": "ASSET",
             "TYPE": "ID",
-            "ID_TABLE": "ASSETS",
+            "ID_API": "ASSETS",
             "EDIT": 1,
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": None,
             "NEW": 0,
             "AUTH": {
@@ -78,12 +79,11 @@ mod_def["ASSETNODES"] = {
             "NAME": "ASSETNODES_NODES_ID",
             "HEADER": "NODE",
             "TYPE": "ID",
-            "ID_TABLE": "NODES",
+            "ID_API": "NODES",
             "EDIT": 1,
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": None,
             "NEW": 0,
             "AUTH": {
@@ -101,7 +101,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 1,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": "SENSOR0 NAME",
             "NEW": 0,
             "AUTH": {
@@ -119,7 +118,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": 0.0,
             "NEW": 0,
             "AUTH": {
@@ -137,7 +135,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 1,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": "SENSOR1 NAME",
             "NEW": 0,
             "AUTH": {
@@ -155,7 +152,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": 0.0,
             "NEW": 0,
             "AUTH": {
@@ -173,7 +169,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 1,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": "SENSOR2 NAME",
             "NEW": 0,
             "AUTH": {
@@ -191,7 +186,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": 0.0,
             "NEW": 0,
             "AUTH": {
@@ -209,7 +203,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 1,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": "SENSOR3 NAME",
             "NEW": 0,
             "AUTH": {
@@ -227,7 +220,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": 0.0,
             "NEW": 0,
             "AUTH": {
@@ -245,7 +237,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 1,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": "SENSOR4 NAME",
             "NEW": 0,
             "AUTH": {
@@ -263,7 +254,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": 0.0,
             "NEW": 0,
             "AUTH": {
@@ -281,7 +271,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 1,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": "SENSOR5 NAME",
             "NEW": 0,
             "AUTH": {
@@ -299,7 +288,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": 0.0,
             "NEW": 0,
             "AUTH": {
@@ -317,7 +305,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 1,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": "SENSOR6 NAME",
             "NEW": 0,
             "AUTH": {
@@ -335,7 +322,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": 0.0,
             "NEW": 0,
             "AUTH": {
@@ -353,7 +339,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 1,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": "SENSOR7 NAME",
             "NEW": 0,
             "AUTH": {
@@ -371,7 +356,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": 0.0,
             "NEW": 0,
             "AUTH": {
@@ -389,7 +373,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 1,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": "SENSOR8 NAME",
             "NEW": 0,
             "AUTH": {
@@ -407,7 +390,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": 0.0,
             "NEW": 0,
             "AUTH": {
@@ -425,7 +407,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 1,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": "SENSOR9 NAME",
             "NEW": 0,
             "AUTH": {
@@ -443,7 +424,6 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 0,
-            "INTERNAL": 0,
             "DEFAULT": 0.0,
             "NEW": 0,
             "AUTH": {
