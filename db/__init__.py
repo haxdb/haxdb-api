@@ -67,3 +67,32 @@ class db:
 
     def rollback(self):
         return self.db.rollback()
+
+    def mod2db(self, mod_def):
+        tbl = []
+        idx = []
+
+        for md in mod_def:
+            md = mod_def[md]
+            t = tables.table(md["TABLE"])
+            for col in md["COLS"]:
+                ftab = None
+                fcol = None
+                if col["TYPE"] == "ID":
+                    ftab = col["ID"]
+                    fcol = "{}_ID".format(col["ID"])
+                    t.add(col["NAME"],
+                          col["TYPE"],
+                          col_size=col.get("SIZE", None),
+                          col_required=col.get("REQUIRED", False),
+                          fk_table=ftab,
+                          fk_col=fcol,
+                          )
+            for i in md["INDEX"]:
+                idx.append(tables.index(md["TABLE"], i, unique=False))
+            for i in md["UNIQUE"]:
+                idx.append(tables.index(md["TABLE"], i, unique=True))
+
+            tbl.append(t)
+
+        db.create(tables=tbl, indexes=idx)

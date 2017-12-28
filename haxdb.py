@@ -9,8 +9,9 @@ import haxdb_data
 import haxdb_api as api
 import re
 
-app = Flask("haxdb-api")
-app.secret_key = os.urandom(24)
+flask_app = Flask("haxdb-api")
+flask_app.secret_key = os.urandom(24)
+route = flask_app.route
 
 VERSION = "v1"
 config = None
@@ -35,6 +36,10 @@ class error:
     __str__ = __repr__
 
 
+def mod2db(mod_def):
+    return db.mod2db(mod_def)
+
+
 def get(key, use_session=False):
     r = haxdb_data.var.getlist(key)
     if isinstance(r, list):
@@ -49,16 +54,14 @@ def session(key, val=None):
         return haxdb_data.session.get(key)
 
 
-def response(success=0, message=None, data=None, raw=None):
+def response(success=0, message=None, raw=None):
     output_format = get("format")
 
     out = raw or {}
     out["success"] = success
-    out["value"] = value
     out["message"] = message
     out["timestamp"] = time.time()
-    out["authenticated"] = 1 if authenticated else 0
-    out["data"] = None if not data else data
+    # out["authenticated"] = 1 if authenticated else 0
 
     if output_format and output_format == "msgpack":
         return msgpack.packb(out)
@@ -130,7 +133,7 @@ def require_auth(view_function):
 
         if not (key and authenticated == 1):
             msg = "NOT AUTHENTICATED"
-            return output(success=0, message=msg, authenticated=False)
+            return response(success=0, message=msg, raw={"authenticated": 0})
         return view_function(*args, **kwargs)
 
     return decorated_function
@@ -142,7 +145,7 @@ def require_dba(view_function):
         session.permanent = True
         dba = haxdb_data.session.get("api_dba")
         if (not dba or (dba and int(dba) != 1)):
-            return output(success=0, message="INVALID PERMISSION")
+            return response(success=0, message="INVALID PERMISSION")
         return view_function(*args, **kwargs)
 
     return decorated_function
@@ -155,7 +158,7 @@ def no_readonly(view_function):
         readonly = haxdb_data.session.get("api_readonly")
 
         if (readonly and readonly == 1):
-            return output(success=0, message="INVALID PERMISSION")
+            return response(success=0, message="INVALID PERMISSION")
         return view_function(*args, **kwargs)
 
     return decorated_function

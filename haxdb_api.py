@@ -4,15 +4,11 @@ import re
 import os.path
 
 haxdb = None
-db = None
-output = None
 
 
-def init(app_haxdb):
-    global haxdb, db, output
-    haxdb = app_haxdb
-    db = haxdb.db
-    output = haxdb.output
+def init(hdb):
+    global haxdb
+    haxdb = hdb
 
 
 def valid_value(col, val):
@@ -56,411 +52,53 @@ def valid_value(col, val):
         return True
 
     if col_type == "DATE":
-        d = re.compile("^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$")
+        r = "^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$"
+        d = re.compile(r)
         return d.match(val)
 
-    return False
+
+def build_query(self, query):
+    pass
 
 
-class api_call:
-    API_NAME = None
-    API_ROWID = None
-    API_CONTEXT_ID = 0
-    COLS = []
-    _COLS = {}
-    ORDER = []
+def get_udf(table):
+    pass
 
-    def __init__(self, api_def):
-        self.API_NAME = api_def["NAME"]
-        self.API_ROWID = api_def["ROWID"]
-        self.COLS = api_def["COLS"]
-        self.ORDER = api_def["ORDER"]
-        for col in self.COLS:
-            if "CATEGORY" not in col:
-                col["CATEGORY"] = "PRIMARY"
-            self._COLS[col["NAME"]] = col
 
-    def is_udf(self, col):
-        if "UDF" in col and col["UDF"] == 1:
-            return True
-        return False
+def list_call(mod_def):
+    table = mod_def["TABLE"]
+    query = haxdb.get("query")
+    csv = haxdb.get("csv")
 
-    def get_meta(self, action=None):
-        meta = {}
-        meta["api"] = self.API_NAME
-        meta["action"] = action
-        meta["col_rowid"] = self.API_ROWID
-        meta["cols"] = self.get_cols()
-        meta["lists"] = self.get_lists(meta["cols"])
-        return meta
+    udf = get_udf(table)
 
-    def get_list_id(self, list_name):
-        row = db.qaf("SELECT * FROM LISTS WHERE LISTS_NAME=%s", (list_name,))
-        if row:
-            return row["LISTS_ID"]
-        return None
 
-    def get_lists(self, cols=None):
-        cols = cols or self.get_cols()
+    if csv == 1:
+        return haxdb.func("FILE_CSV")(filename, headers, rows)
 
-        list_ids = ()
-        for col in cols:
-            if col["TYPE"] == "LIST":
-                if "LIST" in col:
-                    try:
-                        list_id = int(col["LIST"])
-                    except (ValueError, TypeError) as e:
-                        list_id = 0
-                    if list_id not in list_ids:
-                        list_ids += (list_id, )
-                elif "LIST_NAME" in col:
-                    list_id = self.get_list_id(col["LIST_NAME"])
-                    if list_id and list_id not in list_ids:
-                        list_ids += (int(list_id),)
-        if not list_ids:
-            return {}
+    event_data = {
+        "api": self.API_NAME,
+        "call": "list",
+        "rowcount": len(rows),
+    }
+    haxdb.trigger("API.{}.LIST".format(self.API_NAME), event_data)
 
-        lists = {}
+    return output(success=1, data=rows, meta=meta)
 
-        sql = """
-        SELECT LISTS.*, LIST_ITEMS.* FROM LISTS
-        JOIN LIST_ITEMS ON LIST_ITEMS_LISTS_ID=LISTS_ID
-             AND LIST_ITEMS_ENABLED=1
-        WHERE
-        LISTS_ID IN ({})
-        """.format(",".join(("%s",) * len(list_ids)))
 
-        sql += " ORDER BY LIST_ITEMS_ORDER"
-        row = db.qaf(sql, list_ids)
-        while row:
-            lname = row["LISTS_NAME"]
-            lid = row["LISTS_ID"]
-            if lid not in lists:
-                lists[lid] = {"name": lname, "items": []}
-            list_item = {
-                "ID": row["LIST_ITEMS_ID"],
-                "VALUE": row["LIST_ITEMS_VALUE"],
-                "DESCRIPTION": row["LIST_ITEMS_DESCRIPTION"],
-            }
-            lists[lid]["items"].append(list_item)
-            row = db.next()
+def view_call(mod_def, rowid=None):
+    rowid = rowid or haxdb.get("rowid")
 
-        return lists
+    table = mod_def["TABLE"]
+    row_id = "{}_ID".format(table)
+    row_name = mod_def["ROW_NAME"]
 
-    def get_cols(self):
-        cols = list(self.COLS)
-
-        sql = """
-        SELECT
-        UDF_ID, UDF_NAME, UDF_TYPE,
-        UDF_LISTS_ID, UDF_CATEGORY, UDF_API
-        FROM UDF
-        WHERE UDF_CONTEXT=%s and UDF_CONTEXT_ID=%s and UDF_ENABLED=1
-        ORDER BY UDF_ORDER
-        """
-        row = db.qaf(sql, (self.API_NAME, self.API_CONTEXT_ID, ))
-        while row:
-            col = {
-                    "UDF": 1,
-                    "UDF_ID": row["UDF_ID"],
-                    "NAME": row["UDF_NAME"],
-                    "CATEGORY": row["UDF_CATEGORY"],
-                    "HEADER": row["UDF_NAME"],
-                    "TYPE": row["UDF_TYPE"],
-                    "QUERY": 1,
-                    "SEARCH": 1,
-                    "REQUIRED": 0,
-                    "EDIT": 1,
-                  }
-            if row["UDF_TYPE"] == "LIST":
-                col["LIST"] = row["UDF_LISTS_ID"]
-            if row["UDF_TYPE"] == "ID":
-                col["ID_API"] = row["UDF_API"]
-
-            cols.append(col)
-            row = db.next()
-
-        return cols
-
-    def build_query(self, query):
-        params = ()
-        sql = ""
-        if query:
-            queries = shlex.split(query)
-            for query in queries:
-                opreg = re.compile("([!=><])")
-                qs = opreg.split(query)
-                if len(qs) > 1:
-                    col = qs[0]
-                    op = qs[1]
-                    if op == "!":
-                        op = "!="
-                    vals = qs[2].split("|")
-                    if col in self._COLS and self._COLS[col]["QUERY"]:
-                        sql += " AND ("
-                        valcount = 0
-                        for val in vals:
-                            if valcount > 0:
-                                sql += " OR "
-
-                            if val == "NULL" and op == "=":
-                                sql += "HDB_LIST.{} IS NULL".format(col)
-                            elif val == "NULL" and op == "!=":
-                                sql += "HDB_LIST.{} IS NOT NULL".format(col)
-                            else:
-                                sql += "HDB_LIST.{} {} %s".format(col, op)
-                                params += (val,)
-
-                            valcount += 1
-
-                        sql += ")"
-                    else:
-                        sql += " AND ("
-                        valcount = 0
-                        for val in vals:
-                            if valcount > 0:
-                                sql += " OR "
-                            if val == "NULL" and op == "=":
-                                sql += """
-                                (
-                                    (SELECT COUNT(*)
-                                    FROM UDF, UDF_DATA
-                                    WHERE UDF_CONTEXT=%s
-                                    AND UDF_CONTEXT_ID=%s
-                                    and UDF_ENABLED=1
-                                    and UDF_ID=UDF_DATA_UDF_ID
-                                    and UDF_NAME=%s
-                                    and UDF_DATA_ROWID={}
-                                    and UDF_ENABLED=1) < 1
-                                OR
-                                    (SELECT COUNT(*)
-                                    FROM UDF, UDF_DATA
-                                    WHERE UDF_CONTEXT=%s
-                                    AND UDF_CONTEXT_ID=%s
-                                    and UDF_ENABLED=1
-                                    and UDF_ID=UDF_DATA_UDF_ID
-                                    and UDF_NAME=%s
-                                    and UDF_ENABLED=1
-                                    and UDF_DATA_VALUE IS NULL
-                                    and UDF_DATA_ROWID={}) > 0
-                                )""".format(self.API_ROWID, self.API_ROWID)
-                                params += (self.API_NAME, self.API_CONTEXT_ID)
-                                params += (col,)
-                                params += (self.API_NAME, self.API_CONTEXT_ID)
-                                params += (col,)
-                            elif val == "NULL" and op == "!=":
-                                sql += """
-                                    (
-                                    SELECT COUNT(*)
-                                    FROM UDF, UDF_DATA
-                                    WHERE UDF_CONTEXT=%s
-                                    AND UDF_CONTEXT_ID=%s
-                                    and UDF_ENABLED=1
-                                    and UDF_ID=UDF_DATA_UDF_ID
-                                    and UDF_NAME=%s
-                                    and UDF_ENABLED=1
-                                    and UDF_DATA_ROWID={}) > 0
-                                """.format(self.API_ROWID)
-                                params += (self.API_NAME, self.API_CONTEXT_ID)
-                                params += (col,)
-                            else:
-                                sql += """
-                                 (
-                                 SELECT COUNT(*)
-                                 FROM UDF, UDF_DATA
-                                 WHERE UDF_CONTEXT=%s
-                                 AND UDF_CONTEXT_ID=%s
-                                 and UDF_ENABLED=1
-                                 and UDF_ID=UDF_DATA_UDF_ID
-                                 and UDF_NAME=%s
-                                 and UDF_ENABLED=1
-                                 and UDF_DATA_VALUE {} %s
-                                 and UDF_DATA_ROWID={}) > 0
-                                 """.format(op, self.API_ROWID)
-                                params += (self.API_NAME, self.API_CONTEXT_ID)
-                                params += (col, val,)
-                            valcount += 1
-                        sql += ")"
-                else:
-                    query = "%" + query + "%"
-                    sql += " AND ("
-                    valcount = 0
-
-                    for col in self.COLS:
-                        if col["NAME"] in self._COLS and col["SEARCH"] == 1:
-                            if valcount > 0:
-                                sql += " OR "
-                            sql += " {} LIKE %s ".format(col["NAME"])
-                            params += (query,)
-                            valcount += 1
-                    if valcount > 0:
-                        sql += " OR "
-                    sql += """
-                    (SELECT COUNT(*)
-                    FROM UDF, UDF_DATA
-                    WHERE UDF_CONTEXT=%s
-                    AND UDF_CONTEXT_ID=%s
-                    and UDF_ENABLED=1
-                    and UDF_ID=UDF_DATA_UDF_ID
-                    and UDF_ENABLED=1
-                    and UDF_DATA_VALUE LIKE %s
-                    and UDF_DATA_ROWID={}) > 0
-                    """.format(self.API_ROWID)
-                    params += (self.API_NAME, self.API_CONTEXT_ID, query)
-                    sql += ")"
-        return sql, params
-
-    def csv_out(self, rows, headers=None):
-        import csv
-        from datetime import datetime
-        from StringIO import StringIO
-
-        if not headers:
-            cols = self.get_cols()
-            headers = []
-            for col in cols:
-                headers.append(col["NAME"])
-
-        csvfile = StringIO()
-        writer = csv.DictWriter(csvfile,
-                                fieldnames=headers,
-                                extrasaction='ignore')
-        writer.writeheader()
-        numrows = 0
-        for row in rows:
-            numrows += 1
-            writer.writerow(row)
-
-        filedata = csvfile.getvalue()
-        now = datetime.now().strftime("%Y%m%d%H%M")
-        filename = "{}.{}.csv".format(self.API_NAME, now)
-
-        event_data = {
-            "api": self.API_NAME,
-            "call": "csv",
-            "headers": headers,
-            "rowcount": numrows,
-            "filename": filename,
-        }
-        haxdb.trigger("API.{}.CSV".format(self.API_NAME), event_data)
-
-        return haxdb.func("FILE_DOWNLOAD")(filename, filedata, "text/csv")
-
-    def list_call(self, table=None, params=None,
-                  row_func=None, meta=None,
-                  output_format=None):
-
-        table = table or self.API_NAME
-        query = haxdb.get("query")
-
-        params = params or ()
-        params += (self.API_NAME, self.API_CONTEXT_ID)
-
-        meta = meta or {}
-        meta.update(self.get_meta("list"))
-        meta["query"] = query
-
-        sql = """
-            SELECT HDB_LIST.*,
-            U1.UDF_NAME AS HAXDB_UDF_NAME,
-            U1D.UDF_DATA_VALUE AS HAXDB_UDF_DATA_VALUE
-            FROM {} HDB_LIST
-            LEFT OUTER JOIN UDF U1 ON
-                    U1.UDF_CONTEXT=%s
-                    AND U1.UDF_CONTEXT_ID=%s
-                    AND U1.UDF_ENABLED=1
-            LEFT OUTER JOIN UDF_DATA U1D ON
-                    U1D.UDF_DATA_UDF_ID=U1.UDF_ID
-                    AND U1D.UDF_DATA_ROWID=HDB_LIST.{}
-            WHERE
-            1=1
-            """.format(table, self.API_ROWID)
-
-        rowid = haxdb.get("rowid")
-        if rowid:
-            sql += """
-                AND {} = {}
-            """.format(self.API_ROWID, rowid)
-        else:
-            rowid = haxdb.getlist("rowid")
-            if rowid:
-                try:
-                    rowid = list(rowid)
-                    rowid = map(int, rowid)
-                    rowids = ",".join(str(x) for x in rowid)
-                    sql += """
-                        AND {} in ({})
-                        """.format(self.API_ROWID, rowids)
-                except (ValueError, TypeError) as e:
-                    pass
-
-        query_sql, query_params = self.build_query(query)
-        sql += query_sql
-        params += query_params
-
-        sql += " GROUP BY HDB_LIST.{}, HAXDB_UDF_NAME".format(self.API_ROWID)
-        if len(self.ORDER) > 0:
-            sql += " ORDER BY {}, {}".format(",".join(self.ORDER),
-                                             self.API_ROWID)
-        else:
-            sql += " ORDER BY {}".format(self.API_ROWID)
-
-        row = db.qaf(sql, params)
-        if db.error:
-            return output(success=0, meta=meta, message=db.error)
-        rows = []
-        rowdata = None
-        lastrowid = None
-        while row:
-            row = dict(row)
-            if row_func:
-                row = row_func(dict(row))
-
-            rowid = row[self.API_ROWID]
-            if rowid != lastrowid:
-                if rowdata:
-                    rows.append(rowdata)
-                rowdata = {}
-                lastrowid = rowid
-            if row["HAXDB_UDF_NAME"]:
-                rowdata[row["HAXDB_UDF_NAME"]] = row["HAXDB_UDF_DATA_VALUE"]
-            del row["HAXDB_UDF_NAME"]
-            del row["HAXDB_UDF_DATA_VALUE"]
-            rowdata.update(row)
-
-            row = db.next()
-
-        if rowdata:
-            rows.append(rowdata)
-
-        if output_format == "CSV":
-            return self.csv_out(rows)
-
-        event_data = {
-            "api": self.API_NAME,
-            "call": "list",
-            "rowcount": len(rows),
-        }
-        haxdb.trigger("API.{}.LIST".format(self.API_NAME), event_data)
-
-        return output(success=1, data=rows, meta=meta)
-
-    def view_call(self, table=None, where=None,
-                  params=None, row_func=None,
-                  rowid=None, meta=None):
-        rowid = rowid or haxdb.get("rowid")
-
-        table = table or self.API_NAME
-        where = where or "1=1"
-        params = params or ()
-
-        meta = meta or {}
-        meta.update(self.get_meta("view"))
-        meta["rowid"] = rowid
-
-        sql = """
-            select HAXDB_VIEW_TABLE.*
-            FROM {} HAXDB_VIEW_TABLE
+    sql = """
+            select
+                {} AS ROW_ID,
+                {} AS ROW_NAME,
+                HVT.*
+            FROM {} HVT
             WHERE
             {}
             and {}=%s
