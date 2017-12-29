@@ -56,6 +56,6 @@ def init(app_haxdb):
 
 
 def run():
-    haxdb.save_function("FILE_DOWNLOAD", file_download)
-    haxdb.save_function("FILE_CSV", file_csv)
-    haxdb.save_function("FILE_DATAURL", file_dataurl)
+    haxdb.func("FILE_DOWNLOAD", file_download)
+    haxdb.func("FILE_CSV", file_csv)
+    haxdb.func("FILE_DATAURL", file_dataurl)
