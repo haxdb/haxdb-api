@@ -4,11 +4,10 @@ import mod_tools
 
 
 def init(haxdb):
-    mod_db.init(haxdb)
+    haxdb.mod2db(mod_def)
     mod_api.init(haxdb)
     return {}
 
 
 def run():
-    mod_db.run()
     mod_api.run()

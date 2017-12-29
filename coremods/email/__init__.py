@@ -1,30 +1,30 @@
-import time
-import base64
-import re
-import os
-import urllib2
-import json
 
 haxdb = None
 
 
 def send_email(receiver, subject, msg):
-    global haxdb
-
-    sender = "%s <%s>" % (config["EMAIL"]["NAME"], config["EMAIL"]["FROM"])
-    header = "From: %s\n" % sender
-    header += "To: %s\n" % receiver
-    header += "Subject: %s\n" % subject
-    header += "\r\n\r\n"
-    msg = header + msg
-
     import smtplib
     try:
-        host = config["EMAIL"]["HOST"]
-        port = config["EMAIL"]["PORT"]
-        server = smtplib.SMTP(host, port, None, 10)
-        server.starttls()
-        server.login(config["EMAIL"]["USER"], config["EMAIL"]["PASS"])
+        ename = haxdb.config["EMAIL"]["NAME"]
+        efrom = haxdb.config["EMAIL"]["FROM"]
+        ehost = haxdb.config["EMAIL"]["HOST"]
+        eport = haxdb.config["EMAIL"]["PORT"]
+        euser = haxdb.config["EMAIL"]["USER"]
+        epass = haxdb.config["EMAIL"]["PASS"]
+        etls = haxdb.config["EMAIL"]["TLS"]
+
+        sender = "{} <{}>".format(ename, efrom)
+        header = "From: {}\n".format(sender)
+        header += "To: {}\n".format(receiver)
+        header += "Subject: {}\n".format(subject)
+        header += "\r\n\r\n"
+        msg = header + msg
+
+        server = smtplib.SMTP(ehost, eport, None, 10)
+        if etls == 1:
+            server.starttls()
+        if euser and epass:
+            server.login(euser, epass)
         server.sendmail(sender, receiver, msg)
         server.quit()
     except smtplib.SMTPRecipientsRefused:
@@ -37,7 +37,7 @@ def send_email(receiver, subject, msg):
 def init(hdb):
     global haxdb
     haxdb = hdb
-    haxdb.func("SEND_EMAIL")
+    haxdb.func("SEND_EMAIL", send_email)
     return {}
 
 

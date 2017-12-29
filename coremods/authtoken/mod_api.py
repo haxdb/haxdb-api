@@ -1,10 +1,3 @@
-import os
-import base64
-import json
-import time
-import re
-from flask import request
-
 haxdb = None
 
 
@@ -15,9 +8,8 @@ def init(hdb):
 
 def run():
     @haxdb.route("/AUTHTOKEN", methods=["GET", "POST"])
-    @haxdb.route("/AUTHTOKEN/<token>", methods=["GET", "POST"])
-    def mod_auth_token(token=None):
-        token = token or haxdb.get("token")
+    def mod_auth_token():
+        token = haxdb.get("token")
         dbas = [x.strip().upper() for x in config["AUTH"]["DBA"].split(',')]
         now = int(time.time())
 
