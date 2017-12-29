@@ -1,127 +1,27 @@
-from flask import request
-from werkzeug.utils import secure_filename
-import os
+from mod_def import mod_def
 
 haxdb = None
-db = None
-config = None
-apis = {}
 
 
-def init(app_haxdb, api, mod_config, mod_def):
-    global haxdb, db, config, apis
-    haxdb = app_haxdb
-    db = haxdb.db
-    config = mod_config
-
-    for api_name in mod_def.keys():
-        apis[api_name] = api.api_call(mod_def[api_name])
+def init(hdb):
+    global haxdb
+    haxdb = hdb
 
 
 def run():
     @haxdb.route("/UDF/list", methods=["POST", "GET"])
-    @haxdb.route("/UDF/list/<UDF_CONTEXT>", methods=["POST", "GET"])
-    @haxdb.route("/UDF/list/<UDF_CONTEXT>/<int:UDF_CONTEXT_ID>", methods=["POST", "GET"])
-    @haxdb.require_auth
-    @haxdb.no_readonly
-    @haxdb.require_dba
-    def mod_udf_def_list(UDF_CONTEXT=None, UDF_CONTEXT_ID=None):
-        UDF_CONTEXT = UDF_CONTEXT or haxdb.get("UDF_CONTEXT")
-        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.get("UDF_CONTEXT_ID") or 0
-        disabled = haxdb.get("disabled")
-        meta = {"name": UDF_CONTEXT}
+    def mod_udf_def_list():
+        return haxdb.api.list_call(mod_def["UDF"])
 
-        t = """
-        (
-            SELECT UDF.*, LISTS_NAME,
-            UDF_ID AS ROW_ID, UDF_NAME AS ROW_NAME
-            FROM UDF
-            LEFT OUTER JOIN LISTS ON LISTS_ID=UDF_LISTS_ID
-            WHERE
-            UDF_CONTEXT=%s
-            AND UDF_CONTEXT_ID=%s
-        )
-        """
-        p = (UDF_CONTEXT, UDF_CONTEXT_ID)
-        if disabled == 1:
-            t += " AND UDF_ENABLED=1 "
-
-        return apis["UDF"].list_call(table=t, params=p, meta=meta)
-
-    @haxdb.route("/UDF/csv", methods=["POST", "GET"])
-    @haxdb.route("/UDF/csv/<UDF_CONTEXT>", methods=["POST", "GET"])
-    @haxdb.route("/UDF/csv/<UDF_CONTEXT>/<int:UDF_CONTEXT_ID>", methods=["POST", "GET"])
-    @haxdb.require_auth
-    @haxdb.no_readonly
-    @haxdb.require_dba
-    def mod_udf_def_csv(UDF_CONTEXT=None, UDF_CONTEXT_ID=None):
-        UDF_CONTEXT = UDF_CONTEXT or haxdb.get("UDF_CONTEXT")
-        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.get("UDF_CONTEXT_ID") or 0
-        disabled = haxdb.get("disabled")
-
-        t = """
-        (
-            SELECT UDF.*, LISTS_NAME,
-            UDF_ID AS ROW_ID, UDF_NAME AS ROW_NAME
-            FROM UDF
-            LEFT OUTER JOIN LISTS ON LISTS_ID=UDF_LISTS_ID
-            WHERE
-            UDF_CONTEXT=%s
-            AND UDF_CONTEXT_ID=%s
-        )
-        """
-        p = (UDF_CONTEXT, UDF_CONTEXT_ID)
-        if disabled == 1:
-            t += " AND UDF_ENABLED=1 "
-
-        return apis["UDF"].list_call(table=t, params=p, output_format="CSV")
 
     @haxdb.route("/UDF/new", methods=["POST", "GET"])
-    @haxdb.route("/UDF/new/<UDF_CONTEXT>", methods=["POST", "GET"])
-    @haxdb.route("/UDF/new/<UDF_CONTEXT>/<int:UDF_CONTEXT_ID>", methods=["POST", "GET"])
-    @haxdb.require_auth
-    @haxdb.no_readonly
-    @haxdb.require_dba
-    def mod_udf_def_new(UDF_CONTEXT=None, UDF_CONTEXT_ID=None):
-        UDF_CONTEXT = UDF_CONTEXT or haxdb.get("UDF_CONTEXT")
-        UDF_CONTEXT_ID = UDF_CONTEXT_ID or haxdb.get("UDF_CONTEXT_ID") or 0
-
-        defaults = {
-            "UDF_CONTEXT": UDF_CONTEXT,
-            "UDF_CONTEXT_ID": UDF_CONTEXT_ID,
-        }
-        return apis["UDF"].new_call(defaults=defaults)
+    def mod_udf_def_new():
+        return haxdb.api.new_call(mod_def["UDF"])
 
     @haxdb.route("/UDF/delete", methods=["GET", "POST"])
-    @haxdb.route("/UDF/delete/<int:rowid>", methods=["GET", "POST"])
-    @haxdb.require_auth
-    @haxdb.no_readonly
-    @haxdb.require_dba
-    def mod_udf_def_delete(rowid=None):
-        rowid = rowid or haxdb.get("rowid")
-
-        sql = """
-        SELECT UDF_CONTEXT, UDF_CONTEXT_ID, UDF_NAME FROM UDF
-        WHERE UDF_ID=%s
-        """
-        row = db.qaf(sql, (rowid,))
-        if row:
-            sql = """
-                DELETE FROM FILES WHERE
-                FILES_CONTEXT=%s
-                AND FILES_CONTEXT_ID=%s
-                AND FILES_FIELD_NAME=%s
-            """
-            db.query(sql, (row["UDF_CONTEXT"],
-                           row["UDF_CONTEXT_ID"],
-                           row["UDF_NAME"]))
-
-        return apis["UDF"].delete_call(rowid=rowid)
+    def mod_udf_def_delete():
+        return haxdb.api.delete_call(mod_def["UDF"])
 
     @haxdb.route("/UDF/save", methods=["GET", "POST"])
-    @haxdb.route("/UDF/save/<int:rowid>/<col>/<val>", methods=["GET", "POST"])
-    @haxdb.require_auth
-    @haxdb.no_readonly
-    @haxdb.require_dba
-    def mod_udf_def_save(rowid=None, col=None, val=None):
-        return apis["UDF"].save_call(rowid=rowid)
+    def mod_udf_def_save():
+        return haxdb.api.save_call(mod_def["UDF"])
