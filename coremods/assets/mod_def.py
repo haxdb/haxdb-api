@@ -194,7 +194,9 @@ mod_def["ASSETURLS"] = {
     "UDF": 0,
     "ORDER": ["ASSETURLS_ORDER", "ASSETURLS_NAME"],
     "INDEX": [],
-    "UNIQUE": [["ASSETURLS_ASSETS_ID", "ASSETURLS_URL"]]
+    "UNIQUE": [["ASSETURLS_ASSETS_ID", "ASSETURLS_URL"],
+               ["ASSETURLS_ASSETS_ID", "ASSETURLS_NAME"],
+              ]
     "AUTH": {
         "READ": 1,
         "WRITE": 1,
