@@ -14,8 +14,8 @@ def init(hdb):
 
 
 def run():
-    @haxdb.app.route("/AUTHTOKEN", methods=["GET", "POST"])
-    @haxdb.app.route("/AUTHTOKEN/<token>", methods=["GET", "POST"])
+    @haxdb.route("/AUTHTOKEN", methods=["GET", "POST"])
+    @haxdb.route("/AUTHTOKEN/<token>", methods=["GET", "POST"])
     def mod_auth_token(token=None):
         token = token or haxdb.get("token")
         dbas = [x.strip().upper() for x in config["AUTH"]["DBA"].split(',')]
