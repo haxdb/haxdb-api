@@ -139,9 +139,9 @@ def boolval(val):
 
 
 def run():
-    @haxdb.app.route("/ASSETS_RFID/pulse", methods=methods)
-    @haxdb.app.route("/ASSETS_RFID/pulse/<rfid>", methods=methods)
-    @haxdb.app.route("/ASSETS_RFID/pulse/<rfid>/<status>", methods=methods)
+    @haxdb.route("/ASSETS_RFID/pulse", methods=methods)
+    @haxdb.route("/ASSETS_RFID/pulse/<rfid>", methods=methods)
+    @haxdb.route("/ASSETS_RFID/pulse/<rfid>/<status>", methods=methods)
     def mod_rfid_asset_pulse(rfid=None, status=None):
         api_key = haxdb.get("api_key")
         rfid = rfid or haxdb.get("rfid")
@@ -247,8 +247,8 @@ def run():
 
 ##############################################################################
 
-    @haxdb.app.route("/PEOPLE_RFID/list", methods=methods)
-    @haxdb.app.route("/PEOPLE_RFID/list/<int:PEOPLE_ID>", methods=methods)
+    @haxdb.route("/PEOPLE_RFID/list", methods=methods)
+    @haxdb.route("/PEOPLE_RFID/list/<int:PEOPLE_ID>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_PEOPLE_RFID_list(PEOPLE_ID=None):
@@ -270,8 +270,8 @@ def run():
         p = (PEOPLE_ID,)
         return apis["PEOPLE_RFID"].list_call(table=t, params=p, meta=m)
 
-    @haxdb.app.route("/PEOPLE_RFID/new", methods=methods)
-    @haxdb.app.route("/PEOPLE_RFID/new/<int:PEOPLE_ID>", methods=methods)
+    @haxdb.route("/PEOPLE_RFID/new", methods=methods)
+    @haxdb.route("/PEOPLE_RFID/new/<int:PEOPLE_ID>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
@@ -287,30 +287,30 @@ def run():
         }
         return apis["PEOPLE_RFID"].new_call(defaults=defaults, meta=m)
 
-    @haxdb.app.route("/PEOPLE_RFID/save", methods=methods)
-    @haxdb.app.route("/PEOPLE_RFID/save/<int:rowid>", methods=methods)
+    @haxdb.route("/PEOPLE_RFID/save", methods=methods)
+    @haxdb.route("/PEOPLE_RFID/save/<int:rowid>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_PEOPLE_RFID_save(rowid=None):
         return apis["PEOPLE_RFID"].save_call(rowid=rowid)
 
-    @haxdb.app.route("/PEOPLE_RFID/delete", methods=methods)
-    @haxdb.app.route("/PEOPLE_RFID/delete/<int:rowid>", methods=methods)
+    @haxdb.route("/PEOPLE_RFID/delete", methods=methods)
+    @haxdb.route("/PEOPLE_RFID/delete/<int:rowid>", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_PEOPLE_RFID_delete(rowid=None):
         return apis["PEOPLE_RFID"].delete_call(rowid=rowid)
 
-    @haxdb.app.route("/PEOPLE_RFID/upload", methods=methods)
+    @haxdb.route("/PEOPLE_RFID/upload", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_PEOPLE_RFID_upload():
         return apis["PEOPLE_RFID"].upload_call()
 
-    @haxdb.app.route("/PEOPLE_RFID/download", methods=methods)
+    @haxdb.route("/PEOPLE_RFID/download", methods=methods)
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly

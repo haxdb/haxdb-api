@@ -43,7 +43,7 @@ def init(app_haxdb, api, mod_config, mod_def):
 
 
 def run():
-    @haxdb.app.route("/FIELDSET/list", methods=["POST", "GET"])
+    @haxdb.route("/FIELDSET/list", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_FIELDSET_list():
@@ -77,8 +77,8 @@ def run():
         p = (FIELDSET_CONTEXT, FIELDSET_CONTEXT_ID, people_id)
         return apis["FIELDSET"].list_call(table=t, params=p, meta=m, row_func=calc_row)
 
-    @haxdb.app.route("/FIELDSET/view", methods=["POST", "GET"])
-    @haxdb.app.route("/FIELDSET/view/<int:rowid>", methods=["POST", "GET"])
+    @haxdb.route("/FIELDSET/view", methods=["POST", "GET"])
+    @haxdb.route("/FIELDSET/view/<int:rowid>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_FIELDSET_view(rowid=None):
@@ -93,8 +93,8 @@ def run():
 
         return apis["FIELDSET"].view_call(rowid=rowid, row_func=c)
 
-    @haxdb.app.route("/FIELDSET/save", methods=["GET", "POST"])
-    @haxdb.app.route("/FIELDSET/save/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.route("/FIELDSET/save", methods=["GET", "POST"])
+    @haxdb.route("/FIELDSET/save/<int:rowid>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
@@ -131,7 +131,7 @@ def run():
         else:
             return apis["FIELDSET"].save_call(rowid=rowid)
 
-    @haxdb.app.route("/FIELDSET/new", methods=["GET", "POST"])
+    @haxdb.route("/FIELDSET/new", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
@@ -186,29 +186,29 @@ def run():
         db.commit()
         return haxdb.output(success=1, meta=m, message="SAVED")
 
-    @haxdb.app.route("/FIELDSET/delete", methods=["GET", "POST"])
-    @haxdb.app.route("/FIELDSET/delete/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.route("/FIELDSET/delete", methods=["GET", "POST"])
+    @haxdb.route("/FIELDSET/delete/<int:rowid>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_FIELDSET_delete(rowid=None):
         return apis["FIELDSET"].delete_call(rowid=rowid)
 
-    @haxdb.app.route("/FIELDSET/upload", methods=["GET", "POST"])
+    @haxdb.route("/FIELDSET/upload", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_FIELDSET_upload():
         return apis["FIELDSET"].upload_call()
 
-    @haxdb.app.route("/FIELDSET/download", methods=["GET", "POST"])
+    @haxdb.route("/FIELDSET/download", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_FIELDSET_download(rowid=None):
         return apis["FIELDSET"].download_call()
 
-    @haxdb.app.route("/QUERY/list", methods=["POST", "GET"])
+    @haxdb.route("/QUERY/list", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_QUERY_list():
@@ -233,8 +233,8 @@ def run():
         p = (QUERY_CONTEXT, QUERY_CONTEXT_ID, people_id)
         return apis["QUERY"].list_call(table=t, params=p, meta=m)
 
-    @haxdb.app.route("/QUERY/view", methods=["POST", "GET"])
-    @haxdb.app.route("/QUERY/view/<int:rowid>", methods=["POST", "GET"])
+    @haxdb.route("/QUERY/view", methods=["POST", "GET"])
+    @haxdb.route("/QUERY/view/<int:rowid>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_QUERY_view(rowid=None):
@@ -244,15 +244,15 @@ def run():
             return row
         return apis["QUERY"].view_call(rowid=rowid, row_func=calc_row)
 
-    @haxdb.app.route("/QUERY/save", methods=["GET", "POST"])
-    @haxdb.app.route("/QUERY/save/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.route("/QUERY/save", methods=["GET", "POST"])
+    @haxdb.route("/QUERY/save/<int:rowid>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_QUERY_save(rowid=None):
         return apis["QUERY"].save_call(rowid=rowid)
 
-    @haxdb.app.route("/QUERY/new", methods=["GET", "POST"])
+    @haxdb.route("/QUERY/new", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
@@ -272,22 +272,22 @@ def run():
         }
         return apis["QUERY"].new_call(defaults=defaults)
 
-    @haxdb.app.route("/QUERY/delete", methods=["GET", "POST"])
-    @haxdb.app.route("/QUERY/delete/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.route("/QUERY/delete", methods=["GET", "POST"])
+    @haxdb.route("/QUERY/delete/<int:rowid>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_QUERY_delete(rowid=None):
         return apis["QUERY"].delete_call(rowid=rowid)
 
-    @haxdb.app.route("/QUERY/upload", methods=["GET", "POST"])
+    @haxdb.route("/QUERY/upload", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_QUERY_upload():
         return apis["QUERY"].upload_call()
 
-    @haxdb.app.route("/QUERY/download", methods=["GET", "POST"])
+    @haxdb.route("/QUERY/download", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly

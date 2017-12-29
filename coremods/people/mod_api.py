@@ -19,7 +19,7 @@ def init(app_haxdb, api, mod_config, mod_def):
 
 
 def run():
-    @haxdb.app.route("/PEOPLE/list", methods=["POST", "GET"])
+    @haxdb.route("/PEOPLE/list", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_people_list(category=None):
@@ -30,8 +30,8 @@ def run():
             return row
         return apis["PEOPLE"].list_call(row_func=calc_row)
 
-    @haxdb.app.route("/PEOPLE/view", methods=["POST", "GET"])
-    @haxdb.app.route("/PEOPLE/view/<int:rowid>", methods=["POST", "GET"])
+    @haxdb.route("/PEOPLE/view", methods=["POST", "GET"])
+    @haxdb.route("/PEOPLE/view/<int:rowid>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_people_view(rowid=None):
@@ -42,50 +42,50 @@ def run():
             return row
         return apis["PEOPLE"].view_call(rowid=rowid, row_func=c_row)
 
-    @haxdb.app.route("/PEOPLE/csv", methods=["POST", "GET"])
+    @haxdb.route("/PEOPLE/csv", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_people_csv():
         return apis["PEOPLE"].list_call(output_format="CSV")
 
-    @haxdb.app.route("/PEOPLE/save", methods=["GET", "POST"])
-    @haxdb.app.route("/PEOPLE/save/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.route("/PEOPLE/save", methods=["GET", "POST"])
+    @haxdb.route("/PEOPLE/save/<int:rowid>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_people_save(rowid=None):
         return apis["PEOPLE"].save_call(rowid=rowid)
 
-    @haxdb.app.route("/PEOPLE/new", methods=["GET", "POST"])
+    @haxdb.route("/PEOPLE/new", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_people_new():
         return apis["PEOPLE"].new_call()
 
-    @haxdb.app.route("/PEOPLE/delete/<int:rowid>", methods=["GET", "POST"])
-    @haxdb.app.route("/PEOPLE/delete", methods=["GET", "POST"])
+    @haxdb.route("/PEOPLE/delete/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.route("/PEOPLE/delete", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_people_delete(rowid=None):
         return apis["PEOPLE"].delete_call(rowid=rowid)
 
-    @haxdb.app.route("/PEOPLE/upload", methods=["GET", "POST"])
+    @haxdb.route("/PEOPLE/upload", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly
     def mod_people_upload():
         return apis["PEOPLE"].upload_call()
 
-    @haxdb.app.route("/PEOPLE/download", methods=["GET", "POST"])
-    @haxdb.app.route("/PEOPLE/download", methods=["GET", "POST"])
+    @haxdb.route("/PEOPLE/download", methods=["GET", "POST"])
+    @haxdb.route("/PEOPLE/download", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     def mod_people_download():
         return apis["PEOPLE"].download_call()
 
-    @haxdb.app.route("/PEOPLE/thumbnail", methods=["GET", "POST"])
+    @haxdb.route("/PEOPLE/thumbnail", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.require_dba
     @haxdb.no_readonly

@@ -19,9 +19,9 @@ def init(app_haxdb, api, mod_config, mod_def):
 
 
 def run():
-    @haxdb.app.route("/UDF/list", methods=["POST", "GET"])
-    @haxdb.app.route("/UDF/list/<UDF_CONTEXT>", methods=["POST", "GET"])
-    @haxdb.app.route("/UDF/list/<UDF_CONTEXT>/<int:UDF_CONTEXT_ID>", methods=["POST", "GET"])
+    @haxdb.route("/UDF/list", methods=["POST", "GET"])
+    @haxdb.route("/UDF/list/<UDF_CONTEXT>", methods=["POST", "GET"])
+    @haxdb.route("/UDF/list/<UDF_CONTEXT>/<int:UDF_CONTEXT_ID>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.no_readonly
     @haxdb.require_dba
@@ -48,9 +48,9 @@ def run():
 
         return apis["UDF"].list_call(table=t, params=p, meta=meta)
 
-    @haxdb.app.route("/UDF/csv", methods=["POST", "GET"])
-    @haxdb.app.route("/UDF/csv/<UDF_CONTEXT>", methods=["POST", "GET"])
-    @haxdb.app.route("/UDF/csv/<UDF_CONTEXT>/<int:UDF_CONTEXT_ID>", methods=["POST", "GET"])
+    @haxdb.route("/UDF/csv", methods=["POST", "GET"])
+    @haxdb.route("/UDF/csv/<UDF_CONTEXT>", methods=["POST", "GET"])
+    @haxdb.route("/UDF/csv/<UDF_CONTEXT>/<int:UDF_CONTEXT_ID>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.no_readonly
     @haxdb.require_dba
@@ -76,9 +76,9 @@ def run():
 
         return apis["UDF"].list_call(table=t, params=p, output_format="CSV")
 
-    @haxdb.app.route("/UDF/new", methods=["POST", "GET"])
-    @haxdb.app.route("/UDF/new/<UDF_CONTEXT>", methods=["POST", "GET"])
-    @haxdb.app.route("/UDF/new/<UDF_CONTEXT>/<int:UDF_CONTEXT_ID>", methods=["POST", "GET"])
+    @haxdb.route("/UDF/new", methods=["POST", "GET"])
+    @haxdb.route("/UDF/new/<UDF_CONTEXT>", methods=["POST", "GET"])
+    @haxdb.route("/UDF/new/<UDF_CONTEXT>/<int:UDF_CONTEXT_ID>", methods=["POST", "GET"])
     @haxdb.require_auth
     @haxdb.no_readonly
     @haxdb.require_dba
@@ -92,8 +92,8 @@ def run():
         }
         return apis["UDF"].new_call(defaults=defaults)
 
-    @haxdb.app.route("/UDF/delete", methods=["GET", "POST"])
-    @haxdb.app.route("/UDF/delete/<int:rowid>", methods=["GET", "POST"])
+    @haxdb.route("/UDF/delete", methods=["GET", "POST"])
+    @haxdb.route("/UDF/delete/<int:rowid>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.no_readonly
     @haxdb.require_dba
@@ -118,8 +118,8 @@ def run():
 
         return apis["UDF"].delete_call(rowid=rowid)
 
-    @haxdb.app.route("/UDF/save", methods=["GET", "POST"])
-    @haxdb.app.route("/UDF/save/<int:rowid>/<col>/<val>", methods=["GET", "POST"])
+    @haxdb.route("/UDF/save", methods=["GET", "POST"])
+    @haxdb.route("/UDF/save/<int:rowid>/<col>/<val>", methods=["GET", "POST"])
     @haxdb.require_auth
     @haxdb.no_readonly
     @haxdb.require_dba
