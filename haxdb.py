@@ -1,19 +1,22 @@
 from functools import wraps
-from flask import Flask, session as sess, jsonify, json, request
+from flask import Flask, session as sess, jsonify, json, request, Blueprint
+from flask_cors import CORS
 import msgpack
 import os
 import time
 from datetime import timedelta
-from flask_cors import CORS
 import haxdb_data
 import haxdb_api as api
 import re
 
+VERSION = "v1"
+METHOD = ["POST", "GET"]
+
 flask_app = Flask("haxdb-api")
 flask_app.secret_key = os.urandom(24)
-route = flask_app.route
+api_app = Blueprint(VERSION, "haxdb-api-version")
+route = api_app.route
 
-VERSION = "v1"
 config = None
 db = None
 logger = None

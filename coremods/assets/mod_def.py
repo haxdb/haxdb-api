@@ -1,22 +1,19 @@
 mod_def = {}
 
 mod_def["ASSETS"] = {
-    "PARENT": None,
-    "PRIORITY": 10,
-    "MENU": 1,
-    "ICON": "wrench",
-    "NAME": "ASSETS",
     "TABLE": "ASSETS",
-    "PARENT": None,
     "ROW_NAME": "ASSETS_NAME",
-    "DEFAULT_COLS": ["ASSETS_NAME",
-                     "ASSETS_TYPE",
-                     "ASSETS_LOCATION"],
     "NEW": 1,
     "UDF": 20,
     "ORDER": ["ASSETS_LOCATION, ASSETS_NAME"],
     "INDEX": [["ASSETS_LOCATION", "ASSETS_NAME"]],
     "UNIQUE": [["ASSETS_NAME"]],
+    "CLIENT": {
+        "MAJOR": 1,
+        "MINOR": 0,
+        "PARENT": None,
+        "ICON": "key"
+    },
     "AUTH": {
         "READ": 0,
         "WRITE": 100,
@@ -177,26 +174,25 @@ mod_def["ASSETS"] = {
             }
         },
     ],
+    "CALLS": ["list", "view", "save", "new", "delete"]
 }
 
 mod_def["ASSETURLS"] = {
-    "PARENT": "ASSETS",
-    "PRIORITY": 10,
-    "MENU": None,
-    "ICON": "link",
-    "NAME": "ASSETURLS",
     "TABLE": "ASSETURLS",
     "ROW_NAME": "ASSETURLS_NAME",
-    "DEFAULT_COLS": ["ASSETURLS_NAME",
-                     "ASSETURLS_LINK",
-                     "ASSETURLS_ORDER"],
     "NEW": 1,
     "UDF": 0,
     "ORDER": ["ASSETURLS_ORDER", "ASSETURLS_NAME"],
     "INDEX": [],
     "UNIQUE": [["ASSETURLS_ASSETS_ID", "ASSETURLS_URL"],
                ["ASSETURLS_ASSETS_ID", "ASSETURLS_NAME"],
-              ]
+              ],
+    "CLIENT": {
+        "MAJOR": 0,
+        "MINOR": 0,
+        "PARENT": "ASSETS",
+        "ICON": "link",
+    },
     "AUTH": {
         "READ": 1,
         "WRITE": 1,
@@ -273,22 +269,23 @@ mod_def["ASSETURLS"] = {
             }
         },
     ],
+    "CALLS": ["list", "view", "save", "new", "delete"]
 }
 
 mod_def["ASSETAUTHS"] = {
-    "PARENT": "ASSETS",
-    "PRIORITY": 10,
-    "MENU": 2,
-    "ICON": "lock",
-    "NAME": "ASSETAUTHS",
     "TABLE": "ASSETAUTHS",
     "ROW_NAME": "CALC_ASSETAUTHS_PEOPLE_ID",
-    "DEFAULT_COLS": ["ASSETAUTHS_PEOPLE_ID", "ASSETAUTHS_ENABLED"],
     "NEW": 0,
     "UDF": 0,
     "ORDER": ["CALC_ASSETAUTHS_PEOPLE_ID"],
     "INDEX": [],
     "UNIQUE": [["ASSETAUTHS_ASSETS_ID", "ASSETAUTHS_PEOPLE_ID"]],
+    "CLIENT": {
+        "MAJOR": 0,
+        "MINOR": 0,
+        "PARENT": "NODES",
+        "ICON": "lock",
+    },
     "AUTH": {
         "READ": 100,
         "WRITE": 100,
@@ -347,4 +344,5 @@ mod_def["ASSETAUTHS"] = {
             }
         },
     ],
+    "CALLS": ["list", "view", "save", "new", "delete"]
 }

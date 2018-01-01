@@ -9,19 +9,22 @@ def init(hdb):
 
 
 def run():
-    @haxdb.route("/UDF/list", methods=["POST", "GET"])
-    def mod_udf_def_list():
+    @haxdb.route("/UDF/list", methods=haxdb.METHOD)
+    def UDF_list():
         return haxdb.api.list_call(mod_def["UDF"])
 
+    @haxdb.route("/UDF/view", methods=haxdb.METHOD)
+    def UDF_view():
+        return haxdb.api.view_call(mod_def["UDF"])
 
-    @haxdb.route("/UDF/new", methods=["POST", "GET"])
-    def mod_udf_def_new():
+    @haxdb.route("/UDF/new", methods=haxdb.METHOD)
+    def UDF_new():
         return haxdb.api.new_call(mod_def["UDF"])
 
-    @haxdb.route("/UDF/delete", methods=["GET", "POST"])
-    def mod_udf_def_delete():
+    @haxdb.route("/UDF/delete", methods=haxdb.METHOD)
+    def UDF_delete():
         return haxdb.api.delete_call(mod_def["UDF"])
 
-    @haxdb.route("/UDF/save", methods=["GET", "POST"])
-    def mod_udf_def_save():
+    @haxdb.route("/UDF/save", methods=haxdb.METHOD)
+    def UDF_save():
         return haxdb.api.save_call(mod_def["UDF"])

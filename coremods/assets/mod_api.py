@@ -14,90 +14,70 @@ def run():
     #################################################
     # /ASSETS
     #################################################
-    @haxdb.route("/ASSETS/list", methods=methods)
-    def mod_assets_list():
+    @haxdb.route("/ASSETS/list", methods=haxdb.METHOD)
+    def ASSETS_list():
         return haxdb.api.list_call(mod_def["ASSETS"])
 
-    @haxdb.route("/ASSETS/view", methods=methods)
-    def mod_assets_view():
+    @haxdb.route("/ASSETS/view", methods=haxdb.METHOD)
+    def ASSETS_view():
         return haxdb.api.view_call(mod_def["ASSETS"])
 
-    @haxdb.route("/ASSETS/new", methods=methods)
-    def mod_assets_new():
+    @haxdb.route("/ASSETS/new", methods=haxdb.METHOD)
+    def ASSETS_new():
         return haxdb.api.new_call(mod_def["ASSETS"])
 
-    @haxdb.route("/ASSETS/delete", methods=methods)
-    def mod_assets_delete():
+    @haxdb.route("/ASSETS/delete", methods=haxdb.METHOD)
+    def ASSETS_delete():
         return haxdb.api.delete_call(mod_def["ASSETS"])
 
-    @haxdb.route("/ASSETS/save", methods=methods)
-    def mod_assets_save():
+    @haxdb.route("/ASSETS/save", methods=haxdb.METHOD)
+    def ASSETS_save():
         return haxdb.api.save_call(mod_def["ASSETS"])
-
-    @haxdb.route("/ASSETS/upload", methods=methods)
-    def mod_ASSETS_upload():
-        return haxdb.api.upload_call(mod_def["ASSETS"])
-
-    @haxdb.route("/ASSETS/download", methods=methods)
-    def mod_assets_download(rowid=None):
-        return haxdb.api.download_call(mod_def["ASSETS"])
-
-    @haxdb.route("/ASSETS/thumbnail", methods=methods)
-    def mod_assets_thumbnail():
-        return haxdb.api.thumbnail_call(mod_def["ASSETS"])
 
     #################################################
     # /ASSETURLS
     #################################################
 
-    @haxdb.route("/ASSETURLS/list", methods=methods)
-    def mod_asset_links_list():
+    @haxdb.route("/ASSETURLS/list", methods=haxdb.METHOD)
+    def ASSETURLS_list():
         return haxdb.api.list_call(mod_def["ASSETURLS"])
 
-    @haxdb.route("/ASSETURLS/new", methods=methods)
-    def mod_asset_links_new():
+    @haxdb.route("/ASSETURLS/view", methods=haxdb.METHOD)
+    def ASSETURLS_view():
+        return haxdb.api.view_call(mod_def["ASSETURLS"])
+
+    @haxdb.route("/ASSETURLS/new", methods=haxdb.METHOD)
+    def ASSETURLS_new():
         return haxdb.api.new_call(mod_def["ASSETURLS"])
 
-    @haxdb.route("/ASSETURLS/save", methods=methods)
-    def mod_asset_links_save():
-        return haxdb.api.save_call(mod_def["ASSETURLS"])
-
-    @haxdb.route("/ASSETURLS/delete", methods=methods)
-    def mod_asset_links_delete():
+    @haxdb.route("/ASSETURLS/delete", methods=haxdb.METHOD)
+    def ASSETURLS_delete():
         return haxdb.api.delete_call(mod_def["ASSETURLS"])
 
-    @haxdb.route("/ASSETURLS/upload", methods=methods)
-    def mod_ASSETURLS_upload():
-        return haxdb.api.upload_call(mod_def["ASSETURLS"])
-
-    @haxdb.route("/ASSETURLS/download", methods=methods)
-    def mod_ASSETURLS_download():
-        return haxdb.api.download_call(mod_def["ASSETURLS"])
+    @haxdb.route("/ASSETURLS/save", methods=haxdb.METHOD)
+    def ASSETURLS_save():
+        return haxdb.api.save_call(mod_def["ASSETURLS"])
 
     #################################################
     # /ASSETAUTHS
     #################################################
 
-    @haxdb.route("/ASSETAUTHS/list", methods=methods)
-    def mod_ASSETAUTHS_list():
+    @haxdb.route("/ASSETAUTHS/list", methods=haxdb.METHOD)
+    def ASSETAUTHS_list():
         return haxdb.api.list_call(mod_def["ASSETAUTHS"])
 
-    @haxdb.route("/ASSETAUTHS/new", methods=methods)
-    def mod_ASSETAUTHS_new():
+    @haxdb.route("/ASSETAUTHS/view", methods=haxdb.METHOD)
+    def ASSETAUTHS_view():
+        return haxdb.api.view_call(mod_def["ASSETAUTHS"])
+
+    @haxdb.route("/ASSETAUTHS/new", methods=haxdb.METHOD)
+    def ASSETAUTHS_new():
         return haxdb.api.new_call(mod_def["ASSETAUTHS"])
 
-    @haxdb.route("/ASSETAUTHS/delete", methods=methods)
-    def mod_ASSETAUTHS_delete():
+    @haxdb.route("/ASSETAUTHS/delete", methods=haxdb.METHOD)
+    def ASSETAUTHS_delete():
         return haxdb.api.delete_call(mod_def["ASSETAUTHS"])
 
-    @haxdb.route("/ASSETAUTHS/save", methods=methods)
-    def mod_asset_auths_save():
+    @haxdb.route("/ASSETAUTHS/save", methods=haxdb.METHOD)
+    def ASSETAUTHS_save():
         return haxdb.api.save_call(mod_def["ASSETAUTHS"])
-
-    @haxdb.route("/ASSETAUTHS/upload", methods=methods)
-    def mod_ASSETAUTHS_upload():
-        return haxdb.api.upload_call(mod_def["ASSETAUTHS"])
-
-    @haxdb.route("/ASSETAUTHS/download", methods=methods)
-    def mod_ASSETAUTHS_download():
-        return haxdb.api.download_call(mod_def["ASSETAUTHS"])

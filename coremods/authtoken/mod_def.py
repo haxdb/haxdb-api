@@ -1,17 +1,18 @@
 mod_def = {}
 
 mod_def["AUTHTOKEN"] = {
-    "NAME": "AUTHTOKEN",
     "TABLE": "AUTHTOKEN",
-    "PARENT_TABLE": None,
-    "ROW_NAME": None,
-    "DEFAULT_COLS": ["AUTHTOKEN_TOKEN",
-                     "AUTHTOKEN_PEOPLE_ID",
-                     "AUTHTOKEN_EXPIRE"],
+    "ROW_NAME": "AUTHTOKEN_TOKEN",
     "UDF": {},
     "ORDER": [],
     "INDEX": [],
     "UNIQUE": [["AUTHTOKEN_TOKEN"]],
+    "CLIENT": {
+        "MAJOR": 0,
+        "MINOR": 1,
+        "PARENT": None,
+        "ICON": "key"
+    },
     "COLS": [
         {
             "CATEGORY": "AUTHTOKEN",
@@ -63,5 +64,6 @@ mod_def["AUTHTOKEN"] = {
                 "WRITE": 500,
             }
         },
-    }
+    },
+    "CALLS": ["list", "view", "save", "new", "delete"]
 }

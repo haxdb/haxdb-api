@@ -1,28 +1,25 @@
 mod_def = {}
 
 mod_def["ASSETNODES"] = {
-    "PARENT": "NODES",
-    "PRIORITY": 10,
-    "MENU": None,
-    "ICON": "wrench",
-    "NAME": "ASSETNODES",
     "TABLE": "ASSETNODES",
-    "PARENT": None,
     "ROW_NAME": "ASSETNODES_NAME",
-    "DEFAULT_COLS": ["ASSETNODES_NAME",
-                     "ASSETNODES_TIMEOUT",
-                     "ASSETNODES_ASSETS_ID"],
     "NEW": 1,
     "UDF": 0,
     "ORDER": ["ASSETNODES_NAME"],
     "INDEX": [["ASSETNODES_ASSETS_ID"]],
     "UNIQUE": [["ASSETNODES_NODES_ID"]],
+    "CLIENT": {
+        "MAJOR": 0,
+        "MINOR": 0,
+        "PARENT": "NODES",
+        "ICON": "cube"
+    },
     "AUTH": {
         "READ": 100,
         "WRITE": 100,
         "INSERT": 100,
         "DELETE": 100,
-    }
+    },
     "COLS": [
         {
             "CATEGORY": "NODE",
@@ -431,5 +428,6 @@ mod_def["ASSETNODES"] = {
                 "WRITE": 100,
             }
         },
-    ]
+    ],
+    "CALLS": ["list", "view", "save", "new", "delete"]
 }

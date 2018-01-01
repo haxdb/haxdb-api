@@ -1,22 +1,19 @@
 mod_def = {}
 
 mod_def["FILES"] = {
-    "PARENT": None,
-    "PRIORITY": 10,
-    "MENU": 2,
-    "ICON": "file",
-    "NAME": "FILES",
     "TABLE": "FILES",
     "ROW_NAME": "FILES_ID",
-    "DEFAULT_COLS": ["FILES_TABLE",
-                     "FILES_ROWID",
-                     "FILES_COLUMN",
-                     "FILES_DATA"],
     "NEW": 0,
     "UDF": 0,
     "ORDER": ["FILES_TABLE", "FILES_ROW_ID", "FILES_COLUMN"],
     "INDEX": [],
     "UNIQUE": [["FILES_TABLE", "FILES_ROWID", "FILES_COLUMN"]],
+    "CLIENT": {
+        "MAJOR": 0,
+        "MINOR": 1,
+        "PARENT": None,
+        "ICON": "file"
+    },
     "AUTH": {
         "READ": 100,
         "WRITE": 100,
@@ -124,5 +121,6 @@ mod_def["FILES"] = {
                 "WRITE": 100,
             }
         },
-    ]
+    ],
+    "CALLS": ["list", "view", "save", "new", "delete"]
 }

@@ -3,19 +3,19 @@ mod_def = {}
 mod_def["UDF"] = {
     "NAME": "UDF",
     "TABLE": "UDF",
-    "PARENT": None,
     "ROW_NAME": "UDF_NAME",
-    "DEFAULT_COLS": ["UDF_TABLE",
-                     "UDF_CATEGORY",
-                     "UDF_NUM",
-                     "UDF_NAME",
-                     "UDF_ENABLED",
-                     "UDF_TYPE"],
     "UDF": 0,
     "NEW": 0,
     "ORDER": ["UDF_TABLE", "UDF_NUM"],
     "INDEX": [],
     "UNIQUE": [["UDF_TABLE", "UDF_NUM"], ["UDF_TABLE", "UDF_NAME"]],
+    "CLIENT": {
+        "NAME": "UDF",
+        "MAJOR": 0,
+        "MINOR": 1,
+        "PARENT": None,
+        "ICON": "database",
+    },
     "AUTH": {
         "READ": 1,
         "WRITE": 1,
@@ -99,8 +99,9 @@ mod_def["UDF"] = {
          "CATEGORY": "UDF",
          "NAME": "UDF_TYPE",
          "HEADER": "TYPE",
-         "TYPE": ["CHAR", "TEXT", "INT", "FLOAT", "BOOL", "LIST",
-                  "ID", "FILE", "DATE", "TIMESTAMP"],
+         "TYPE": "SELECT",
+         "OPTIONS": ["CHAR", "TEXT", "INT", "FLOAT", "BOOL", "LIST",
+                     "ID", "FILE", "DATE", "TIMESTAMP"],
          "SIZE": 15,
          "EDIT": 0,
          "QUERY": 0,
@@ -204,4 +205,5 @@ mod_def["UDF"] = {
          }
         },
     ],
+    "CALLS": ["list", "view", "save", "new", "delete"]
 }
