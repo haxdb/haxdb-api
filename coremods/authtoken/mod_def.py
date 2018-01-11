@@ -3,7 +3,7 @@ mod_def = {}
 mod_def["AUTHTOKEN"] = {
     "TABLE": "AUTHTOKEN",
     "ROW_NAME": "AUTHTOKEN_TOKEN",
-    "UDF": {},
+    "UDF": 0,
     "ORDER": [],
     "INDEX": [],
     "UNIQUE": [["AUTHTOKEN_TOKEN"]],

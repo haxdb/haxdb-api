@@ -87,6 +87,11 @@ class db:
                       fk_table=ftab,
                       fk_col=fcol,
                       )
+
+            for i in range(0, int(md["UDF"])):
+                cname = "{}_UDF{}".format(md["TABLE"], i)
+                t.add(cname, "CHAR", col_size="50")
+
             for i in md["INDEX"]:
                 idx.append(tables.index(md["TABLE"], i, unique=False))
             for i in md["UNIQUE"]:

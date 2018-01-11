@@ -21,29 +21,26 @@ class db:
         return filedata
 
     def get_datatype(self, datatype, datasize):
+        if datasize:
+            datasize = int(datasize)
+
         if datatype == "INT":
-            return "INT" if not datasize else "INT(%s)" % str(datasize)
+            if datasize:
+                return "INT({})".format(datasize)
+            return "INT"
 
-        if datatype == "VARCHAR" or datatype == "CHAR":
-            if not datasize:
-                return "VARCHAR(50)"
-            else:
+        if datatype == "CHAR":
+            if datasize:
                 return "VARCHAR({})".format(datasize)
-
-        if datatype == "ASCII":
-            if not datasize:
-                return "VARCHAR(50) CHARSET ASCII"
-            else:
-                return "VARCHAR({}) CHARSET ASCII".format(datasize)
+            return "VARCHAR(50)"
 
         if datatype == "BOOL":
             return "INT(1)"
 
         if datatype == "FLOAT":
-            if not datasize:
-                return "FLOAT(10,4)"
-            else:
+            if datasize:
                 return "FLOAT({},4)".format(datasize)
+            return "FLOAT(10,4)"
 
         if datatype == "TEXT":
             return "TEXT"
@@ -64,10 +61,12 @@ class db:
                 t_sql = """
                 CREATE TABLE IF NOT EXISTS {} (
                 {}_ID INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                {}_INTERNAL INT(1) NOT NULL DEFAULT 0,
                 {}_INSERTED TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
                 {}_UPDATED TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
                                               ON UPDATE CURRENT_TIMESTAMP
-                )""".format(table.name, table.name, table.name, table.name)
+                )""".format(table.name, table.name, table.name,
+                            table.name, table.name)
                 self.query(t_sql, squelch=True)
                 self.commit()
 

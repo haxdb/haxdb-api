@@ -58,4 +58,4 @@ def run():
         haxdb.logger.info("{}.run()".format(mod))
         mods[mod].run()
 
-        haxdb.db.close()
+    haxdb.db.close()
