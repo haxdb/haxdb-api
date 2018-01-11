@@ -14,4 +14,4 @@ def init(app_haxdb):
 
 
 def run():
-    haxdb.func("RFID_CREATE"), rfid_create)
+    haxdb.func("RFID_CREATE", rfid_create)

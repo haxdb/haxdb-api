@@ -36,7 +36,7 @@ mod_def["AUTHTOKEN"] = {
             "NAME": "AUTHTOKEN_PEOPLE_ID",
             "HEADER": "PERSON",
             "TYPE": "ID",
-            "ID": "PEOPLE"
+            "API_ID": "PEOPLE",
             "EDIT": 0,
             "QUERY": 1,
             "SEARCH": 1,
@@ -64,6 +64,6 @@ mod_def["AUTHTOKEN"] = {
                 "WRITE": 500,
             }
         },
-    },
+    ],
     "CALLS": ["list", "view", "save", "new", "delete"]
 }

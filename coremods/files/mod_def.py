@@ -19,7 +19,7 @@ mod_def["FILES"] = {
         "WRITE": 100,
         "INSERT": 100,
         "DELETE": 100,
-    }
+    },
     "COLS": [
         {
             "CATEGORY": "FILE",

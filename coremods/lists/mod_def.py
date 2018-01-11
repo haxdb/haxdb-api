@@ -3,7 +3,7 @@ mod_def = {}
 mod_def["LISTS"] = {
     "TABLE": "LISTS",
     "ROW_NAME": "LISTS_NAME",
-    "NEW": 1",
+    "NEW": 1,
     "UDF": 0,
     "ORDER": ["LISTS_NAME"],
     "INDEX": [],
@@ -67,7 +67,7 @@ mod_def["LIST_ITEMS"] = {
             "NAME": "LIST_ITEMS_LISTS_ID",
             "HEADER": "LIST",
             "TYPE": "ID",
-            "ID_API": "LISTS",
+            "API_ID": "LISTS",
             "EDIT": 0,
             "QUERY": 1,
             "SEARCH": 1,

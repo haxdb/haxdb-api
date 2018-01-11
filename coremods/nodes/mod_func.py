@@ -13,4 +13,4 @@ def init(app_haxdb):
 
 
 def run():
-    haxdb.func("APIKEY_CREATE"), apikey_create)
+    haxdb.func("APIKEY_CREATE", apikey_create)

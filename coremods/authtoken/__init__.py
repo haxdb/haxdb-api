@@ -1,6 +1,5 @@
-import mod_db
 import mod_api
-import mod_tools
+from mod_def import mod_def
 
 
 def init(haxdb):

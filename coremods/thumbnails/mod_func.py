@@ -45,4 +45,4 @@ def init(app_haxdb):
 
 
 def run():
-    haxdb.func("THUMBNAIL_CREATE"), thumbnail_create)
+    haxdb.func("THUMBNAIL_CREATE", thumbnail_create)

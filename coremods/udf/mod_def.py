@@ -21,7 +21,7 @@ mod_def["UDF"] = {
         "WRITE": 1,
         "INSERT": 100,
         "DELETE": 100,
-    }
+    },
     "COLS": [
         {
          "CATEGORY": "UDF",
@@ -120,7 +120,7 @@ mod_def["UDF"] = {
          "NAME": "UDF_LISTS_ID",
          "HEADER": "LIST",
          "TYPE": "ID",
-         "ID_TABLE": "LISTS",
+         "API_ID": "LISTS",
          "EDIT": 1,
          "QUERY": 1,
          "SEARCH": 0,

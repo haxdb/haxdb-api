@@ -1,31 +1,17 @@
-import os
-import base64
-import json
-import time
-import datetime
-from flask import request, session
+from mod_def import mod_def
 
 haxdb = None
-db = None
-config = None
-apis = {}
-methods = ["POST", "GET"]
 
 
-def init(app_haxdb, api, mod_config, mod_def):
-    global haxdb, db, config
+def init(app_haxdb):
+    global haxdb
     haxdb = app_haxdb
-    db = haxdb.db
-    config = mod_config
-
-    for api_name in mod_def.keys():
-        apis[api_name] = api.api_call(mod_def[api_name])
 
 
 def run():
     global haxdb, db, config
 
-    @haxdb.app.before_request
+    @haxdb.flask_app.before_request
     def mod_api_keys_before_request():
         session.permanent = True
         key = haxdb.get("api_key", use_session=True)
@@ -67,7 +53,7 @@ def run():
         vals = {
             'api_key': haxdb.func("APIKEY_CREATE")(),
         }
-        
+
         return haxdb.api.new_call(mod_def["NODES"], values=vals)
 
     @haxdb.route("/NODES/delete", methods=haxdb.METHOD)

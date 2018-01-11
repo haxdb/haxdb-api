@@ -3,7 +3,7 @@ mod_def = {}
 mod_def["FIELDSET"] = {
     "TABLE": "FIELDSET",
     "ROW_NAME": "FIELDSET_NAME",
-    "NEW": 1",
+    "NEW": 1,
     "UDF": 0,
     "ORDER": ["FIELDSET_ORDER", "FIELDSET_NAME"],
     "INDEX": [],
@@ -60,7 +60,7 @@ mod_def["FIELDSET"] = {
             "NAME": "FIELDSET_PEOPLE_ID",
             "HEADER": "PERSON",
             "TYPE": "ID",
-            "ID-API": "PEOPLE",
+            "API_ID": "PEOPLE",
             "NEW": 1,
             "EDIT": 1,
             "QUERY": 1,

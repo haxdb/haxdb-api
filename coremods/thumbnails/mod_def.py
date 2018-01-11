@@ -85,6 +85,6 @@ mod_def["THUMBNAILS"] = {
                 "WRITE": 100,
             }
         },
-    ]
+    ],
     "CALLS": ["upload", "download"]
 }

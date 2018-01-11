@@ -3,7 +3,7 @@ mod_def = {}
 mod_def["QUERY"] = {
     "TABLE": "QUERY",
     "ROW_NAME": "QUERY_NAME",
-    "NEW": 1",
+    "NEW": 1,
     "UDF": 0,
     "ORDER": ["QUERY_ORDER", "QUERY_NAME"],
     "INDEX": [],
@@ -43,7 +43,7 @@ mod_def["QUERY"] = {
             "NAME": "QUERY_PEOPLE_ID",
             "HEADER": "PERSON",
             "TYPE": "ID",
-            "ID-API": "PEOPLE",
+            "API_ID": "PEOPLE",
             "NEW": 1,
             "EDIT": 1,
             "QUERY": 1,
@@ -96,7 +96,7 @@ mod_def["QUERY"] = {
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 1,
-            "DEFAULT": 9999.9
+            "DEFAULT": 9999.9,
             "AUTH": {
                 "READ": 100,
                 "WRITE": 100,

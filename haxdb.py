@@ -111,35 +111,22 @@ def init(app_config, app_db, app_logger):
 
 def run():
     debug = (int(config["API"]["DEBUG"]) == 1)
-    CORS(app, origin=config["API"]["ORIGINS"])
+    CORS(flask_app, origins=config["API"]["ORIGINS"])
     timeout = config["API"]["SESSION_TIMEOUT"]
-    app.permanent_session_lifetime = timedelta(seconds=int(timeout))
-    app.run(config["API"]["HOST"], int(config["API"]["PORT"]), debug=debug)
+    host = config["API"]["HOST"]
+    port = config["API"]["PORT"]
+    flask_app.permanent_session_lifetime = timedelta(seconds=int(timeout))
+    flask_app.run(host, port, debug=debug)
 
 
-@app.before_request
+@flask_app.before_request
 def open_db():
     db.open()
 
 
-@app.teardown_appcontext
+@flask_app.teardown_appcontext
 def close_db(error):
     db.close()
-
-
-def require_auth(view_function):
-    @wraps(view_function)
-    def decorated_function(*args, **kwargs):
-        session.permanent = True
-        key = haxdb_data.session.get("api_key")
-        authenticated = haxdb_data.session.get("api_authenticated")
-
-        if not (key and authenticated == 1):
-            msg = "NOT AUTHENTICATED"
-            return response(success=0, message=msg, raw={"authenticated": 0})
-        return view_function(*args, **kwargs)
-
-    return decorated_function
 
 
 def require_dba(view_function):
@@ -148,19 +135,6 @@ def require_dba(view_function):
         session.permanent = True
         dba = haxdb_data.session.get("api_dba")
         if (not dba or (dba and int(dba) != 1)):
-            return response(success=0, message="INVALID PERMISSION")
-        return view_function(*args, **kwargs)
-
-    return decorated_function
-
-
-def no_readonly(view_function):
-    @wraps(view_function)
-    def decorated_function(*args, **kwargs):
-        session.permanent = True
-        readonly = haxdb_data.session.get("api_readonly")
-
-        if (readonly and readonly == 1):
             return response(success=0, message="INVALID PERMISSION")
         return view_function(*args, **kwargs)
 

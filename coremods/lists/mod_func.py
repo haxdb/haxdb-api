@@ -1,8 +1,10 @@
 haxdb = None
 
+
 def list_create(name, internal=1):
     sql = "INSERT INTO LISTS (LISTS_NAME, LISTS_INTERNAL) VALUES (%s, %s)"
     return haxdb.db.query(sql, (name, internal))
+
 
 def list_add(listname, itemname, itemvalue, internal=1):
     sql = "SELECT * FROM LISTS WHERE LISTS_NAME=%s"

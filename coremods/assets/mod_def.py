@@ -205,7 +205,7 @@ mod_def["ASSETURLS"] = {
             "NAME": "ASSETURLS_ASSETS_ID",
             "HEADER": "ASSET",
             "TYPE": "ID",
-            "ID_API": "ASSETS",
+            "API_ID": "ASSETS",
             "EDIT": 0,
             "QUERY": 1,
             "SEARCH": 0,
@@ -214,7 +214,7 @@ mod_def["ASSETURLS"] = {
             "NEW": 0,
             "AUTH": {
                 "READ": 1,
-                "WRITE" 1,
+                "WRITE": 1,
             }
         },
         {
@@ -231,7 +231,7 @@ mod_def["ASSETURLS"] = {
             "DEFAULT": "NEW URL",
             "AUTH": {
                 "READ": 100,
-                "WRITE" 100,
+                "WRITE": 100,
             }
         },
         {
@@ -248,7 +248,7 @@ mod_def["ASSETURLS"] = {
             "DEFAULT": 1,
             "AUTH": {
                 "READ": 100,
-                "WRITE" 100,
+                "WRITE": 100,
             }
         },
         {
@@ -265,7 +265,7 @@ mod_def["ASSETURLS"] = {
             "DEFAULT": 999.0,
             "AUTH": {
                 "READ": 100,
-                "WRITE" 100,
+                "WRITE": 100,
             }
         },
     ],
@@ -298,7 +298,7 @@ mod_def["ASSETAUTHS"] = {
             "NAME": "ASSETAUTHS_ASSETS_ID",
             "HEADER": "ASSET",
             "TYPE": "ID",
-            "ID_API": "ASSETS",
+            "API_ID": "ASSETS",
             "EDIT": 0,
             "QUERY": 1,
             "SEARCH": 0,
@@ -315,7 +315,7 @@ mod_def["ASSETAUTHS"] = {
             "NAME": "ASSETAUTHS_PEOPLE_ID",
             "HEADER": "PERSON",
             "TYPE": "ID",
-            "ID_API": "PEOPLE",
+            "API_ID": "PEOPLE",
             "EDIT": 0,
             "QUERY": 1,
             "SEARCH": 1,

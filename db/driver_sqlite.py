@@ -3,9 +3,11 @@ import sqlite3
 
 class db:
 
+    config = None
     logger = None
 
     def __init__(self, config, logger):
+        self.config = config
         self.logger = logger
         self.conn = sqlite3.connect(config["HOST"])
         self.conn.row_factory = sqlite3.Row
@@ -47,7 +49,9 @@ class db:
                     {}_ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT
                     , {}_INSERTED TIMESTAMP NOT NULL DEFAULT current_timestamp
                     , {}_UPDATED TIMESTAMP NOT NULL DEFAULT current_timestamp
-                """.format(table.name, table.name, table.name, table.name)
+                    , {}_INTERNAL INTEGER NOT NULL DEFAULT 0
+                """.format(table.name, table.name,
+                           table.name, table.name, table.name)
                 create_table_sql += ")"
                 self.query(create_table_sql, squelch=True)
                 self.commit()
@@ -110,13 +114,7 @@ class db:
             return result
         except sqlite3.Error as er:
             self.error = er.message
-            if not squelch:
-                print "\n########################################\n"
-                print "SQL ERROR: %s" % self.error
-                print data
-                print "-----------------------------------"
-                print sql
-                print "\n########################################\n"
+            return False
 
     def next(self):
         return self.cur.fetchone()

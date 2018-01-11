@@ -48,7 +48,7 @@ def valid_value(col, val):
             return False
         return True
 
-    if col_type in ("TEXT", "STR", "LIST", "ASCII"):
+    if col_type in ("TEXT", "LIST"):
         return True
 
     if col_type == "DATE":
@@ -71,7 +71,6 @@ def list_call(mod_def):
     csv = haxdb.get("csv")
 
     udf = get_udf(table)
-
 
     if csv == 1:
         return haxdb.func("FILE_CSV")(filename, headers, rows)
@@ -103,44 +102,44 @@ def view_call(mod_def, rowid=None):
             {}
             and {}=%s
         """.format(table, where, self.API_ROWID)
-        params += (rowid,)
+    params += (rowid,)
 
-        row = db.qaf(sql, params)
-        if db.error:
-            return output(success=0, meta=meta, message=db.error)
+    row = db.qaf(sql, params)
+    if db.error:
+        return output(success=0, meta=meta, message=db.error)
 
-        if not row:
-            return output(success=0, meta=meta, message="NO DATA")
+    if not row:
+        return output(success=0, meta=meta, message="NO DATA")
 
-        row = dict(row)
-        udf_sql = """
-        SELECT * FROM UDF
-        JOIN UDF_DATA ON UDF_DATA_UDF_ID=UDF_ID
-        WHERE
-        UDF_CONTEXT=%s and UDF_CONTEXT_ID=%s AND UDF_DATA_ROWID=%s
-        AND UDF_ENABLED=1
-        ORDER BY UDF_ORDER
-        """
-        udf_params = (self.API_NAME, self.API_CONTEXT_ID, rowid)
-        db.query(udf_sql, udf_params)
+    row = dict(row)
+    udf_sql = """
+    SELECT * FROM UDF
+    JOIN UDF_DATA ON UDF_DATA_UDF_ID=UDF_ID
+    WHERE
+    UDF_CONTEXT=%s and UDF_CONTEXT_ID=%s AND UDF_DATA_ROWID=%s
+    AND UDF_ENABLED=1
+    ORDER BY UDF_ORDER
+    """
+    udf_params = (self.API_NAME, self.API_CONTEXT_ID, rowid)
+    db.query(udf_sql, udf_params)
+    udf = db.next()
+    while udf:
+        row[udf["UDF_NAME"]] = udf["UDF_DATA_VALUE"]
         udf = db.next()
-        while udf:
-            row[udf["UDF_NAME"]] = udf["UDF_DATA_VALUE"]
-            udf = db.next()
 
-        if row_func:
-            row = row_func(dict(row))
+    if row_func:
+        row = row_func(dict(row))
 
-        event_data = {
-            "api": self.API_NAME,
-            "call": "view",
-            "rowid": rowid,
-        }
-        if "ROW_NAME" in row:
-            event_data["name"] = row["ROW_NAME"]
-        haxdb.trigger("API.{}.VIEW".format(self.API_NAME), event_data)
+    event_data = {
+        "api": self.API_NAME,
+        "call": "view",
+        "rowid": rowid,
+    }
+    if "ROW_NAME" in row:
+        event_data["name"] = row["ROW_NAME"]
+    haxdb.trigger("API.{}.VIEW".format(self.API_NAME), event_data)
 
-        return output(success=1, meta=meta, data=row)
+    return output(success=1, meta=meta, data=row)
 
     def new_call(self, table=None, meta=None, defaults=None):
         defaults = defaults or {}

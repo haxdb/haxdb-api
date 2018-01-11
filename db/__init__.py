@@ -40,8 +40,7 @@ class db:
         self.lastrowid = self.db.lastrowid
         self.error = self.db.error
         if int(self.config["DEBUG"]) == 1 and not squelch:
-            sep = "##########################################################"
-            sep += "#####################"
+            sep = "###########################################################"
             self.logger.debug(sep)
             self.logger.debug("sql: {}".format(sql))
             self.logger.debug("data: {}".format(data))
@@ -79,15 +78,15 @@ class db:
                 ftab = None
                 fcol = None
                 if col["TYPE"] == "ID":
-                    ftab = col["ID"]
-                    fcol = "{}_ID".format(col["ID"])
-                    t.add(col["NAME"],
-                          col["TYPE"],
-                          col_size=col.get("SIZE", None),
-                          col_required=col.get("REQUIRED", False),
-                          fk_table=ftab,
-                          fk_col=fcol,
-                          )
+                    ftab = col["API_ID"]
+                    fcol = "{}_ID".format(ftab)
+                t.add(col["NAME"],
+                      col["TYPE"],
+                      col_size=col.get("SIZE", None),
+                      col_required=col.get("REQUIRED", False),
+                      fk_table=ftab,
+                      fk_col=fcol,
+                      )
             for i in md["INDEX"]:
                 idx.append(tables.index(md["TABLE"], i, unique=False))
             for i in md["UNIQUE"]:
@@ -95,4 +94,4 @@ class db:
 
             tbl.append(t)
 
-        db.create(tables=tbl, indexes=idx)
+        self.create(tables=tbl, indexes=idx)
