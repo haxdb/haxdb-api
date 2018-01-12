@@ -57,15 +57,9 @@ def valid_value(col, val):
         return d.match(val)
 
 
-def parse_query(query, valid_cols):
-    # = equal
-    # ! not equal
-    # > greater than
-    # < less than
-    # ~ like (can use wildcards * or %)
-    ops = "=!<>~"
-
+def parse_query(query, cols):
     sql = ""
+    params = ()
     query = query.replace("(", " ( ")
     query = query.replace(")", " ) ")
     query = shlex.split(query)
@@ -83,26 +77,38 @@ def parse_query(query, valid_cols):
         elif q.upper() == "OR":
             connector = "OR"
         else:
-            r = re.split(ops, q)
+            r = re.split("([=<>~]|!=)", q, 1)
             if len(r) > 2:
-                pass
+                field = r[0]
+                op = r[1]
+                vals = r[2].split("|")
+                if field in cols and cols[field]["QUERY"] == 1:
+                    sql += " {} ( 1=2".format(connector)
+                    for val in vals:
+                        sql == " OR {}{}%s".format(field, op)
+                        params += (val,)
+                        cnt += 1
+                    sql += ")"
+                    connector = "AND"
             else:
                 q = "%{}%".format(q)
-
+                sql += " {} ( 1=2".format(connector)
+                for col in cols:
+                    if cols[col]["SEARCH"] == 1:
+                        sql += " OR {} LIKE %s".format(col)
+                        params += (q,)
+                sql += ")"
+                connector = "AND"
 
     while open_par > 0:
         sql += ")"
         open_par -= 1
 
-    return sql
+    return sql, params
 
 
-def build_list_query(table, cols, udf):
+def build_list_query(table, cols):
     query = haxdb.get("query")
-
-    valid_cols = set(cols)
-    for u in udf:
-        valid_cols.append(udf[u])
 
     sql = """
     SELECT * FROM {}
@@ -111,7 +117,7 @@ def build_list_query(table, cols, udf):
     params = (table,)
 
     if query:
-        sqlext, paramsext = parse_query(query, valid_cols)
+        sqlext, paramsext = parse_query(query, cols)
         sql = "{} {}".format(sql, sqlext)
         params += paramsext
 
@@ -126,43 +132,66 @@ def get_udf(table):
     cur = haxdb.db.query(sql, (table,))
     for row in cur:
         uname = "{}_FIELD{}".format(table, row["UDF_NUM"])
-        udf[uname] = row["UDF_NAME"]
+        udf[uname] = row
     return udf
 
 
 def get_cols(mod_def):
-    cols = []
+    udfs = get_udf(mod_def["NAME"])
+    cols = {}
+    headers = []
+
     for col in mod_def["COLS"]:
-        cols.append(col["NAME"])
-    return COLS
+        cols[col["NAME"]] = col
+        headers.append(col["NAME"])
+
+    for udf in udfs:
+        fieldname = "{}_UDF{}".format(mod_def["NAME"], udf["UDF_NUM"])
+        col = {
+            "CATEGORY": udf["UDF_CATEGORY"],
+            "NAME": udf["UDF_NAME"],
+            "HEADER": udf["UDF_HEADER"],
+            "TYPE": udf["UDF_TYPE"],
+            "EDIT": udf["UDF_EDIT"],
+            "QUERY": udf["UDF_QUERY"],
+            "SEARCH": udf["UDF_SEARCH"],
+            "REQUIRED": udf["UDF_REQUIRED"],
+            "DEFAULT": udf["UDF_DEFAULT"],
+            "NEW": udf["UDF_NEW"],
+            "AUTH": {
+                "READ": col["UDF_READ"],
+                "WRITE": col["UDF_WRITE"],
+            }
+        }
+        cols[fieldname] = col
+        headers.append(udf["UDF_NAME"])
+
+    return headers, cols
 
 
 def list_call(mod_def):
-    csv = haxdb.get("csv")
+    headers, cols = get_cols(mod_def)
 
-    udf = get_udf(table)
-    cols = get_cols(mod_def)
-
-    sql, params = build_list_query(table, cols, udf)
+    sql, params = build_list_query(table, cols)
     cur = haxdb.db.query(sql, params)
     data = []
     for row in cur:
         newdata = {}
         for col in cols:
             newdata[col] = row[col]
-        for  col in udf:
-            newdata[udf[col]] = row[col]
         data.append(newdata)
-
-    if csv == 1:
-        return haxdb.func("FILE_CSV")(filename, headers, rows)
 
     event_data = {
         "api": mod_def["NAME"],
         "call": "list",
+        "query": haxdb.get("query"),
+        "csv": haxdb.get("csv")
         "data": data,
     }
     haxdb.trigger("LIST.{}".format(mod_def["NAME"]), event_data)
+
+    if haxdb.get("csv") == 1:
+        return haxdb.func("FILE_CSV")(filename, headers, data)
 
     raw = {"data": data}
     return output(success=1, raw=raw)
@@ -170,17 +199,44 @@ def list_call(mod_def):
 
 def view_call(mod_def, rowid=None):
     rowid = rowid or haxdb.get("rowid")
-    raw = {}
+    if not rowid:
+        msg "MISSING PARAMETER: rowid"
+        return output(success=0, message=msg)
+
+    table = mod_def["NAME"]
+    sql = "select * FROM {} WHERE {}_ID=%s".format(table, table)
+    row = haxdb.db.qaf(sql, (rowid,))
+    if not row:
+        msg = "NO ROWS RETURNED"
+        return output(success=0, message=msg)
+
+    headers, cols = get_cols(mod_def)
+    data = {}
+    for col in cols:
+        data[col] = row[col]
+
+    event_data = {
+        "api": mod_def["NAME"],
+        "call": "view",
+        "rowid": rowid,
+        "data": data,
+    }
+    haxdb.trigger("VIEW.{}.{}".format(mod_def["NAME"], rowid), event_data)
+
+    raw = {"data": data}
     return output(success=1, raw=raw)
+
 
 def new_call(mod_def, defaults=None):
     raw = {}
     return output(success=1, raw=raw)
 
+
 def delete_call(mod_def, rowid=None):
     rowid = rowid or haxdb.get("rowid")
     raw = {}
     return output(success=1, raw=raw)
+
 
 def save_call(mod_def, rowid=None):
     rowid = rowid or haxdb.get("rowid")
