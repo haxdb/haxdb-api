@@ -1,7 +1,7 @@
 mod_def = {}
 
 mod_def["FIELDSET"] = {
-    "TABLE": "FIELDSET",
+    "NAME": "FIELDSET",
     "ROW_NAME": "FIELDSET_NAME",
     "NEW": 1,
     "UDF": 0,

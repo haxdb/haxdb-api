@@ -1,7 +1,7 @@
 mod_def = {}
 
 mod_def["FILES"] = {
-    "TABLE": "FILES",
+    "NAME": "FILES",
     "ROW_NAME": "FILES_ID",
     "NEW": 0,
     "UDF": 0,

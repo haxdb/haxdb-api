@@ -1,7 +1,7 @@
 mod_def = {}
 
 mod_def["LISTS"] = {
-    "TABLE": "LISTS",
+    "NAME": "LISTS",
     "ROW_NAME": "LISTS_NAME",
     "NEW": 1,
     "UDF": 0,
@@ -42,7 +42,7 @@ mod_def["LISTS"] = {
 }
 
 mod_def["LIST_ITEMS"] = {
-    "TABLE": "LIST_ITEMS",
+    "NAME": "LIST_ITEMS",
     "ROW_NAME": "LIST_ITEMS_NAME",
     "NEW": 1,
     "UDF": 5,

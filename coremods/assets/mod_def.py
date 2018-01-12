@@ -1,7 +1,7 @@
 mod_def = {}
 
 mod_def["ASSETS"] = {
-    "TABLE": "ASSETS",
+    "NAME": "ASSETS",
     "ROW_NAME": "ASSETS_NAME",
     "NEW": 1,
     "UDF": 20,
@@ -178,7 +178,7 @@ mod_def["ASSETS"] = {
 }
 
 mod_def["ASSETURLS"] = {
-    "TABLE": "ASSETURLS",
+    "NAME": "ASSETURLS",
     "ROW_NAME": "ASSETURLS_NAME",
     "NEW": 1,
     "UDF": 0,
@@ -273,7 +273,7 @@ mod_def["ASSETURLS"] = {
 }
 
 mod_def["ASSETAUTHS"] = {
-    "TABLE": "ASSETAUTHS",
+    "NAME": "ASSETAUTHS",
     "ROW_NAME": "CALC_ASSETAUTHS_PEOPLE_ID",
     "NEW": 0,
     "UDF": 0,

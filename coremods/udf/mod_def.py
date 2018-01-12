@@ -2,7 +2,7 @@ mod_def = {}
 
 mod_def["UDF"] = {
     "NAME": "UDF",
-    "TABLE": "UDF",
+    "NAME": "UDF",
     "ROW_NAME": "UDF_NAME",
     "UDF": 0,
     "NEW": 0,

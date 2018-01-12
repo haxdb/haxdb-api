@@ -73,7 +73,7 @@ class db:
 
         for md in mod_def:
             md = mod_def[md]
-            t = tables.table(md["TABLE"])
+            t = tables.table(md["NAME"])
             for col in md["COLS"]:
                 ftab = None
                 fcol = None
@@ -89,13 +89,13 @@ class db:
                       )
 
             for i in range(0, int(md["UDF"])):
-                cname = "{}_UDF{}".format(md["TABLE"], i)
+                cname = "{}_UDF{}".format(md["NAME"], i)
                 t.add(cname, "CHAR", col_size="50")
 
             for i in md["INDEX"]:
-                idx.append(tables.index(md["TABLE"], i, unique=False))
+                idx.append(tables.index(md["NAME"], i, unique=False))
             for i in md["UNIQUE"]:
-                idx.append(tables.index(md["TABLE"], i, unique=True))
+                idx.append(tables.index(md["NAME"], i, unique=True))
 
             tbl.append(t)
 

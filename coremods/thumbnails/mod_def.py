@@ -1,7 +1,7 @@
 mod_def = {}
 
 mod_def["THUMBNAILS"] = {
-    "TABLE": "THUMBNAILS",
+    "NAME": "THUMBNAILS",
     "ROW_NAME": ["THUMBNAILS_TABLE", "THUMBNAILS_ROWID"],
     "UDF": 0,
     "ORDER": ["THUMBNAILS_TABLE", "THUMBNAILS_ROWID"],

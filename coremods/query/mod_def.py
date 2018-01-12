@@ -1,7 +1,7 @@
 mod_def = {}
 
 mod_def["QUERY"] = {
-    "TABLE": "QUERY",
+    "NAME": "QUERY",
     "ROW_NAME": "QUERY_NAME",
     "NEW": 1,
     "UDF": 0,

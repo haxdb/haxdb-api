@@ -1,7 +1,7 @@
 mod_def = {}
 
 mod_def["NODES"] = {
-    "TABLE": "NODES",
+    "NAME": "NODES",
     "ROW_NAME": "NODES_NAME",
     "NEW": 1,
     "UDF": 0,
