@@ -1,4 +1,3 @@
-import mod_db
 import mod_func
 from mod_def import mod_def
 

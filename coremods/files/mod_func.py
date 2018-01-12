@@ -53,9 +53,10 @@ def file_csv(filename, headers, rows):
 def init(app_haxdb):
     global haxdb
     haxdb = app_haxdb
-
-
-def run():
     haxdb.func("FILE_DOWNLOAD", file_download)
     haxdb.func("FILE_CSV", file_csv)
     haxdb.func("FILE_DATAURL", file_dataurl)
+
+
+def run():
+    pass

@@ -10,7 +10,8 @@ def apikey_create():
 def init(app_haxdb):
     global haxdb
     haxdb = app_haxdb
+    haxdb.func("APIKEY_CREATE", apikey_create)
 
 
 def run():
-    haxdb.func("APIKEY_CREATE", apikey_create)
+    pass

@@ -23,8 +23,9 @@ def list_add(listname, itemname, itemvalue, internal=1):
 def init(app_haxdb):
     global haxdb
     haxdb = app_haxdb
+    haxdb.func("LIST_CREATE", list_create)
+    haxdb.func("LIST_ADD", list_add)
 
 
 def run():
-    haxdb.func("LIST_CREATE", list_create)
-    haxdb.func("LIST_ADD", list_add)
+    pass

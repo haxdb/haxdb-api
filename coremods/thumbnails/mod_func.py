@@ -42,7 +42,8 @@ def thumbnail_create(img=None, file=None):
 def init(app_haxdb):
     global haxdb
     haxdb = app_haxdb
+    haxdb.func("THUMBNAIL_CREATE", thumbnail_create)
 
 
 def run():
-    haxdb.func("THUMBNAIL_CREATE", thumbnail_create)
+    pass
