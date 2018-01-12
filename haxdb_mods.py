@@ -35,26 +35,18 @@ def run():
     # usermods first so that coremods will overwrite.
     usermods = import_mods(haxdb.config["MODS"]["USER"])
     coremods = import_mods(haxdb.config["MODS"]["CORE"])
+    mod_names = set(usermods + coremods)
 
     haxdb.db.open()
 
-    haxdb.logger.info("Initializing coremods:")
-    for mod in coremods:
+    haxdb.logger.info(" Initializing MODS:")
+    for mod in mod_names:
         haxdb.logger.info("{}.init()".format(mod))
-        mods[mod].init(haxdb)
+        mod_def = mods[mod].init(haxdb)
+        haxdb.mod_def.update(mod_def)
 
-    haxdb.logger.info("Initializing usermods:")
-    for mod in usermods:
-        haxdb.logger.info("{}.init()".format(mod))
-        mods[mod].init(haxdb)
-
-    haxdb.logger.info("Running coremods:")
-    for mod in coremods:
-        haxdb.logger.info("{}.run()".format(mod))
-        mods[mod].run()
-
-    haxdb.logger.info("Running usermods:")
-    for mod in usermods:
+    haxdb.logger.info(" Running MODS:")
+    for mod in mod_names:
         haxdb.logger.info("{}.run()".format(mod))
         mods[mod].run()
 

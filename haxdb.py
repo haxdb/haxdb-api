@@ -22,6 +22,7 @@ db = None
 logger = None
 saved_functions = {}
 saved_triggers = []
+mod_def = {}
 
 
 class error:
@@ -59,12 +60,13 @@ def session(key, val=None):
 
 def response(success=0, message=None, raw=None):
     output_format = get("format")
+    authenticated = session("authenticated")
 
     out = raw or {}
     out["success"] = success
     out["message"] = message
     out["timestamp"] = time.time()
-    # out["authenticated"] = 1 if authenticated else 0
+    out["authenticated"] = authenticated
 
     if output_format and output_format == "msgpack":
         return msgpack.packb(out)

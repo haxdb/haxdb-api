@@ -9,6 +9,7 @@ def init(hdb):
     haxdb = hdb
     haxdb.mod2db(mod_def)
     mod_func.init(haxdb)
+    return mod_def
 
 
 def run():
