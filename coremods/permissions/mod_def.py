@@ -150,10 +150,10 @@ mod_def["NODEPERMS"] = {
     "COLS": [
         {
             "CATEGORY": "PERMISSIONS",
-            "NAME": "NODEPERMS_PEOPLE_ID",
-            "HEADER": "PERSON",
+            "NAME": "NODEPERMS_NODES_ID",
+            "HEADER": "NODE",
             "TYPE": "ID",
-            "API_ID": "PEOPLE",
+            "API_ID": "NODES",
             "EDIT": 0,
             "QUERY": 1,
             "SEARCH": 0,
