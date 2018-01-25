@@ -185,7 +185,7 @@ def list_call(mod_def):
         "api": mod_def["NAME"],
         "call": "list",
         "query": haxdb.get("query"),
-        "csv": haxdb.get("csv")
+        "csv": haxdb.get("csv"),
         "data": data,
     }
     haxdb.trigger("LIST.{}".format(mod_def["NAME"]), event_data)
@@ -200,7 +200,7 @@ def list_call(mod_def):
 def view_call(mod_def, rowid=None):
     rowid = rowid or haxdb.get("rowid")
     if not rowid:
-        msg "MISSING PARAMETER: rowid"
+        msg = "MISSING PARAMETER: rowid"
         return output(success=0, message=msg)
 
     table = mod_def["NAME"]
