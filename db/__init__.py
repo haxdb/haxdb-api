@@ -6,6 +6,9 @@ class db:
     tables = tables
     config = None
     logger = None
+    rowcount = None
+    lastrowid = None
+    error = None
 
     def __init__(self, config, logger):
         self.config = config
