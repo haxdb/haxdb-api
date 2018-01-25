@@ -194,21 +194,21 @@ def list_call(mod_def):
         return haxdb.func("FILE_CSV")(filename, headers, data)
 
     raw = {"data": data}
-    return output(success=1, raw=raw)
+    return haxdb.response(success=1, raw=raw)
 
 
 def view_call(mod_def, rowid=None):
     rowid = rowid or haxdb.get("rowid")
     if not rowid:
         msg = "MISSING PARAMETER: rowid"
-        return output(success=0, message=msg)
+        return haxdb.response(success=0, message=msg)
 
     table = mod_def["NAME"]
     sql = "select * FROM {} WHERE {}_ID=%s".format(table, table)
     row = haxdb.db.qaf(sql, (rowid,))
     if not row:
         msg = "NO ROWS RETURNED"
-        return output(success=0, message=msg)
+        return haxdb.response(success=0, message=msg)
 
     headers, cols = get_cols(mod_def)
     data = {}
@@ -224,21 +224,72 @@ def view_call(mod_def, rowid=None):
     haxdb.trigger("VIEW.{}.{}".format(mod_def["NAME"], rowid), event_data)
 
     raw = {"data": data}
-    return output(success=1, raw=raw)
+    return haxdb.response(success=1, raw=raw)
 
 
-def new_call(mod_def, defaults=None):
-    raw = {}
-    return output(success=1, raw=raw)
+def new_call(mod_def, defaults=None, values=None):
+    table = mod_def["NAME"]
+
+    data = {}
+    # set defaults from mod_def
+    for colname in mod_def["COLS"]:
+        col = mod_def["COLS"][colname]
+        if "DEFAULT" in col:
+            data[colname] = col["DEFAULT"]
+
+    # set any defaults passed in
+    if defaults:
+        for key in defaults:
+            data[key] = defaults[key]
+
+    # set user passed data
+    for colname in mod_def["COLS"]:
+        col = mod_def["COLS"][colname]
+        val = haxdb.get(colname)
+        data[colname] = val
+
+    # override values with any values passed in
+    if values:
+        for key in values:
+            data[key] = values[key]
+
+    cols = []
+    binds = []
+    vals = []
+    for colname in mod_def["COLS"]:
+        if colname in data:
+            col = mod_def["COLS"][colname]
+            if not valid_value(col, val):
+                msg = "INVALID VALUE FOR {}".format(colname)
+                return haxdb.response(success=0, message=msg)
+
+    for key in data:
+        cols.append(key)
+        binds.append("%s")
+        vals.append(data[key])
+
+    sql = """
+    INSERT INTO {} ({}) VALUES ({})
+    """.format(table, ",".join(cols), ",".join(binds))
+    r = haxdb.db.query(sql, vals)
+
+    if not r:
+        msg = haxdb.db.error
+        return haxdb.response(success=0, message=msg)
+
+    raw = {
+        "rowid": haxdb.db.lastrowid,
+    }
+    return haxdb.response(success=1, raw=raw)
 
 
 def delete_call(mod_def, rowid=None):
     rowid = rowid or haxdb.get("rowid")
     raw = {}
-    return output(success=1, raw=raw)
+    return haxdb.response(success=1, raw=raw)
 
 
 def save_call(mod_def, rowid=None):
     rowid = rowid or haxdb.get("rowid")
     raw = {}
-    return output(success=1, raw=raw)
+    return haxdb.response(success=1, raw=raw)
