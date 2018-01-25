@@ -15,19 +15,18 @@ def run():
 
     @haxdb.route("/PEOPLEPERMS/list", methods=haxdb.METHOD)
     def PEOPLEPERMS_list():
-        people_id = haxdb.get("PEOPLE_ID")
-        perms = {}
-        for mod_def in haxdb.mod_def:
-            row = {
-                "TABLE": mod_def["name"],
-                "READ": 0,
-                "WRITE": 0,
-                "INSERT": 0,
-                "DELETE": 0,
-            }
-            perms[row["TABLE"]] = row
-        raw = {"data": data}
-        return haxdb.response(success=1, raw=raw)
+        pid = haxdb.get("PEOPLEPERMS_PEOPLE_ID")
+        if pid:
+            isql = """
+            INSERT INTO PEOPLEPERMS (PEOPLEPERMS_PEOPLE_ID, PEOPLEPERMS_TABLE,
+            PEOPLEPERMS_READ, PEOPLEPERMS_WRITE, PEOPLEPERMS_INSERT,
+            PEOPLEPERMS_DELETE) VALUES (%s, %s, 0, 0, 0, 0)
+            """
+            for mod_def in haxdb.mod_def:
+                table = mod_def["NAME"]
+                haxdb.db.query(isql, (pid, table))
+
+        return haxdb.api.list_call(mod_def["PEOPLEPERMS"])
 
     @haxdb.route("/PEOPLEPERMS/save", methods=haxdb.METHOD)
     def PEOPLEPERMS_save():
@@ -39,7 +38,18 @@ def run():
 
     @haxdb.route("/NODEPERMS/list", methods=haxdb.METHOD)
     def NODEPERMS_list():
-        return haxdb.api.list_call(mod_def["NODEPERMS"])
+        pid = haxdb.get("NODESPERMS_NODES_ID")
+        if pid:
+            isql = """
+            INSERT INTO NODESPERMS (NODESPERMS_NODES_ID, NODESPERMS_TABLE,
+            NODESPERMS_READ, NODESPERMS_WRITE, NODESPERMS_INSERT,
+            NODESPERMS_DELETE) VALUES (%s, %s, 0, 0, 0, 0)
+            """
+            for mod_def in haxdb.mod_def:
+                table = mod_def["NAME"]
+                haxdb.db.query(isql, (pid, table))
+
+        return haxdb.api.list_call(mod_def["NODESPERMS"])
 
     @haxdb.route("/NODEPERMS/save", methods=haxdb.METHOD)
     def NODEPERMS_save():
