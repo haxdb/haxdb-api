@@ -229,8 +229,8 @@ def view_call(mod_def, rowid=None):
 
 def new_call(mod_def, defaults=None, values=None):
     table = mod_def["NAME"]
-
     data = {}
+
     # set defaults from mod_def
     for colname in mod_def["COLS"]:
         col = mod_def["COLS"][colname]
@@ -277,19 +277,89 @@ def new_call(mod_def, defaults=None, values=None):
         msg = haxdb.db.error
         return haxdb.response(success=0, message=msg)
 
+    event_data = {
+        "api": mod_def["NAME"],
+        "call": "new",
+        "rowid": haxdb.db.lastrowid,
+    }
+    haxdb.trigger("NEW.{}".format(mod_def["NAME"]), event_data)
+
     raw = {
         "rowid": haxdb.db.lastrowid,
     }
-    return haxdb.response(success=1, raw=raw)
+    return haxdb.response(success=1, message="CREATED", raw=raw)
+
+
+def save_call(mod_def, rowid=None, values=None):
+    rowid = rowid or haxdb.get("rowid")
+    table = mod_def["NAME"]
+    data = {}
+
+    # set value from user
+    for colname in mod_def["COLS"]:
+        col = mod_def["COLS"][colname]
+        val = haxdb.get(colname)
+        data[colname] = val
+
+    # override values with any values passed in
+    if values:
+        for key in values:
+            data[key] = values[key]
+
+    if len(data) <= 0:
+        msg = "NOTHING TO SAVE"
+        return haxdb.response(success=0, message=msg)
+
+    params = ()
+    sql = "UPDATE {} SET".format(table)
+    for colname in data:
+        col = mod_def["COLS"][colname]
+        if not valid_value(col, data[colname]):
+            msg = "INVALID VALUE FOR: {}".format(colname)
+            return haxdb.result(success=0, message=msg)
+        sql += " {}=%s".format(colname)
+        params += (data[colname],)
+    sql += " WHERE {}_ID=%s".format(table)
+    params += (rowid,)
+
+    r = haxdb.db.query(sql, params)
+    if not r:
+        msg = haxdb.db.error
+        return haxdb.response(success=0, message=msg)
+
+    event_data = {
+        "api": mod_def["NAME"],
+        "call": "save",
+        "rowid": rowid,
+    }
+    haxdb.trigger("SAVE.{}.{}".format(mod_def["NAME"], rowid), event_data)
+
+    raw = {
+        "rowid": rowid,
+        "data": data,
+    }
+    return haxdb.response(success=1, message="SAVED", raw=raw)
 
 
 def delete_call(mod_def, rowid=None):
     rowid = rowid or haxdb.get("rowid")
-    raw = {}
-    return haxdb.response(success=1, raw=raw)
+    table = mod_def["NAME"]
+    sql = "DELETE FROM {} WHERE {}_ID=%s".format(table, table)
+    r = haxdb.db.query(sql, (rowid,))
+    if not r:
+        msg = haxdb.db.error
+        return haxdb.response(success=0, message=msg)
 
+    event_data = {
+        "api": mod_def["NAME"],
+        "call": "delete",
+        "rowid": rowid,
+        "rowcount": haxdb.db.rowcount,
+    }
+    haxdb.trigger("DELETE.{}.{}".format(mod_def["NAME"], rowid), event_data)
 
-def save_call(mod_def, rowid=None):
-    rowid = rowid or haxdb.get("rowid")
-    raw = {}
-    return haxdb.response(success=1, raw=raw)
+    raw = {
+        "rowid": rowid,
+        "rowcount": haxdb.db.rowcount,
+    }
+    return haxdb.response(success=1, message="DELETED", raw=raw)
