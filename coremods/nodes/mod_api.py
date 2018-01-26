@@ -1,4 +1,6 @@
 from mod_def import mod_def
+from flask import session, request
+import time
 
 haxdb = None
 
@@ -9,7 +11,6 @@ def init(app_haxdb):
 
 
 def run():
-    global haxdb, db, config
 
     @haxdb.flask_app.before_request
     def mod_api_keys_before_request():
@@ -28,8 +29,7 @@ def run():
             and (NODES_IP IS NULL OR NODES_IP='' OR NODES_IP=%s)
             """
             now = int(time.time())
-            db.query(sql, (key, now, ip,))
-            row = db.next()
+            row = haxdb.db.qaf(sql, (key, now, ip,))
             if row and row["NODES_API_KEY"] == key:
                 haxdb.session("api_authenticated", 1)
                 haxdb.session("api_people_id", row["NODES_PEOPLE_ID"])
@@ -51,7 +51,7 @@ def run():
     @haxdb.route("/NODES/new", methods=haxdb.METHOD)
     def NODES_new():
         vals = {
-            'api_key': haxdb.func("APIKEY_CREATE")(),
+            'api_key': haxdb.func("APIKEY:CREATE")(),
         }
 
         return haxdb.api.new_call(mod_def["NODES"], values=vals)

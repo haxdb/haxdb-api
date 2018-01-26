@@ -113,8 +113,8 @@ def build_list_query(table, cols):
     sql = """
     SELECT * FROM {}
     WHERE 1=1
-    """
-    params = (table,)
+    """.format(table)
+    params = ()
 
     if query:
         sqlext, paramsext = parse_query(query, cols)
@@ -171,6 +171,7 @@ def get_cols(mod_def):
 
 def list_call(mod_def):
     headers, cols = get_cols(mod_def)
+    table = mod_def["NAME"]
 
     sql, params = build_list_query(table, cols)
     cur = haxdb.db.query(sql, params)
@@ -232,10 +233,9 @@ def new_call(mod_def, defaults=None, values=None):
     data = {}
 
     # set defaults from mod_def
-    for colname in mod_def["COLS"]:
-        col = mod_def["COLS"][colname]
+    for col in mod_def["COLS"]:
         if "DEFAULT" in col:
-            data[colname] = col["DEFAULT"]
+            data[col["NAME"]] = col["DEFAULT"]
 
     # set any defaults passed in
     if defaults:
@@ -243,10 +243,10 @@ def new_call(mod_def, defaults=None, values=None):
             data[key] = defaults[key]
 
     # set user passed data
-    for colname in mod_def["COLS"]:
-        col = mod_def["COLS"][colname]
-        val = haxdb.get(colname)
-        data[colname] = val
+    for col in mod_def["COLS"]:
+        val = haxdb.get(col["NAME"])
+        if val is not None:
+            data[col["NAME"]] = val
 
     # override values with any values passed in
     if values:
@@ -256,11 +256,10 @@ def new_call(mod_def, defaults=None, values=None):
     cols = []
     binds = []
     vals = []
-    for colname in mod_def["COLS"]:
-        if colname in data:
-            col = mod_def["COLS"][colname]
+    for col in mod_def["COLS"]:
+        if col["NAME"] in data:
             if not valid_value(col, val):
-                msg = "INVALID VALUE FOR {}".format(colname)
+                msg = "INVALID VALUE FOR {}".format(col["NAME"])
                 return haxdb.response(success=0, message=msg)
 
     for key in data:
@@ -277,9 +276,12 @@ def new_call(mod_def, defaults=None, values=None):
         msg = haxdb.db.error
         return haxdb.response(success=0, message=msg)
 
+    haxdb.db.commit()
+
     event_data = {
         "api": mod_def["NAME"],
         "call": "new",
+        "data": data,
         "rowid": haxdb.db.lastrowid,
     }
     haxdb.trigger("NEW.{}".format(mod_def["NAME"]), event_data)
@@ -296,10 +298,10 @@ def save_call(mod_def, rowid=None, values=None):
     data = {}
 
     # set value from user
-    for colname in mod_def["COLS"]:
-        col = mod_def["COLS"][colname]
-        val = haxdb.get(colname)
-        data[colname] = val
+    for col in mod_def["COLS"]:
+        val = haxdb.get(col["NAME"])
+        if val is not None:
+            data[col["NAME"]] = val
 
     # override values with any values passed in
     if values:
@@ -327,6 +329,8 @@ def save_call(mod_def, rowid=None, values=None):
         msg = haxdb.db.error
         return haxdb.response(success=0, message=msg)
 
+    haxdb.db.commit()
+
     event_data = {
         "api": mod_def["NAME"],
         "call": "save",
@@ -349,6 +353,8 @@ def delete_call(mod_def, rowid=None):
     if not r:
         msg = haxdb.db.error
         return haxdb.response(success=0, message=msg)
+
+    haxdb.db.commit()
 
     event_data = {
         "api": mod_def["NAME"],

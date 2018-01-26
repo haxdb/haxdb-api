@@ -30,7 +30,7 @@ mod_def["PEOPLE"] = {
             "EDIT": 1,
             "QUERY": 1,
             "SEARCH": 1,
-            "REQUIRED": 1,
+            "REQUIRED": 0,
             "DEFAULT": None,
             "NEW": 1,
             "AUTH": {
@@ -47,7 +47,7 @@ mod_def["PEOPLE"] = {
             "EDIT": 1,
             "QUERY": 1,
             "SEARCH": 1,
-            "REQUIRED": 1,
+            "REQUIRED": 0,
             "DEFAULT": None,
             "NEW": 1,
             "AUTH": {
@@ -81,7 +81,7 @@ mod_def["PEOPLE"] = {
             "EDIT": 1,
             "QUERY": 1,
             "SEARCH": 1,
-            "REQUIRED": 1,
+            "REQUIRED": 0,
             "DEFAULT": None,
             "NEW": 1,
             "AUTH": {

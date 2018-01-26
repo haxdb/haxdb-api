@@ -27,4 +27,4 @@ def init(app_haxdb):
 
 
 def run():
-    haxdb.func("HAS_PERM", has_perm)
+    haxdb.func("PERM:HAS", has_perm)

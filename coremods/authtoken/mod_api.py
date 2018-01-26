@@ -1,3 +1,8 @@
+import time
+import base64
+import os
+from flask import request
+
 haxdb = None
 
 
@@ -7,36 +12,39 @@ def init(hdb):
 
 
 def run():
-    @haxdb.route("/AUTH/TOKEN", methods=["GET", "POST"])
+    @haxdb.route("/AUTH/token", methods=["GET", "POST"])
     def mod_auth_token():
         token = haxdb.get("token")
-        dbas = [x.strip().upper() for x in config["AUTH"]["DBA"].split(',')]
+        dbalist = haxdb.config["AUTHEMAIL"]["DBA"].split(',')
+        config_dbas = [x.strip().upper() for x in dbalist]
         now = int(time.time())
 
         # DELETE OLD TOKEN
-        db.query("DELETE FROM AUTH_TOKEN WHERE AUTH_TOKEN_EXPIRE<%s", (now,))
-        if db.error:
-            return haxdb.response(success=0, message=db.error)
-        db.commit()
+        sql = "DELETE FROM AUTHTOKEN WHERE AUTHTOKEN_EXPIRE<%s"
+        haxdb.db.query(sql, (now,))
+        if haxdb.db.error:
+            return haxdb.response(success=0, message=haxdb.db.error)
+        haxdb.db.commit()
 
         # VALIDATE TOKEN
         sql = """
         SELECT *
-        FROM AUTH_TOKEN
-        JOIN PEOPLE ON AUTH_TOKEN_PEOPLE_ID = PEOPLE_ID
+        FROM AUTHTOKEN
+        JOIN PEOPLE ON AUTHTOKEN_PEOPLE_ID = PEOPLE_ID
         WHERE
-        AUTH_TOKEN_TOKEN = %s
-        AND AUTH_TOKEN_EXPIRE > %s
+        AUTHTOKEN_TOKEN = %s
+        AND AUTHTOKEN_EXPIRE > %s
         """
-        db.query(sql, (token, now,))
-        row = db.next()
+        haxdb.db.query(sql, (token, now,))
+        row = haxdb.db.next()
         if not row:
             msg = "TOKEN IS INVALID OR EXPIRED.\nLOG IN AGAIN."
             return haxdb.response(success=0, message=msg)
 
         # CREATE SESSION NODE
         api_key = base64.urlsafe_b64encode(os.urandom(500))[5:39]
-        expire = int(time.time() + int(config["AUTH"]["TOKEN_EXPIRE"]))
+        expire = int(haxdb.config["AUTHTOKEN"]["TOKEN_EXPIRE"])
+        expire += time.time()
         node_name = "{} {} TOKEN AUTH".format(row["PEOPLE_NAME_FIRST"],
                                               row["PEOPLE_NAME_LAST"],)
         dba = row["PEOPLE_DBA"]
@@ -45,24 +53,25 @@ def run():
         ip = str(request.access_route[-1])
         sql = """
         INSERT INTO NODES (NODES_API_KEY,NODES_PEOPLE_ID,NODES_NAME,
-                           NODES_READONLY,NODES_DBA,NODES_IP,NODES_EXPIRE,
-                           NODES_ENABLED,NODES_QUEUED)
-        VALUES (%s,%s,%s,0,%s,%s,%s,1,0)
+                           NODES_DBA,NODES_IP,NODES_EXPIRE,
+                           NODES_ENABLED)
+        VALUES (%s,%s,%s,%s,%s,%s,1)
         """
-        db.query(sql, (api_key, row["PEOPLE_ID"], node_name, dba, ip, expire,))
-        if db.error:
-            return haxdb.response(success=0, message=db.error)
+        params = (api_key, row["PEOPLE_ID"], node_name, dba, ip, expire,)
+        haxdb.db.query(sql, params)
+        if haxdb.db.error:
+            return haxdb.response(success=0, message=haxdb.db.error)
 
         # REMOVE TOKEN
-        sql = "DELETE FROM AUTH_TOKEN WHERE AUTH_TOKEN_TOKEN=%s"
-        db.query(sql, (token,))
-        if db.error:
-            return haxdb.response(success=0, message=db.error)
-        db.commit()
+        sql = "DELETE FROM AUTHTOKEN WHERE AUTHTOKEN_TOKEN=%s"
+        haxdb.db.query(sql, (token,))
+        if haxdb.db.error:
+            return haxdb.response(success=0, message=haxdb.db.error)
+        haxdb.db.commit()
 
         raw = {
             "api_key": api_key,
-            "name": "{} {}".format(row["PERSON_NAME_FIRST"],
-                                   row["PERSON_NAME_LAST"])
+            "name": "{} {}".format(row["PEOPLE_NAME_FIRST"],
+                                   row["PEOPLE_NAME_LAST"])
         }
         return haxdb.response(success=1, message="AUTHENTICATED", raw=raw)

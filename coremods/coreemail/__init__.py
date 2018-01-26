@@ -11,7 +11,7 @@ def send_email(receiver, subject, msg):
         eport = haxdb.config["EMAIL"]["PORT"]
         euser = haxdb.config["EMAIL"]["USER"]
         epass = haxdb.config["EMAIL"]["PASS"]
-        etls = haxdb.config["EMAIL"]["TLS"]
+        etls = int(haxdb.config["EMAIL"]["TLS"])
 
         sender = "{} <{}>".format(ename, efrom)
         header = "From: {}\n".format(sender)
@@ -27,8 +27,23 @@ def send_email(receiver, subject, msg):
             server.login(euser, epass)
         server.sendmail(sender, receiver, msg)
         server.quit()
+    except smtplib.SMTPServerDisconnected:
+        return haxdb.error("EMAIL SERVER DISCONNECTED")
+    except smtplib.SMTPDataError:
+        return haxdb.error("EMAIL DATA ERROR")
+    except smtplib.SMTPConnectError:
+        return haxdb.error("EMAIL CONNECT ERROR")
     except smtplib.SMTPRecipientsRefused:
         return haxdb.error("INVALID EMAIL ADDRESS")
+    except smtplib.SMTPAuthenticationError:
+        return haxdb.error("MISCONFIGURED EMAIL")
+    except smtplib.SMTPHeloError:
+        return haxdb.error("HELO ERROR")
+    except smtplib.SMTPSenderRefused:
+        return haxdb.error("SENDER REFUSED")
+    except smtplib.SMTPResponseException, e:
+        print e.smtp_code, e.smtp_error
+        return haxdb.error(e.smtp_error)
     except smtplib.SMTPException:
         return haxdb.error("FAILED TO SEND EMAIL")
     return True
@@ -37,7 +52,7 @@ def send_email(receiver, subject, msg):
 def init(hdb):
     global haxdb
     haxdb = hdb
-    haxdb.func("SEND_EMAIL", send_email)
+    haxdb.func("EMAIL:SEND", send_email)
     return {}
 
 

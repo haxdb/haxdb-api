@@ -6,7 +6,6 @@ import os
 import time
 from datetime import timedelta
 import haxdb_data
-import haxdb_api as api
 import re
 
 VERSION = "v1"
@@ -19,17 +18,18 @@ route = api_app.route
 
 config = None
 db = None
+api = None
 logger = None
 saved_functions = {}
 saved_triggers = []
 mod_def = {}
 
 
-class error:
+class error(str):
     message = ""
 
     def __init__(self, msg):
-        self.message = msg
+        self.message = str(msg)
 
     def __bool__(self):
         return False
@@ -44,9 +44,9 @@ def mod2db(mod_def):
     return db.mod2db(mod_def)
 
 
-def get(key, use_session=False):
+def get(key, use_session=False, force_list=False):
     r = haxdb_data.var.getlist(key)
-    if isinstance(r, list):
+    if force_list or (isinstance(r, list) and len(r) > 1):
         return r
     return haxdb_data.var.get(key, use_session)
 
@@ -104,10 +104,11 @@ def trigger(event, data):
                 logger.error(msg)
 
 
-def init(app_config, app_db, app_logger):
+def init(app_config, app_db, app_api, app_logger):
     global config, db, api, logger
     config = app_config
     db = app_db
+    api = app_api
     logger = app_logger
 
 
@@ -118,6 +119,12 @@ def run():
     host = config["API"]["HOST"]
     port = config["API"]["PORT"]
     flask_app.permanent_session_lifetime = timedelta(seconds=int(timeout))
+    flask_app.register_blueprint(api_app, url_prefix="/{}".format(VERSION))
+
+    from flask import url_for
+    for rule in flask_app.url_map.iter_rules():
+        print rule
+
     flask_app.run(host, port, debug=debug)
 
 
