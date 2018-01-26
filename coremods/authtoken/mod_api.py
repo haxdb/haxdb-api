@@ -7,7 +7,7 @@ def init(hdb):
 
 
 def run():
-    @haxdb.route("/AUTHTOKEN", methods=["GET", "POST"])
+    @haxdb.route("/AUTH/TOKEN", methods=["GET", "POST"])
     def mod_auth_token():
         token = haxdb.get("token")
         dbas = [x.strip().upper() for x in config["AUTH"]["DBA"].split(',')]
@@ -16,7 +16,7 @@ def run():
         # DELETE OLD TOKEN
         db.query("DELETE FROM AUTH_TOKEN WHERE AUTH_TOKEN_EXPIRE<%s", (now,))
         if db.error:
-            return haxdb.output(success=0, message=db.error, meta=meta)
+            return haxdb.response(success=0, message=db.error)
         db.commit()
 
         # VALIDATE TOKEN
@@ -51,18 +51,18 @@ def run():
         """
         db.query(sql, (api_key, row["PEOPLE_ID"], node_name, dba, ip, expire,))
         if db.error:
-            return haxdb.output(success=0, message=db.error, meta=meta)
+            return haxdb.response(success=0, message=db.error)
 
         # REMOVE TOKEN
         sql = "DELETE FROM AUTH_TOKEN WHERE AUTH_TOKEN_TOKEN=%s"
         db.query(sql, (token,))
         if db.error:
-            return haxdb.output(success=0, message=db.error, meta=meta)
+            return haxdb.response(success=0, message=db.error)
         db.commit()
 
-        meta["people_name"] = "{} {}".format(row["PEOPLE_NAME_FIRST"],
-                                             row["PEOPLE_NAME_LAST"])
-        return haxdb.output(success=1,
-                            message="AUTHENTICATED",
-                            meta=meta,
-                            value=api_key)
+        raw = {
+            "api_key": api_key,
+            "name": "{} {}".format(row["PERSON_NAME_FIRST"],
+                                   row["PERSON_NAME_LAST"])
+        }
+        return haxdb.response(success=1, message="AUTHENTICATED", raw=raw)
