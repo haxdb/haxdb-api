@@ -37,8 +37,11 @@ def run():
         # SEND EMAIL
         to = email
         subject = haxdb.config["CORE_AUTHEMAIL"]["AUTH_SUBJECT"]
-        message = haxdb.config["CORE_AUTHEMAIL"]["AUTH_BODY"]
-        message = message.replace("[tokenurl]", tokenurl)
+        if tokenurl:
+            message = haxdb.config["CORE_AUTHEMAIL"]["AUTH_BODY"]
+            message = message.replace("[tokenurl]", tokenurl)
+        else:
+            message = haxdb.config["CORE_AUTHEMAIL"]["AUTH_BODY_NOURL"]
         message = message.replace("[token]", token)
         result = haxdb.func("EMAIL_SEND")(to, subject, message)
         if not result:
