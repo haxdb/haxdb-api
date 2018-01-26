@@ -4,6 +4,9 @@ haxdb = None
 
 
 def has_perm(table, perm_type, perm_val):
+    if haxdb.session("api_dba") == 1:
+        return True
+
     nodes_id = haxdb.session("nodes_id")
     sql = """
     SELECT * FROM NODESPERM WHERE

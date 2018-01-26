@@ -137,13 +137,16 @@ def get_udf(table):
 
 
 def get_cols(mod_def):
+    table = mod_def["NAME"]
     udfs = get_udf(mod_def["NAME"])
     cols = {}
     headers = []
 
     for col in mod_def["COLS"]:
-        cols[col["NAME"]] = col
-        headers.append(col["NAME"])
+        read_perm = col["AUTH"]["READ"]
+        if haxdb.func("PERM:HAS")(table, "READ", read_perm):
+            cols[col["NAME"]] = col
+            headers.append(col["NAME"])
 
     for udf in udfs:
         fieldname = "{}_UDF{}".format(mod_def["NAME"], udf["UDF_NUM"])
@@ -173,6 +176,11 @@ def list_call(mod_def):
     headers, cols = get_cols(mod_def)
     table = mod_def["NAME"]
 
+    read_perm = int(mod_def["AUTH"]["READ"])
+    if not haxdb.func("PERM:HAS")(table, "READ", read_perm):
+        msg = "INVALID PERMISSIONS"
+        return haxdb.response(success=0, message=msg)
+
     sql, params = build_list_query(table, cols)
     cur = haxdb.db.query(sql, params)
     data = []
@@ -199,12 +207,17 @@ def list_call(mod_def):
 
 
 def view_call(mod_def, rowid=None):
+    table = mod_def["NAME"]
+    read_perm = int(mod_def["AUTH"]["READ"])
+    if not haxdb.func("PERM:HAS")(table, "READ", read_perm):
+        msg = "INVALID PERMISSIONS"
+        return haxdb.response(success=0, message=msg)
+
     rowid = rowid or haxdb.get("rowid")
     if not rowid:
         msg = "MISSING PARAMETER: rowid"
         return haxdb.response(success=0, message=msg)
 
-    table = mod_def["NAME"]
     sql = "select * FROM {} WHERE {}_ID=%s".format(table, table)
     row = haxdb.db.qaf(sql, (rowid,))
     if not row:
@@ -230,6 +243,12 @@ def view_call(mod_def, rowid=None):
 
 def new_call(mod_def, defaults=None, values=None):
     table = mod_def["NAME"]
+
+    insert_perm = int(mod_def["AUTH"]["INSERT"])
+    if not haxdb.func("PERM:HAS")(table, "INSERT", insert_perm):
+        msg = "INVALID PERMISSIONS"
+        return haxdb.response(success=0, message=msg)
+
     data = {}
 
     # set defaults from mod_def
@@ -301,6 +320,10 @@ def save_call(mod_def, rowid=None, values=None):
     for col in mod_def["COLS"]:
         val = haxdb.get(col["NAME"])
         if val is not None:
+            write_perm = col["AUTH"]["WRITE"]
+            if not haxdb.func("PERM:HAS")(table, "WRITE", write_perm):
+                msg = "INVALID PERMISSIONS"
+                return haxdb.response(success=0, message=msg)
             data[col["NAME"]] = val
 
     # override values with any values passed in
@@ -348,6 +371,12 @@ def save_call(mod_def, rowid=None, values=None):
 def delete_call(mod_def, rowid=None):
     rowid = rowid or haxdb.get("rowid")
     table = mod_def["NAME"]
+
+    delete_perm = int(mod_def["AUTH"]["DELETE"])
+    if not haxdb.func("PERM:HAS")(table, "DELETE", delete_perm):
+        msg = "INVALID PERMISSIONS"
+        return haxdb.response(success=0, message=msg)
+
     sql = "DELETE FROM {} WHERE {}_ID=%s".format(table, table)
     r = haxdb.db.query(sql, (rowid,))
     if not r:
