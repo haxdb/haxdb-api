@@ -19,7 +19,7 @@ def people_create(email, first_name=None, last_name=None, dba=0):
     haxdb.db.query(sql, (email, first_name, last_name, dba))
     if haxdb.db.rowcount > 0:
         haxdb.db.commit()
-        people = {
+        person = {
             "PEOPLE_ID": haxdb.db.lastrowid,
             "PEOPLE_NAME_FIRST": first_name,
             "PEOPLE_NAME_LAST": last_name,
