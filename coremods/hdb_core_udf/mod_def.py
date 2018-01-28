@@ -12,7 +12,7 @@ mod_def["UDF"] = {
     "CLIENT": {
         "NAME": "UDF",
         "MAJOR": 0,
-        "MINOR": 1,
+        "MINOR": 0,
         "PARENT": None,
         "ICON": "database",
     },

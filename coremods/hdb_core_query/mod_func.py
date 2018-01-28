@@ -44,7 +44,7 @@ def QUERY_getall(people_id=None):
     if people_id:
         sql += " WHERE QUERY_PEOPLE_ID=%s"
         params += (people_id, )
-    sql += "ORDER BY QUERY_ORDER"
+    sql += " ORDER BY QUERY_ORDER"
     r = haxdb.db.query(sql, params)
 
     queries = {}

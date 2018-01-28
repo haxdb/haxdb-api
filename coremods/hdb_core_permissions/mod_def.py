@@ -10,7 +10,7 @@ mod_def["PEOPLEPERMS"] = {
     "UNIQUE": [["PEOPLEPERMS_PEOPLE_ID", "PEOPLEPERMS_TABLE"]],
     "CLIENT": {
         "MAJOR": 0,
-        "MINOR": 1,
+        "MINOR": 0,
         "PARENT": "PEOPLE",
         "ICON": "key"
     },
@@ -137,7 +137,7 @@ mod_def["NODEPERMS"] = {
     "UNIQUE": [["NODEPERMS_PEOPLE_ID", "NODEPERMS_TABLE"]],
     "CLIENT": {
         "MAJOR": 0,
-        "MINOR": 1,
+        "MINOR": 0,
         "PARENT": "PEOPLE",
         "ICON": "key"
     },

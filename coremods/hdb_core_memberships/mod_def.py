@@ -8,8 +8,8 @@ mod_def["MEMBERSHIPS"] = {
     "INDEX": [],
     "UNIQUE": [["MEMBERSHIPS_NAME"]],
     "CLIENT": {
-        "MAJOR": 1,
-        "MINOR": 0,
+        "MAJOR": 0,
+        "MINOR": 1,
         "PARENT": None,
         "ICON": "id-card"
     },

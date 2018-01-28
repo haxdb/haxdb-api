@@ -9,8 +9,8 @@ mod_def["NODES"] = {
     "INDEX": [],
     "UNIQUE": [],
     "CLIENT": {
-        "MAJOR": 1,
-        "MINOR": 0,
+        "MAJOR": 0,
+        "MINOR": 1,
         "PARENT": None,
         "ICON": "cube"
     },
