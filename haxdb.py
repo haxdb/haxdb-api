@@ -142,7 +142,7 @@ def require_dba(view_function):
     @wraps(view_function)
     def decorated_function(*args, **kwargs):
         session.permanent = True
-        dba = haxdb_data.session.get("api_dba")
+        dba = haxdb_data.session.get("dba")
         if (not dba or (dba and int(dba) != 1)):
             return response(success=0, message="INVALID PERMISSION")
         return view_function(*args, **kwargs)

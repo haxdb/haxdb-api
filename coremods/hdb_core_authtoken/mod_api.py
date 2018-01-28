@@ -21,19 +21,21 @@ def run():
         if not person:
             return haxdb.response(success=0, message=person)
 
-        name = "{} {} TOKEN AUTH".format(person["PEOPLE_NAME_FIRST"],
-                                         person["PEOPLE_NAME_LAST"])
+        pname = "{} {}".format(person["PEOPLE_NAME_FIRST"],
+                               person["PEOPLE_NAME_LAST"])
+        nname = "{} TOKEN AUTH".format(pname)
+
         ip = str(request.access_route[-1])
         expire = int(haxdb.config["AUTHTOKEN"]["TOKEN_EXPIRE"])+now
         dba = person["PEOPLE_DBA"]
         if person["PEOPLE_EMAIL"].upper() in config_dbas:
             dba = 1
 
-        api_key = haxdb.func("NODES:CREATE")(name, ip, expire, dba,
-                                            people_id=person["PEOPLE_ID"])
+        api_key = haxdb.func("NODES:CREATE")(nname, ip, expire, dba,
+                                             people_id=person["PEOPLE_ID"])
 
         raw = {
             "api_key": api_key,
-            "name": name,
+            "name": pname,
         }
         return haxdb.response(success=1, message="AUTHENTICATED", raw=raw)

@@ -23,12 +23,12 @@ mod_def["FIELDSET"] = {
     "COLS": [
         {
             "CATEGORY": "FIELDSET",
-            "NAME": "FIELDSET_NAME",
-            "HEADER": "NAME",
+            "NAME": "FIELDSET_TABLE",
+            "HEADER": "CONTEXT",
             "TYPE": "CHAR",
             "SIZE": 25,
             "NEW": 1,
-            "EDIT": 1,
+            "EDIT": 0,
             "QUERY": 1,
             "SEARCH": 1,
             "REQUIRED": 1,
@@ -74,11 +74,52 @@ mod_def["FIELDSET"] = {
         },
         {
             "CATEGORY": "FIELDSET",
-            "NAME": "FIELDSET_CONTEXT",
-            "HEADER": "CONTEXT",
-            "TYPE": "CHAR",
-            "SIZE": 25,
+            "NAME": "FIELDSET_ORDER",
+            "HEADER": "ORDER",
+            "TYPE": "FLOAT",
             "NEW": 1,
+            "EDIT": 1,
+            "QUERY": 1,
+            "SEARCH": 0,
+            "REQUIRED": 1,
+            "DEFAULT": 9999.9,
+            "AUTH": {
+                "READ": 100,
+                "WRITE": 100,
+            }
+        },
+    ],
+    "CALLS": ["list", "view", "save", "new", "delete"]
+}
+
+mod_def["FIELDSETFIELDS"] = {
+    "NAME": "FIELDSETFIELDS",
+    "ROW_NAME": "FIELDSETFIELDS_FIELD",
+    "NEW": 1,
+    "UDF": 0,
+    "ORDER": ["FIELDSETFIELD_ORDER"],
+    "INDEX": [],
+    "UNIQUE": [["FIELDSETFIELDS_FIELDSET_ID", "FIELDSETFIELDS_FIELD"]],
+    "CLIENT": {
+        "MAJOR": 0,
+        "MINOR": 0,
+        "PARENT": "FIELDSET",
+        "ICON": "columns"
+    },
+    "AUTH": {
+        "READ": 100,
+        "WRITE": 100,
+        "INSERT": 100,
+        "DELETE": 100,
+    },
+    "COLS": [
+        {
+            "CATEGORY": "FIELDSETFIELDS",
+            "NAME": "FIELDSETFIELDS_FIELDSET_ID",
+            "HEADER": "FIELDSET",
+            "TYPE": "API",
+            "API_ID": "FIELDSET",
+            "NEW": 0,
             "EDIT": 0,
             "QUERY": 1,
             "SEARCH": 1,
@@ -90,10 +131,11 @@ mod_def["FIELDSET"] = {
             }
         },
         {
-            "CATEGORY": "FIELDSET",
-            "NAME": "FIELDSET_COLS",
-            "HEADER": "COLS",
-            "TYPE": "TEXT",
+            "CATEGORY": "FIELDSETFIELDS",
+            "NAME": "FIELDSETFIELDS_FIELD",
+            "HEADER": "FIELD",
+            "TYPE": "CHAR",
+            "SIZE": 50,
             "NEW": 1,
             "EDIT": 1,
             "QUERY": 1,
@@ -106,8 +148,8 @@ mod_def["FIELDSET"] = {
             }
         },
         {
-            "CATEGORY": "FIELDSET",
-            "NAME": "FIELDSET_ORDER",
+            "CATEGORY": "FIELDSETFIELDS",
+            "NAME": "FIELDSETFIELDS_ORDER",
             "HEADER": "ORDER",
             "TYPE": "FLOAT",
             "NEW": 1,

@@ -31,14 +31,14 @@ def run():
             now = int(time.time())
             row = haxdb.db.qaf(sql, (key, now, ip,))
             if row and row["NODES_API_KEY"] == key:
-                haxdb.session("api_authenticated", 1)
-                haxdb.session("api_people_id", row["NODES_PEOPLE_ID"])
+                haxdb.session("authenticated", 1)
+                haxdb.session("people_id", row["NODES_PEOPLE_ID"])
                 haxdb.session("nodes_id", row["NODES_ID"])
                 haxdb.session("nodes_name", row["NODES_NAME"])
                 haxdb.session("api_key", row["NODES_API_KEY"])
-                haxdb.session("api_dba", row["NODES_DBA"])
+                haxdb.session("dba", row["NODES_DBA"])
             else:
-                haxdb.session("api_authenticated", 0)
+                haxdb.session("authenticated", 0)
 
     @haxdb.route("/NODES/list", methods=haxdb.METHOD)
     def NODES_list():

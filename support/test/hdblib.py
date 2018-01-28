@@ -1,11 +1,13 @@
 import requests
 import json
+import logging
+import sys
 
 
 class hdbapi:
-    debug = False
     host = "http://localhost:8081/v1"
     api_key = None
+    meta = {}
 
     def api(self, call, data=None):
         url = self.host.rstrip("/") + "/" + call.lstrip("/")
@@ -14,15 +16,24 @@ class hdbapi:
         if "api_key" not in data:
             data["api_key"] = self.api_key
 
-        r = json.loads(requests.get(url, data=data).text)
+        logging.debug("############################")
+        logging.debug("CALL: {}".format(call))
+        logging.debug("URL: {}".format(url))
+        logging.debug("DATA: {}".format(data))
 
-        if self.debug:
-            print "############################"
-            print "CALL: {}".format(call)
-            print "DATA: {}".format(data)
-            print "----------------------------"
+        try:
+            r = requests.get(url, data=data)
+            r = json.loads(r.text)
+            logging.debug("----------------------------")
+            logging.debug(r)
+        except requests.exceptions.RequestException as e:
+            logging.warn(e)
+            return False
+        except ValueError:
             print r
-            print "############################"
+            return False
+
+        logging.debug("############################")
 
         return r
 
@@ -39,46 +50,61 @@ class hdbapi:
         self.api_key = r["api_key"]
         return True
 
+    def meta(self):
+        r = self.api("META")
+        if r and r["success"] == 1:
+            self.meta = r["data"]
+            return True
+        return False
 
 if __name__ == "__main__":
+    from tabulate import tabulate
+    from pprint import pprint
     hdb = hdbapi()
-    hdb.debug = False
-    print "###########################"
+    #logging.basicConfig(level=logging.DEBUG)
+    print "..........................."
     print ""
-    print "\t1) Email"
-    print "\t2) API Key"
+    print "    1) Email"
+    print "    2) API Key"
     print ""
-    print "###########################"
+    print "..........................."
     which = None
     while which not in ('1', '2'):
         which = raw_input("1 or 2? ")
+    print "..........................."
     if which == '2':
         hdb.api_key = raw_input("api_key? ")
+        print "..........................."
     else:
 
         email = raw_input("Email? ")
         while not hdb.auth_email(email):
             email = raw_input("Email? ")
+        print "..........................."
 
         token = raw_input("Token? ")
         while not hdb.authtoken(token):
             token = raw_input("Token? ")
+        print "..........................."
+        print hdb.api_key
+        print "..........................."
 
-    print "############################################"
-    print hdb.api("PEOPLE/list")["data"]
-    print "############################################"
-    person = {
-        "PEOPLE_EMAIL": "test1@serpco.com",
-        "PEOPLE_NAME_FIRST": "FNAME1",
-        "PEOPLE_NAME_LAST": "LNAME1"
-    }
-    print hdb.api("PEOPLE/new", data=person)
-    print "############################################"
-    person = {
-        "PEOPLE_EMAIL": "test2@serpco.com",
-        "PEOPLE_NAME_FIRST": "FNAME2",
-        "PEOPLE_NAME_LAST": "LNAME2"
-    }
-    print hdb.api("PEOPLE/new", data=person)
-    print "############################################"
-    print hdb.api("PEOPLE/list")["data"]
+    if not hdb.meta():
+        sys.exit(1)
+
+    apis = hdb.meta.keys()
+    apis.sort()
+    while True:
+        print "    " + "\n    ".join(apis)
+        print "..........................."
+        a = raw_input("API? ")
+        while a not in apis:
+            a = raw_input("API? ")
+        print "..........................."
+        c = raw_input("[{}] ?".format(",".join(hdb.meta[a]["CALLS"])))
+        while c not in hdb.meta[a]["CALLS"]:
+            c = raw_input("[{}] ?".format(",".join(hdb.meta[a]["CALLS"])))
+        print "..........................."
+        pprint(hdb.api("{}/{}".format(a, c)))
+        print "..........................."
+        raw_input("[end]")

@@ -11,7 +11,7 @@ mod_def["MEMBERSHIPS"] = {
         "MAJOR": 1,
         "MINOR": 0,
         "PARENT": None,
-        "ICON": "id-card-o"
+        "ICON": "id-card"
     },
     "AUTH": {
         "READ": 100,

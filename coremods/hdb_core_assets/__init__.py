@@ -12,5 +12,5 @@ def init(hdb):
 
 
 def run():
-    haxdb.func("LIST:CREATE")("ASSET_LOCATIONS", internal=True)
+    haxdb.func("LISTS:CREATE")("ASSET_LOCATIONS", internal=True)
     mod_api.run()

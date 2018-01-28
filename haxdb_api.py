@@ -136,50 +136,75 @@ def get_udf(table):
     return udf
 
 
-def get_cols(mod_def):
+def get_cols(mod_def, rperm=None, wperm=None):
     table = mod_def["NAME"]
-    udfs = get_udf(mod_def["NAME"])
-    cols = {}
-    headers = []
-
-    for col in mod_def["COLS"]:
-        read_perm = col["AUTH"]["READ"]
-        if haxdb.func("PERM:HAS")(table, "READ", read_perm):
-            cols[col["NAME"]] = col
-            headers.append(col["NAME"])
-
-    for udf in udfs:
-        fieldname = "{}_UDF{}".format(mod_def["NAME"], udf["UDF_NUM"])
-        col = {
-            "CATEGORY": udf["UDF_CATEGORY"],
-            "NAME": udf["UDF_NAME"],
-            "HEADER": udf["UDF_HEADER"],
-            "TYPE": udf["UDF_TYPE"],
-            "EDIT": udf["UDF_EDIT"],
-            "QUERY": udf["UDF_QUERY"],
-            "SEARCH": udf["UDF_SEARCH"],
-            "REQUIRED": udf["UDF_REQUIRED"],
-            "DEFAULT": udf["UDF_DEFAULT"],
-            "NEW": udf["UDF_NEW"],
+    cols = {
+        "{}_ID".format(table): {
+            "CATEGORY": "ROW",
+            "NAME": "{}_ID".format(table),
+            "HEADER": "{}_ID".format(table),
+            "TYPE": "INT",
+            "EDIT": 0,
+            "QUERY": 1,
+            "SEARCH": 0,
+            "REQUIRED": 0,
+            "DEFAULT": 0,
+            "NEW": 0,
             "AUTH": {
-                "READ": col["UDF_READ"],
-                "WRITE": col["UDF_WRITE"],
+                "READ": mod_def["AUTH"]["READ"],
+                "WRITE": mod_def["AUTH"]["WRITE"],
             }
         }
-        cols[fieldname] = col
-        headers.append(udf["UDF_NAME"])
+    }
+    headers = ["{}_ID".format(table)]
+
+    for col in mod_def["COLS"]:
+        colrperm = col["AUTH"]["READ"]
+        colwperm = col["AUTH"]["WRITE"]
+        if ((rperm is None or rperm >= colrperm) and
+            (wperm is None or wperm >= colwperm) and
+            (col["NAME"] not in headers)):
+             cols[col["NAME"]] = col
+             headers.append(col["NAME"])
+
+    udfs = get_udf(table)
+    for udf in udfs:
+        colrperm = int(udf["READ"])
+        colwperm = int(udf["WRITE"])
+        if ( (rperm is None or perm >= colrperm) and
+             (wperm is None or wperm >= colwperm) ):
+            fieldname = "{}_UDF{}".format(mod_def["NAME"], udf["UDF_NUM"])
+            col = {
+                "CATEGORY": udf["UDF_CATEGORY"],
+                "NAME": udf["UDF_NAME"],
+                "HEADER": udf["UDF_HEADER"],
+                "TYPE": udf["UDF_TYPE"],
+                "EDIT": udf["UDF_EDIT"],
+                "QUERY": udf["UDF_QUERY"],
+                "SEARCH": udf["UDF_SEARCH"],
+                "REQUIRED": udf["UDF_REQUIRED"],
+                "DEFAULT": udf["UDF_DEFAULT"],
+                "NEW": udf["UDF_NEW"],
+                "AUTH": {
+                    "READ": udf["UDF_READ"],
+                    "WRITE": udf["UDF_WRITE"],
+                }
+            }
+            cols[fieldname] = col
+            headers.append(udf["UDF_NAME"])
 
     return headers, cols
 
 
 def list_call(mod_def):
-    headers, cols = get_cols(mod_def)
     table = mod_def["NAME"]
-
-    read_perm = int(mod_def["AUTH"]["READ"])
-    if not haxdb.func("PERM:HAS")(table, "READ", read_perm):
+    api_perm = int(mod_def["AUTH"]["READ"])
+    user_perm = haxdb.func("PERM:GET")(table, "READ")
+    if api_perm > user_perm:
         msg = "INVALID PERMISSIONS"
         return haxdb.response(success=0, message=msg)
+
+    headers, cols = get_cols(mod_def, rperm=user_perm)
 
     sql, params = build_list_query(table, cols)
     cur = haxdb.db.query(sql, params)
@@ -208,10 +233,13 @@ def list_call(mod_def):
 
 def view_call(mod_def, rowid=None):
     table = mod_def["NAME"]
-    read_perm = int(mod_def["AUTH"]["READ"])
-    if not haxdb.func("PERM:HAS")(table, "READ", read_perm):
+    api_perm = int(mod_def["AUTH"]["READ"])
+    user_perm = haxdb.func("PERM:GET")(table, "READ")
+    if api_perm > user_perm:
         msg = "INVALID PERMISSIONS"
         return haxdb.response(success=0, message=msg)
+
+    headers, cols = get_cols(mod_def, rperm=user_perm)
 
     rowid = rowid or haxdb.get("rowid")
     if not rowid:
@@ -224,7 +252,6 @@ def view_call(mod_def, rowid=None):
         msg = "NO ROWS RETURNED"
         return haxdb.response(success=0, message=msg)
 
-    headers, cols = get_cols(mod_def)
     data = {}
     for col in cols:
         data[col] = row[col]

@@ -45,7 +45,7 @@ def run():
         subject = haxdb.config["AUTHEMAIL"]["EMAIL_SUBJECT"]
         if tokenurl:
             message = haxdb.config["AUTHEMAIL"]["EMAIL_BODY"]
-            message = message.replace("[tokenurl]", tokenurl)
+            message = message.replace("[url]", tokenurl)
         else:
             message = haxdb.config["AUTHEMAIL"]["EMAIL_BODY_NOURL"]
         message = message.replace("[token]", token)
