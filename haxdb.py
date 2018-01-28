@@ -52,7 +52,7 @@ def get(key, use_session=False, force_list=False):
 
 
 def session(key, val=None):
-    if val:
+    if val is not None:
         haxdb_data.session.set(key, val)
     else:
         return haxdb_data.session.get(key)

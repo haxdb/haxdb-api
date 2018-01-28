@@ -16,6 +16,7 @@ def run():
     def mod_api_keys_before_request():
         session.permanent = True
         key = haxdb.get("api_key", use_session=True)
+        haxdb.session("authenticated", 0)
 
         if key:
             ip = str(request.access_route[-1])
@@ -37,8 +38,7 @@ def run():
                 haxdb.session("nodes_name", row["NODES_NAME"])
                 haxdb.session("api_key", row["NODES_API_KEY"])
                 haxdb.session("dba", row["NODES_DBA"])
-            else:
-                haxdb.session("authenticated", 0)
+
 
     @haxdb.route("/NODES/list", methods=haxdb.METHOD)
     def NODES_list():

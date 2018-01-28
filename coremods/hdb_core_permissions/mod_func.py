@@ -44,6 +44,24 @@ def get_perm(table, perm_type):
     except Exception:
         return 0
 
+def get_perm_all():
+    nodes_id = haxdb.session("nodes_id")
+    sql = """
+        SELECT * FROM NODESPERMS WHERE
+        NODESPERMS_NODES_ID=%s
+    """
+    r = haxdb.db.query(sql, (nodes_id,))
+    perms = {}
+    if r:
+        for row in r:
+            perms[row["NODESPERMS_TABLE"]] = {
+                "read": row["NODESPERMS_READ"],
+                "write": row["NODESPERMS_WRITE"],
+                "insert": row["NODESPERMS_INSERT"],
+                "delete": row["NODESPERMS_DELETE"],
+            }
+    return perms
+
 
 def init(app_haxdb):
     global haxdb
@@ -53,3 +71,4 @@ def init(app_haxdb):
 def run():
     haxdb.func("PERM:HAS", has_perm)
     haxdb.func("PERM:GET", get_perm)
+    haxdb.func("PERM:GET:ALL", get_perm_all)
