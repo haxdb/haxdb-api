@@ -48,13 +48,15 @@ def valid_value(col, val):
             return False
         return True
 
-    if col_type in ("TEXT", "LIST"):
+    if col_type in ("CHAR", "TEXT", "LIST"):
         return True
 
     if col_type == "DATE":
         r = "^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$"
         d = re.compile(r)
         return d.match(val)
+
+    return False
 
 
 def parse_query(query, cols):
@@ -136,6 +138,13 @@ def get_udf(table):
     return udf
 
 
+def get_col(mod_def, colname):
+    for col in mod_def["COLS"]:
+        if col["NAME"] == colname:
+            return col
+    return None
+
+
 def get_cols(mod_def, rperm=None, wperm=None):
     table = mod_def["NAME"]
     cols = {
@@ -162,17 +171,17 @@ def get_cols(mod_def, rperm=None, wperm=None):
         colrperm = col["AUTH"]["READ"]
         colwperm = col["AUTH"]["WRITE"]
         if ((rperm is None or rperm >= colrperm) and
-            (wperm is None or wperm >= colwperm) and
-            (col["NAME"] not in headers)):
-             cols[col["NAME"]] = col
-             headers.append(col["NAME"])
+           (wperm is None or wperm >= colwperm) and
+           (col["NAME"] not in headers)):
+                cols[col["NAME"]] = col
+                headers.append(col["NAME"])
 
     udfs = get_udf(table)
     for udf in udfs:
         colrperm = int(udf["READ"])
         colwperm = int(udf["WRITE"])
-        if ( (rperm is None or perm >= colrperm) and
-             (wperm is None or wperm >= colwperm) ):
+        if ((rperm is None or perm >= colrperm) and
+           (wperm is None or wperm >= colwperm)):
             fieldname = "{}_UDF{}".format(mod_def["NAME"], udf["UDF_NUM"])
             col = {
                 "CATEGORY": udf["UDF_CATEGORY"],
@@ -227,7 +236,7 @@ def list_call(mod_def):
     if haxdb.get("csv") == 1:
         return haxdb.func("FILE_CSV")(filename, headers, data)
 
-    raw = {"data": data}
+    raw = {"api": table, "data": data}
     return haxdb.response(success=1, raw=raw)
 
 
@@ -264,7 +273,7 @@ def view_call(mod_def, rowid=None):
     }
     haxdb.trigger("VIEW.{}.{}".format(mod_def["NAME"], rowid), event_data)
 
-    raw = {"data": data}
+    raw = {"api": table, "data": data}
     return haxdb.response(success=1, raw=raw)
 
 
@@ -333,6 +342,7 @@ def new_call(mod_def, defaults=None, values=None):
     haxdb.trigger("NEW.{}".format(mod_def["NAME"]), event_data)
 
     raw = {
+        "api": table,
         "rowid": haxdb.db.lastrowid,
     }
     return haxdb.response(success=1, message="CREATED", raw=raw)
@@ -342,6 +352,10 @@ def save_call(mod_def, rowid=None, values=None):
     rowid = rowid or haxdb.get("rowid")
     table = mod_def["NAME"]
     data = {}
+
+    if not rowid:
+        msg = "MISSING INPUT: rowid"
+        return haxdb.response(success=0, message=msg)
 
     # set value from user
     for col in mod_def["COLS"]:
@@ -365,10 +379,10 @@ def save_call(mod_def, rowid=None, values=None):
     params = ()
     sql = "UPDATE {} SET".format(table)
     for colname in data:
-        col = mod_def["COLS"][colname]
+        col = get_col(mod_def, colname)
         if not valid_value(col, data[colname]):
             msg = "INVALID VALUE FOR: {}".format(colname)
-            return haxdb.result(success=0, message=msg)
+            return haxdb.response(success=0, message=msg)
         sql += " {}=%s".format(colname)
         params += (data[colname],)
     sql += " WHERE {}_ID=%s".format(table)
@@ -389,6 +403,7 @@ def save_call(mod_def, rowid=None, values=None):
     haxdb.trigger("SAVE.{}.{}".format(mod_def["NAME"], rowid), event_data)
 
     raw = {
+        "api": table,
         "rowid": rowid,
         "data": data,
     }
@@ -404,8 +419,15 @@ def delete_call(mod_def, rowid=None):
         msg = "INVALID PERMISSIONS"
         return haxdb.response(success=0, message=msg)
 
-    sql = "DELETE FROM {} WHERE {}_ID=%s".format(table, table)
-    r = haxdb.db.query(sql, (rowid,))
+    if isinstance(rowid, list):
+        sql = """
+            DELETE FROM {} WHERE {}_ID IN ({})
+        """.format(table, table, ",".join(["%s"]*len(rowid)))
+        params = tuple(rowid)
+    else:
+        sql = "DELETE FROM {} WHERE {}_ID=%s".format(table, table)
+        params = (rowid,)
+    r = haxdb.db.query(sql, params)
     if not r:
         msg = haxdb.db.error
         return haxdb.response(success=0, message=msg)
@@ -421,7 +443,9 @@ def delete_call(mod_def, rowid=None):
     haxdb.trigger("DELETE.{}.{}".format(mod_def["NAME"], rowid), event_data)
 
     raw = {
+        "api": table,
         "rowid": rowid,
         "rowcount": haxdb.db.rowcount,
     }
-    return haxdb.response(success=1, message="DELETED", raw=raw)
+    msg = "DELETED {} ROWS".format(haxdb.db.rowcount)
+    return haxdb.response(success=1, message=msg, raw=raw)
