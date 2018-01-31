@@ -2,7 +2,7 @@ mod_def = {}
 
 mod_def["QUERY"] = {
     "NAME": "QUERY",
-    "ROW_NAME": "QUERY_NAME",
+    "ROWNAME": "QUERY_NAME",
     "NEW": 1,
     "UDF": 0,
     "ORDER": ["QUERY_ORDER", "QUERY_NAME"],
@@ -43,7 +43,7 @@ mod_def["QUERY"] = {
             "NAME": "QUERY_PEOPLE_ID",
             "HEADER": "PERSON",
             "TYPE": "ID",
-            "API_ID": "PEOPLE",
+            "ID_API": "PEOPLE",
             "NEW": 1,
             "EDIT": 1,
             "QUERY": 1,

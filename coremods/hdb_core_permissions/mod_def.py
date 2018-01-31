@@ -2,7 +2,7 @@ mod_def = {}
 
 mod_def["PEOPLEPERMS"] = {
     "NAME": "PEOPLEPERMS",
-    "ROW_NAME": ["PEOPLEPERMS_TABLE"],
+    "ROWNAME": ["PEOPLEPERMS_TABLE"],
     "NEW": 0,
     "UDF": 0,
     "ORDER": ["PEOPLEPERMS_TABLE"],
@@ -26,7 +26,7 @@ mod_def["PEOPLEPERMS"] = {
             "NAME": "PEOPLEPERMS_PEOPLE_ID",
             "HEADER": "PERSON",
             "TYPE": "ID",
-            "API_ID": "PEOPLE",
+            "ID_API": "PEOPLE",
             "EDIT": 0,
             "QUERY": 1,
             "SEARCH": 0,
@@ -129,7 +129,7 @@ mod_def["PEOPLEPERMS"] = {
 
 mod_def["NODEPERMS"] = {
     "NAME": "NODEPERMS",
-    "ROW_NAME": ["NODEPERMS_TABLE"],
+    "ROWNAME": ["NODEPERMS_TABLE"],
     "NEW": 0,
     "UDF": 0,
     "ORDER": ["NODEPERMS_TABLE"],
@@ -153,7 +153,7 @@ mod_def["NODEPERMS"] = {
             "NAME": "NODEPERMS_NODES_ID",
             "HEADER": "NODE",
             "TYPE": "ID",
-            "API_ID": "NODES",
+            "ID_API": "NODES",
             "EDIT": 0,
             "QUERY": 1,
             "SEARCH": 0,

@@ -2,7 +2,7 @@ mod_def = {}
 
 mod_def["LISTS"] = {
     "NAME": "LISTS",
-    "ROW_NAME": "LISTS_NAME",
+    "ROWNAME": "LISTS_NAME",
     "NEW": 1,
     "UDF": 0,
     "ORDER": ["LISTS_NAME"],
@@ -43,7 +43,7 @@ mod_def["LISTS"] = {
 
 mod_def["LIST_ITEMS"] = {
     "NAME": "LIST_ITEMS",
-    "ROW_NAME": "LIST_ITEMS_NAME",
+    "ROWNAME": "LIST_ITEMS_NAME",
     "NEW": 1,
     "UDF": 5,
     "ORDER": ["LIST_ITEMS_LISTS_ID", "LIST_ITEMS_ORDER"],
@@ -67,7 +67,7 @@ mod_def["LIST_ITEMS"] = {
             "NAME": "LIST_ITEMS_LISTS_ID",
             "HEADER": "LIST",
             "TYPE": "ID",
-            "API_ID": "LISTS",
+            "ID_API": "LISTS",
             "EDIT": 0,
             "QUERY": 1,
             "SEARCH": 1,
@@ -123,7 +123,7 @@ mod_def["LIST_ITEMS"] = {
             "SEARCH": 1,
             "REQUIRED": 1,
             "NEW": 1,
-            "DEFAULT": None,
+            "DEFAULT": 0,
             "AUTH": {
                 "READ": 100,
                 "WRITE": 100,

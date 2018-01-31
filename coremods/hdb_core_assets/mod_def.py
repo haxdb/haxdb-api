@@ -2,7 +2,7 @@ mod_def = {}
 
 mod_def["ASSETS"] = {
     "NAME": "ASSETS",
-    "ROW_NAME": "ASSETS_NAME",
+    "ROWNAME": "ASSETS_NAME",
     "NEW": 1,
     "UDF": 20,
     "ORDER": ["ASSETS_LOCATION, ASSETS_NAME"],
@@ -145,7 +145,7 @@ mod_def["ASSETS"] = {
             "NAME": "ASSETS_LOCATION",
             "HEADER": "LOCATION",
             "TYPE": "LIST",
-            "LIST_NAME": "ASSET LOCATIONS",
+            "LIST_NAME": "ASSET_LOCATIONS",
             "EDIT": 1,
             "QUERY": 1,
             "SEARCH": 1,
@@ -179,7 +179,7 @@ mod_def["ASSETS"] = {
 
 mod_def["ASSETURLS"] = {
     "NAME": "ASSETURLS",
-    "ROW_NAME": "ASSETURLS_NAME",
+    "ROWNAME": "ASSETURLS_NAME",
     "NEW": 1,
     "UDF": 0,
     "ORDER": ["ASSETURLS_ORDER", "ASSETURLS_NAME"],
@@ -206,7 +206,7 @@ mod_def["ASSETURLS"] = {
             "NAME": "ASSETURLS_ASSETS_ID",
             "HEADER": "ASSET",
             "TYPE": "ID",
-            "API_ID": "ASSETS",
+            "ID_API": "ASSETS",
             "EDIT": 0,
             "QUERY": 1,
             "SEARCH": 0,
@@ -275,7 +275,7 @@ mod_def["ASSETURLS"] = {
 
 mod_def["ASSETAUTHS"] = {
     "NAME": "ASSETAUTHS",
-    "ROW_NAME": "CALC_ASSETAUTHS_PEOPLE_ID",
+    "ROWNAME": "CALC_ASSETAUTHS_PEOPLE_ID",
     "NEW": 0,
     "UDF": 0,
     "ORDER": ["CALC_ASSETAUTHS_PEOPLE_ID"],
@@ -299,7 +299,7 @@ mod_def["ASSETAUTHS"] = {
             "NAME": "ASSETAUTHS_ASSETS_ID",
             "HEADER": "ASSET",
             "TYPE": "ID",
-            "API_ID": "ASSETS",
+            "ID_API": "ASSETS",
             "EDIT": 0,
             "QUERY": 1,
             "SEARCH": 0,
@@ -316,7 +316,7 @@ mod_def["ASSETAUTHS"] = {
             "NAME": "ASSETAUTHS_PEOPLE_ID",
             "HEADER": "PERSON",
             "TYPE": "ID",
-            "API_ID": "PEOPLE",
+            "ID_API": "PEOPLE",
             "EDIT": 0,
             "QUERY": 1,
             "SEARCH": 1,

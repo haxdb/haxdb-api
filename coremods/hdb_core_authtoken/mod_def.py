@@ -2,7 +2,7 @@ mod_def = {}
 
 mod_def["AUTHTOKEN"] = {
     "NAME": "AUTHTOKEN",
-    "ROW_NAME": "AUTHTOKEN_TOKEN",
+    "ROWNAME": "AUTHTOKEN_TOKEN",
     "UDF": 0,
     "ORDER": [],
     "INDEX": [],
@@ -36,7 +36,7 @@ mod_def["AUTHTOKEN"] = {
             "NAME": "AUTHTOKEN_PEOPLE_ID",
             "HEADER": "PERSON",
             "TYPE": "ID",
-            "API_ID": "PEOPLE",
+            "ID_API": "PEOPLE",
             "EDIT": 0,
             "QUERY": 1,
             "SEARCH": 1,

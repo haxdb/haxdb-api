@@ -2,7 +2,7 @@ mod_def = {}
 
 mod_def["PEOPLE"] = {
     "NAME": "PEOPLE",
-    "ROW_NAME": ["PEOPLE_NAME_FIRST", "PEOPLE_NAME_LAST"],
+    "ROWNAME": ["PEOPLE_NAME_FIRST", "PEOPLE_NAME_LAST"],
     "NEW": 1,
     "UDF": 20,
     "ORDER": ["PEOPLE_NAME_LAST", "PEOPLE_NAME_FIRST"],
@@ -74,10 +74,10 @@ mod_def["PEOPLE"] = {
         },
         {
             "CATEGORY": "PERSON",
-            "NAME": "PEOPLE_MEMBERSHIP",
+            "NAME": "PEOPLE_MEMBERSHIPS_ID",
             "HEADER": "MEMBERSHIP",
             "TYPE": "ID",
-            "API_ID": "MEMBERSHIPS",
+            "ID_API": "MEMBERSHIPS",
             "EDIT": 1,
             "QUERY": 1,
             "SEARCH": 1,

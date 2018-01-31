@@ -81,7 +81,7 @@ class db:
                 ftab = None
                 fcol = None
                 if col["TYPE"] == "ID":
-                    ftab = col["API_ID"]
+                    ftab = col["ID_API"]
                     fcol = "{}_ID".format(ftab)
                 t.add(col["NAME"],
                       col["TYPE"],

@@ -3,7 +3,7 @@ mod_def = {}
 mod_def["UDF"] = {
     "NAME": "UDF",
     "NAME": "UDF",
-    "ROW_NAME": "UDF_NAME",
+    "ROWNAME": "UDF_NAME",
     "UDF": 0,
     "NEW": 0,
     "ORDER": ["UDF_TABLE", "UDF_NUM"],
@@ -120,7 +120,7 @@ mod_def["UDF"] = {
          "NAME": "UDF_LISTS_ID",
          "HEADER": "LIST",
          "TYPE": "ID",
-         "API_ID": "LISTS",
+         "ID_API": "LISTS",
          "EDIT": 1,
          "QUERY": 1,
          "SEARCH": 0,

@@ -2,7 +2,7 @@ mod_def = {}
 
 mod_def["MEMBERSHIPS"] = {
     "NAME": "MEMBERSHIPS",
-    "ROW_NAME": ["MEMBERSHIPS_NAME"],
+    "ROWNAME": ["MEMBERSHIPS_NAME"],
     "NEW": 1,
     "UDF": 10,
     "INDEX": [],

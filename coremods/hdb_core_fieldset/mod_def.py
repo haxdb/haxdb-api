@@ -2,7 +2,7 @@ mod_def = {}
 
 mod_def["FIELDSET"] = {
     "NAME": "FIELDSET",
-    "ROW_NAME": "FIELDSET_NAME",
+    "ROWNAME": "FIELDSET_NAME",
     "NEW": 1,
     "UDF": 0,
     "ORDER": ["FIELDSET_ORDER", "FIELDSET_NAME"],
@@ -60,7 +60,7 @@ mod_def["FIELDSET"] = {
             "NAME": "FIELDSET_PEOPLE_ID",
             "HEADER": "PERSON",
             "TYPE": "ID",
-            "API_ID": "PEOPLE",
+            "ID_API": "PEOPLE",
             "NEW": 1,
             "EDIT": 1,
             "QUERY": 1,
@@ -94,7 +94,7 @@ mod_def["FIELDSET"] = {
 
 mod_def["FIELDSETFIELDS"] = {
     "NAME": "FIELDSETFIELDS",
-    "ROW_NAME": "FIELDSETFIELDS_FIELD",
+    "ROWNAME": "FIELDSETFIELDS_FIELD",
     "NEW": 1,
     "UDF": 0,
     "ORDER": ["FIELDSETFIELD_ORDER"],
@@ -118,7 +118,7 @@ mod_def["FIELDSETFIELDS"] = {
             "NAME": "FIELDSETFIELDS_FIELDSET_ID",
             "HEADER": "FIELDSET",
             "TYPE": "API",
-            "API_ID": "FIELDSET",
+            "ID_API": "FIELDSET",
             "NEW": 0,
             "EDIT": 0,
             "QUERY": 1,
