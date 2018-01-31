@@ -109,13 +109,42 @@ def parse_query(query, cols):
     return sql, params
 
 
-def build_list_query(table, cols):
+def get_joins(cols):
+    i = 0
+    joins = {}
+    for cname in cols:
+        col = cols[cname]
+        if col["TYPE"] == "ID":
+            joins[col["NAME"]] = {
+                "alias": "J{}".format(i),
+                "api": col["ID_API"],
+                "rowname": haxdb.mod_def[col["ID_API"]]["ROWNAME"],
+            }
+            i += 1
+
+    return joins
+
+
+def build_list_query(table, cols, joins):
     query = haxdb.get("query")
 
-    sql = """
-    SELECT * FROM {}
-    WHERE 1=1
-    """.format(table)
+    sql = "SELECT T0.*"
+    for jcolname in joins:
+        j = joins[jcolname]
+        if isinstance(j["rowname"], list):
+            for jv in j["rowname"]:
+                sql += ",{}.{} as {}_{}".format(j["alias"], jv, j["alias"], jv)
+        else:
+            sql += ",{}.{} as {}_{}".format(j["alias"], j["rowname"],
+                                            j["alias"], j["rowname"])
+
+    sql += " FROM {} T0".format(table)
+    for jcolname in joins:
+        j = joins[jcolname]
+        sql += """
+        LEFT OUTER JOIN {} {} ON T0.{}={}.{}_ID
+        """.format(j["api"], j["alias"], jcolname, j["alias"], j["api"])
+    sql += " WHERE 1=1".format(table)
     params = ()
 
     if query:
@@ -215,13 +244,28 @@ def list_call(mod_def):
 
     headers, cols = get_cols(mod_def, rperm=user_perm)
 
-    sql, params = build_list_query(table, cols)
+    joins = get_joins(cols)
+    sql, params = build_list_query(table, cols, joins)
     cur = haxdb.db.query(sql, params)
     data = []
     for row in cur:
         newdata = {}
         for col in cols:
             newdata[col] = row[col]
+
+        for jcolname in joins:
+            j = joins[jcolname]
+            nid = "{}:ROWNAME".format(jcolname)
+            newdata[nid] = ""
+            if isinstance(j["rowname"], list):
+                for jv in j["rowname"]:
+                    print j, jv
+                    jname = row["{}_{}".format(j["alias"], jv)]
+                    if jname:
+                        newdata[nid] += " " + jname
+                newdata[nid] = newdata[nid].strip()
+            else:
+                newdata[nid] = row["{}_{}".format(j["alias"], jv)]
         data.append(newdata)
 
     event_data = {
