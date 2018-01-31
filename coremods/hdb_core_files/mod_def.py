@@ -10,7 +10,7 @@ mod_def["FILES"] = {
     "UNIQUE": [["FILES_TABLE", "FILES_ROWID", "FILES_COLUMN"]],
     "CLIENT": {
         "MAJOR": 0,
-        "MINOR": 1,
+        "MINOR": 0,
         "PARENT": None,
         "ICON": "file"
     },
