@@ -155,6 +155,19 @@ def build_list_query(table, cols, joins):
     return sql, params
 
 
+def build_rowname(rdef, data, prefix=""):
+    rowname = ""
+    if isinstance(rdef, list):
+        for col in rdef:
+            r = data["{}{}".format(prefix, col)] or ""
+            rowname += " {}".format(r)
+    else:
+        r = data["{}{}".format(prefix, rdef)] or ""
+        rowname += r
+    rowname = rowname.strip()
+    return rowname
+
+
 def get_udf(table):
     udf = {}
     sql = """
@@ -256,16 +269,11 @@ def list_call(mod_def):
         for jcolname in joins:
             j = joins[jcolname]
             nid = "{}:ROWNAME".format(jcolname)
-            newdata[nid] = ""
-            if isinstance(j["rowname"], list):
-                for jv in j["rowname"]:
-                    print j, jv
-                    jname = row["{}_{}".format(j["alias"], jv)]
-                    if jname:
-                        newdata[nid] += " " + jname
-                newdata[nid] = newdata[nid].strip()
-            else:
-                newdata[nid] = row["{}_{}".format(j["alias"], jv)]
+            newdata[nid] = build_rowname(j["rowname"], row, j["alias"]+"_")
+
+        newdata["ROWID"] = row["{}_ID".format(table)]
+        rdef = haxdb.mod_def[table]["ROWNAME"]
+        newdata["ROWNAME"] = build_rowname(rdef, row)
         data.append(newdata)
 
     event_data = {
@@ -343,7 +351,7 @@ def new_call(mod_def, defaults=None, values=None):
 
     # set user passed data
     for col in mod_def["COLS"]:
-        val = haxdb.get(col["NAME"])
+        val = haxdb.get("data[{}]".format(col["NAME"]))
         if val is not None:
             data[col["NAME"]] = val
 
@@ -403,8 +411,11 @@ def save_call(mod_def, rowid=None, values=None):
 
     # set value from user
     for col in mod_def["COLS"]:
-        val = haxdb.get(col["NAME"])
+        val = haxdb.get("save[{}]".format(col["NAME"]))
         if val is not None:
+            if col["EDIT"] != 1:
+                msg = "{} IS NOT EDITABLE".format(col["NAME"])
+                return haxdb.response(success=0, message=msg)
             write_perm = col["AUTH"]["WRITE"]
             if not haxdb.func("PERM:HAS")(table, "WRITE", write_perm):
                 msg = "INVALID PERMISSIONS"
@@ -427,8 +438,11 @@ def save_call(mod_def, rowid=None, values=None):
         if not valid_value(col, data[colname]):
             msg = "INVALID VALUE FOR: {}".format(colname)
             return haxdb.response(success=0, message=msg)
-        sql += " {}=%s".format(colname)
-        params += (data[colname],)
+        if not data[colname]:
+            sql += " {}=NULL".format(colname)
+        else:
+            sql += " {}=%s".format(colname)
+            params += (data[colname],)
     sql += " WHERE {}_ID=%s".format(table)
     params += (rowid,)
 
