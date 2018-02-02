@@ -305,13 +305,29 @@ def view_call(mod_def, rowid=None):
         return haxdb.response(success=0, message=msg)
 
     headers, cols = get_cols(mod_def, rperm=user_perm)
-
+    joins = get_joins(cols)
     rowid = rowid or haxdb.get("rowid")
     if not rowid:
         msg = "MISSING PARAMETER: rowid"
         return haxdb.response(success=0, message=msg)
 
-    sql = "select * FROM {} WHERE {}_ID=%s".format(table, table)
+    sql = "select * "
+    for jcolname in joins:
+        j = joins[jcolname]
+        if isinstance(j["rowname"], list):
+            for jv in j["rowname"]:
+                sql += ",{}.{} as {}_{}".format(j["alias"], jv, j["alias"], jv)
+        else:
+            sql += ",{}.{} as {}_{}".format(j["alias"], j["rowname"],
+                                            j["alias"], j["rowname"])
+
+    sql += " FROM {} T0 ".format(table)
+    for jcolname in joins:
+        j = joins[jcolname]
+        sql += """
+        LEFT OUTER JOIN {} {} ON T0.{}={}.{}_ID
+        """.format(j["api"], j["alias"], jcolname, j["alias"], j["api"])
+    sql += " WHERE T0.{}_ID=%s".format(table)
     row = haxdb.db.qaf(sql, (rowid,))
     if not row:
         msg = "NO ROWS RETURNED"
@@ -320,6 +336,11 @@ def view_call(mod_def, rowid=None):
     data = {}
     for col in cols:
         data[col] = row[col]
+
+    for jcolname in joins:
+        j = joins[jcolname]
+        nid = "{}:ROWNAME".format(jcolname)
+        data[nid] = build_rowname(j["rowname"], row, j["alias"]+"_")
 
     event_data = {
         "api": mod_def["NAME"],
