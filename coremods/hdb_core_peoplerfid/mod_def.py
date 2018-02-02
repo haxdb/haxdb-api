@@ -1,6 +1,7 @@
 mod_def = {}
 
 mod_def["PEOPLERFID"] = {
+    "HEADER": "RFIDS",
     "NAME": "PEOPLERFID",
     "ROWNAME": "PEOPLERFID_NAME",
     "NEW": 1,

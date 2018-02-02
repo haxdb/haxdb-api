@@ -66,7 +66,7 @@ def parse_query(query, cols):
     query = query.replace(")", " ) ")
     query = shlex.split(query)
     connector = "AND"
-    use_connector = True;
+    use_connector = True
     open_par = 0
     for q in query:
         if q == "(":
@@ -97,7 +97,7 @@ def parse_query(query, cols):
                     op = " LIKE "
                     newvals = []
                     for val in vals:
-                        newvals.append(val.replace("*","%"))
+                        newvals.append(val.replace("*", "%"))
                     vals = newvals
                 if field in cols and cols[field]["QUERY"] == 1:
                     if use_connector:
@@ -143,7 +143,9 @@ def get_joins(cols):
     joins = {}
     for cname in cols:
         col = cols[cname]
-        if col["TYPE"] == "ID":
+        if (col["TYPE"] == "ID" and
+           col["ID_API"] and
+           haxdb.mod_def[col["ID_API"]]):
             joins[col["NAME"]] = {
                 "alias": "J{}".format(i),
                 "api": col["ID_API"],

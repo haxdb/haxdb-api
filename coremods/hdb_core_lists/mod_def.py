@@ -1,6 +1,7 @@
 mod_def = {}
 
 mod_def["LISTS"] = {
+    "HEADER": "LIST",
     "NAME": "LISTS",
     "ROWNAME": "LISTS_NAME",
     "NEW": 1,
@@ -42,6 +43,7 @@ mod_def["LISTS"] = {
 }
 
 mod_def["LIST_ITEMS"] = {
+    "HEADER": "ITEMS",
     "NAME": "LIST_ITEMS",
     "ROWNAME": "LIST_ITEMS_NAME",
     "NEW": 1,

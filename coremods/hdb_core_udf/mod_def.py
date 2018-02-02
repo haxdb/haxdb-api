@@ -1,6 +1,7 @@
 mod_def = {}
 
 mod_def["UDF"] = {
+    "HEADER": "UDF",
     "NAME": "UDF",
     "NAME": "UDF",
     "ROWNAME": "UDF_NAME",

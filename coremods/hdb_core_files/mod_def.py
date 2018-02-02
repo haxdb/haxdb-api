@@ -1,6 +1,7 @@
 mod_def = {}
 
 mod_def["FILES"] = {
+    "HEADER": "FILE",
     "NAME": "FILES",
     "ROWNAME": "FILES_ID",
     "NEW": 0,

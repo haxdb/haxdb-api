@@ -1,6 +1,7 @@
 mod_def = {}
 
 mod_def["THUMBNAILS"] = {
+    "HEADER": "THUMBNAIL",
     "NAME": "THUMBNAILS",
     "ROWNAME": ["THUMBNAILS_TABLE", "THUMBNAILS_ROWID"],
     "UDF": 0,

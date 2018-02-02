@@ -1,6 +1,7 @@
 mod_def = {}
 
 mod_def["ASSETS"] = {
+    "HEADER": "ASSET",
     "NAME": "ASSETS",
     "ROWNAME": "ASSETS_NAME",
     "NEW": 1,
@@ -178,6 +179,7 @@ mod_def["ASSETS"] = {
 }
 
 mod_def["ASSETURLS"] = {
+    "HEADER": "URLS",
     "NAME": "ASSETURLS",
     "ROWNAME": "ASSETURLS_NAME",
     "NEW": 1,
@@ -274,6 +276,7 @@ mod_def["ASSETURLS"] = {
 }
 
 mod_def["ASSETAUTHS"] = {
+    "HEADER": "AUTHS",
     "NAME": "ASSETAUTHS",
     "ROWNAME": "CALC_ASSETAUTHS_PEOPLE_ID",
     "NEW": 0,
@@ -284,7 +287,7 @@ mod_def["ASSETAUTHS"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": "NODES",
+        "PARENT": "ASSETS",
         "ICON": "lock",
     },
     "AUTH": {

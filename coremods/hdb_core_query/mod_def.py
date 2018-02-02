@@ -1,6 +1,7 @@
 mod_def = {}
 
 mod_def["QUERY"] = {
+    "HEADER": "QUERY",
     "NAME": "QUERY",
     "ROWNAME": "QUERY_NAME",
     "NEW": 1,

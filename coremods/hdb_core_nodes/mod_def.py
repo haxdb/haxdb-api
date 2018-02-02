@@ -1,6 +1,7 @@
 mod_def = {}
 
 mod_def["NODES"] = {
+    "HEADER": "NODE",
     "NAME": "NODES",
     "ROWNAME": "NODES_NAME",
     "NEW": 1,

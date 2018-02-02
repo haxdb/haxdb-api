@@ -1,6 +1,7 @@
 mod_def = {}
 
 mod_def["AUTHTOKEN"] = {
+    "HEADER": "AUTHTOKEN",
     "NAME": "AUTHTOKEN",
     "ROWNAME": "AUTHTOKEN_TOKEN",
     "UDF": 0,

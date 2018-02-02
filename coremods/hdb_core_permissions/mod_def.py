@@ -1,6 +1,7 @@
 mod_def = {}
 
 mod_def["PEOPLEPERMS"] = {
+    "HEADER": "PERMISSIONS",
     "NAME": "PEOPLEPERMS",
     "ROWNAME": ["PEOPLEPERMS_TABLE"],
     "NEW": 0,
@@ -128,6 +129,7 @@ mod_def["PEOPLEPERMS"] = {
 }
 
 mod_def["NODEPERMS"] = {
+    "HEADER": "PERMISSIONS",
     "NAME": "NODEPERMS",
     "ROWNAME": ["NODEPERMS_TABLE"],
     "NEW": 0,
@@ -138,7 +140,7 @@ mod_def["NODEPERMS"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": "PEOPLE",
+        "PARENT": "NODES",
         "ICON": "key"
     },
     "AUTH": {

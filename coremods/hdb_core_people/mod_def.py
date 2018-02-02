@@ -1,6 +1,7 @@
 mod_def = {}
 
 mod_def["PEOPLE"] = {
+    "HEADER": "PERSON",
     "NAME": "PEOPLE",
     "ROWNAME": ["PEOPLE_NAME_FIRST", "PEOPLE_NAME_LAST"],
     "NEW": 1,

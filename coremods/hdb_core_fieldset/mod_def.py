@@ -1,6 +1,7 @@
 mod_def = {}
 
 mod_def["FIELDSET"] = {
+    "HEADER": "FIELDSET",
     "NAME": "FIELDSET",
     "ROWNAME": "FIELDSET_NAME",
     "NEW": 1,
@@ -93,6 +94,7 @@ mod_def["FIELDSET"] = {
 }
 
 mod_def["FIELDSETFIELDS"] = {
+    "HEADER": "FIELDS",
     "NAME": "FIELDSETFIELDS",
     "ROWNAME": "FIELDSETFIELDS_FIELD",
     "NEW": 1,

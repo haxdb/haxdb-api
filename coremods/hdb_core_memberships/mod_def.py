@@ -1,6 +1,7 @@
 mod_def = {}
 
 mod_def["MEMBERSHIPS"] = {
+    "HEADER": "MEMBERSHIP",
     "NAME": "MEMBERSHIPS",
     "ROWNAME": ["MEMBERSHIPS_NAME"],
     "NEW": 1,
