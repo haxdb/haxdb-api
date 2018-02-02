@@ -22,9 +22,10 @@ def run():
             PEOPLEPERMS_READ, PEOPLEPERMS_WRITE, PEOPLEPERMS_INSERT,
             PEOPLEPERMS_DELETE) VALUES (%s, %s, 0, 0, 0, 0)
             """
-            for mod_def in haxdb.mod_def:
-                table = mod_def["NAME"]
+            for md in haxdb.mod_def:
+                table = md["NAME"]
                 haxdb.db.query(isql, (pid, table))
+            haxdb.db.commit()
 
         return haxdb.api.list_call(mod_def["PEOPLEPERMS"])
 
