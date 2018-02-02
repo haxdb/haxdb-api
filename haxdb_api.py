@@ -66,41 +66,70 @@ def parse_query(query, cols):
     query = query.replace(")", " ) ")
     query = shlex.split(query)
     connector = "AND"
-
+    use_connector = True;
     open_par = 0
     for q in query:
         if q == "(":
             open_par += 1
-            sql += "{} (".format(connector)
-            connector = "AND"
+            if use_connector:
+                sql += "{} ".format(connector)
+                connector = "AND"
+            sql += "("
+            use_connector = False
         elif q == ")":
             open_par -= 1
             sql += ")"
+            use_connector = True
         elif q.upper() == "OR":
             connector = "OR"
+            use_connector = True
+        elif q.upper() == "AND":
+            connector = "AND"
+            use_connector = True
         else:
             r = re.split("([=<>~]|!=)", q, 1)
             if len(r) > 2:
                 field = r[0]
                 op = r[1]
                 vals = r[2].split("|")
-                if field in cols and cols[field]["QUERY"] == 1:
-                    sql += " {} ( 1=2".format(connector)
+                print field, op, vals, use_connector
+                if op == "~":
+                    op = " LIKE "
+                    newvals = []
                     for val in vals:
-                        sql == " OR {}{}%s".format(field, op)
-                        params += (val,)
-                        cnt += 1
+                        newvals.append(val.replace("*","%"))
+                    vals = newvals
+                if field in cols and cols[field]["QUERY"] == 1:
+                    if use_connector:
+                        sql += "{} ".format(connector)
+                        connector = "AND"
+                    sql += " ("
+                    valnum = 0
+                    for val in vals:
+                        if valnum > 0:
+                            sql += " OR "
+                        valnum += 1
+                        if val.upper() == "NULL" and op == "=":
+                            sql += " {} IS NULL".format(field)
+                        elif val.upper() == "NULL" and op == "!=":
+                            sql += " {} IS NOT NULL".format(field)
+                        else:
+                            sql += " {}{}%s".format(field, op)
+                            params += (val,)
                     sql += ")"
-                    connector = "AND"
+                    use_connector = True
             else:
+                if use_connector:
+                    sql += "{} ".format(connector)
+                    connector = "AND"
                 q = "%{}%".format(q)
-                sql += " {} ( 1=2".format(connector)
+                sql += " ( 1=2"
                 for col in cols:
                     if cols[col]["SEARCH"] == 1:
                         sql += " OR {} LIKE %s".format(col)
                         params += (q,)
                 sql += ")"
-                connector = "AND"
+                use_connector = True
 
     while open_par > 0:
         sql += ")"
@@ -260,6 +289,10 @@ def list_call(mod_def):
     joins = get_joins(cols)
     sql, params = build_list_query(table, cols, joins)
     cur = haxdb.db.query(sql, params)
+    if not cur:
+        msg = "QUERY MALFORMED"
+        return haxdb.response(success=0, message=msg)
+
     data = []
     for row in cur:
         newdata = {}
@@ -351,7 +384,7 @@ def new_call(mod_def, defaults=None, values=None):
 
     # set user passed data
     for col in mod_def["COLS"]:
-        val = haxdb.get("data[{}]".format(col["NAME"]))
+        val = haxdb.get("new[{}]".format(col["NAME"]))
         if val is not None:
             data[col["NAME"]] = val
 
