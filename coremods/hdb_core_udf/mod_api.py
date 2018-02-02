@@ -17,14 +17,6 @@ def run():
     def UDF_view():
         return haxdb.api.view_call(mod_def["UDF"])
 
-    @haxdb.route("/UDF/new", methods=haxdb.METHOD)
-    def UDF_new():
-        return haxdb.api.new_call(mod_def["UDF"])
-
-    @haxdb.route("/UDF/delete", methods=haxdb.METHOD)
-    def UDF_delete():
-        return haxdb.api.delete_call(mod_def["UDF"])
-
     @haxdb.route("/UDF/save", methods=haxdb.METHOD)
     def UDF_save():
         return haxdb.api.save_call(mod_def["UDF"])

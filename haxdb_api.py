@@ -204,7 +204,7 @@ def get_udf(table):
     """
     cur = haxdb.db.query(sql, (table,))
     for row in cur:
-        uname = "{}_FIELD{}".format(table, row["UDF_NUM"])
+        uname = "{}_UDF{}".format(table, row["UDF_NUM"])
         udf[uname] = row
     return udf
 
@@ -239,6 +239,7 @@ def get_cols(mod_def, rperm=None, wperm=None):
     headers = ["{}_ID".format(table)]
 
     for col in mod_def["COLS"]:
+        print col
         colrperm = col["AUTH"]["READ"]
         colwperm = col["AUTH"]["WRITE"]
         if ((rperm is None or rperm >= colrperm) and
@@ -248,26 +249,31 @@ def get_cols(mod_def, rperm=None, wperm=None):
                 headers.append(col["NAME"])
 
     udfs = get_udf(table)
-    for udf in udfs:
-        colrperm = int(udf["READ"])
-        colwperm = int(udf["WRITE"])
-        if ((rperm is None or perm >= colrperm) and
+    for fieldname in udfs:
+        udf=udfs[fieldname]
+        colrperm = 0
+        if udf["UDF_AUTH_READ"]:
+            colrperm = int(udf["UDF_AUTH_READ"])
+        colwperm = 0
+        if udf["UDF_AUTH_WRITE"]:
+            colwperm = int(udf["UDF_AUTH_WRITE"])
+        if ((rperm is None or rperm >= colrperm) and
            (wperm is None or wperm >= colwperm)):
-            fieldname = "{}_UDF{}".format(mod_def["NAME"], udf["UDF_NUM"])
+            #fieldname = "{}_UDF{}".format(mod_def["NAME"], udf["UDF_NUM"])
             col = {
                 "CATEGORY": udf["UDF_CATEGORY"],
-                "NAME": udf["UDF_NAME"],
-                "HEADER": udf["UDF_HEADER"],
+                "NAME": fieldname,
+                "HEADER": udf["UDF_NAME"],
                 "TYPE": udf["UDF_TYPE"],
-                "EDIT": udf["UDF_EDIT"],
-                "QUERY": udf["UDF_QUERY"],
-                "SEARCH": udf["UDF_SEARCH"],
-                "REQUIRED": udf["UDF_REQUIRED"],
-                "DEFAULT": udf["UDF_DEFAULT"],
-                "NEW": udf["UDF_NEW"],
+                "EDIT": 1,
+                "QUERY": 1,
+                "SEARCH": 0,
+                "REQUIRED": 0,
+                "DEFAULT": None,
+                "NEW": 0,
                 "AUTH": {
-                    "READ": udf["UDF_READ"],
-                    "WRITE": udf["UDF_WRITE"],
+                    "READ": udf["UDF_AUTH_READ"],
+                    "WRITE": udf["UDF_AUTH_WRITE"],
                 }
             }
             cols[fieldname] = col
@@ -297,6 +303,7 @@ def list_call(mod_def):
     for row in cur:
         newdata = {}
         for col in cols:
+            print col
             newdata[col] = row[col]
 
         for jcolname in joins:

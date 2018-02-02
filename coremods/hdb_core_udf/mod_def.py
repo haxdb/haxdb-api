@@ -103,7 +103,7 @@ mod_def["UDF"] = {
          "OPTIONS": ["CHAR", "TEXT", "INT", "FLOAT", "BOOL", "LIST",
                      "ID", "FILE", "DATE", "TIMESTAMP"],
          "SIZE": 15,
-         "EDIT": 0,
+         "EDIT": 1,
          "QUERY": 0,
          "SEARCH": 1,
          "REQUIRED": 1,
@@ -137,7 +137,7 @@ mod_def["UDF"] = {
          "CATEGORY": "UDF",
          "NAME": "UDF_API",
          "HEADER": "API",
-         "TYPE": "STR",
+         "TYPE": "CHAR",
          "SIZE": 25,
          "EDIT": 1,
          "QUERY": 1,
@@ -205,5 +205,5 @@ mod_def["UDF"] = {
          }
         },
     ],
-    "CALLS": ["list", "view", "save", "new", "delete"]
+    "CALLS": ["list", "view", "save"]
 }
