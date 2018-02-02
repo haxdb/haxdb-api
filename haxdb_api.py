@@ -197,18 +197,6 @@ def build_rowname(rdef, data, prefix=""):
     return rowname
 
 
-def get_udf(table):
-    udf = {}
-    sql = """
-    SELECT * FROM UDF WHERE UDF_TABLE=%s AND UDF_ENABLED=1
-    """
-    cur = haxdb.db.query(sql, (table,))
-    for row in cur:
-        uname = "{}_UDF{}".format(table, row["UDF_NUM"])
-        udf[uname] = row
-    return udf
-
-
 def get_col(mod_def, colname):
     for col in mod_def["COLS"]:
         if col["NAME"] == colname:
@@ -217,6 +205,7 @@ def get_col(mod_def, colname):
 
 
 def get_cols(mod_def, rperm=None, wperm=None):
+    dba = haxdb.session("dba")
     table = mod_def["NAME"]
     cols = {
         "{}_ID".format(table): {
@@ -241,43 +230,16 @@ def get_cols(mod_def, rperm=None, wperm=None):
     for col in mod_def["COLS"]:
         print col
         colrperm = col["AUTH"]["READ"]
+        if not colrperm:
+            colrperm = 0
         colwperm = col["AUTH"]["WRITE"]
+        if not colwperm:
+            colwperm = 0
         if ((rperm is None or rperm >= colrperm) and
            (wperm is None or wperm >= colwperm) and
            (col["NAME"] not in headers)):
                 cols[col["NAME"]] = col
                 headers.append(col["NAME"])
-
-    udfs = get_udf(table)
-    for fieldname in udfs:
-        udf=udfs[fieldname]
-        colrperm = 0
-        if udf["UDF_AUTH_READ"]:
-            colrperm = int(udf["UDF_AUTH_READ"])
-        colwperm = 0
-        if udf["UDF_AUTH_WRITE"]:
-            colwperm = int(udf["UDF_AUTH_WRITE"])
-        if ((rperm is None or rperm >= colrperm) and
-           (wperm is None or wperm >= colwperm)):
-            #fieldname = "{}_UDF{}".format(mod_def["NAME"], udf["UDF_NUM"])
-            col = {
-                "CATEGORY": udf["UDF_CATEGORY"],
-                "NAME": fieldname,
-                "HEADER": udf["UDF_NAME"],
-                "TYPE": udf["UDF_TYPE"],
-                "EDIT": 1,
-                "QUERY": 1,
-                "SEARCH": 0,
-                "REQUIRED": 0,
-                "DEFAULT": None,
-                "NEW": 0,
-                "AUTH": {
-                    "READ": udf["UDF_AUTH_READ"],
-                    "WRITE": udf["UDF_AUTH_WRITE"],
-                }
-            }
-            cols[fieldname] = col
-            headers.append(udf["UDF_NAME"])
 
     return headers, cols
 

@@ -1,4 +1,5 @@
 from mod_def import mod_def
+import mod_func
 
 haxdb = None
 
@@ -19,4 +20,6 @@ def run():
 
     @haxdb.route("/UDF/save", methods=haxdb.METHOD)
     def UDF_save():
-        return haxdb.api.save_call(mod_def["UDF"])
+        response = haxdb.api.save_call(mod_def["UDF"])
+        mod_func.extend_mod_def()
+        return response
