@@ -47,7 +47,7 @@ mod_def["LIST_ITEMS"] = {
     "NAME": "LIST_ITEMS",
     "ROWNAME": "LIST_ITEMS_NAME",
     "NEW": 1,
-    "UDF": 5,
+    "UDF": 0,
     "ORDER": ["LIST_ITEMS_LISTS_ID", "LIST_ITEMS_ORDER"],
     "INDEX": [],
     "UNIQUE": [["LIST_ITEMS_LISTS_ID", "LIST_ITEMS_NAME"]],

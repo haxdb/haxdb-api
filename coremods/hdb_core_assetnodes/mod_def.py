@@ -12,7 +12,7 @@ mod_def["ASSETNODES"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": "NODES",
+        "PARENT": "ASSETS",
         "ICON": "cube"
     },
     "AUTH": {

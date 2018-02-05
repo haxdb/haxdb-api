@@ -231,7 +231,7 @@ mod_def["ASSETURLS"] = {
             "SEARCH": 1,
             "REQUIRED": 1,
             "NEW": 1,
-            "DEFAULT": "NEW URL",
+            "DEFAULT": "",
             "AUTH": {
                 "READ": 100,
                 "WRITE": 100,
@@ -248,7 +248,7 @@ mod_def["ASSETURLS"] = {
             "SEARCH": 1,
             "REQUIRED": 1,
             "NEW": 1,
-            "DEFAULT": 1,
+            "DEFAULT": "",
             "AUTH": {
                 "READ": 100,
                 "WRITE": 100,
@@ -325,7 +325,7 @@ mod_def["ASSETAUTHS"] = {
             "SEARCH": 1,
             "REQUIRED": 1,
             "DEFAULT": None,
-            "NEW": 0,
+            "NEW": 1,
             "AUTH": {
                 "READ": 100,
                 "WRITE": 100,
