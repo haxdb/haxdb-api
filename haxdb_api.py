@@ -92,7 +92,6 @@ def parse_query(query, cols):
                 field = r[0]
                 op = r[1]
                 vals = r[2].split("|")
-                print field, op, vals, use_connector
                 if op == "~":
                     op = " LIKE "
                     newvals = []
@@ -230,7 +229,6 @@ def get_cols(mod_def, rperm=None, wperm=None):
     headers = ["{}_ID".format(table)]
 
     for col in mod_def["COLS"]:
-        print col
         colrperm = col["AUTH"]["READ"]
         if not colrperm:
             colrperm = 0
@@ -267,7 +265,6 @@ def list_call(mod_def):
     for row in cur:
         newdata = {}
         for col in cols:
-            print col
             newdata[col] = row[col]
 
         for jcolname in joins:
