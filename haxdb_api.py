@@ -374,7 +374,7 @@ def new_call(mod_def, defaults=None, values=None):
     # set user passed data
     for col in mod_def["COLS"]:
         val = haxdb.get("new[{}]".format(col["NAME"]))
-        if val is not None:
+        if val:
             data[col["NAME"]] = val
 
     # override values with any values passed in
