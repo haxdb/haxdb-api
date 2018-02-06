@@ -528,4 +528,7 @@ def delete_call(mod_def, rowid=None):
         "rowcount": haxdb.db.rowcount,
     }
     msg = "DELETED {} ROWS".format(haxdb.db.rowcount)
-    return haxdb.response(success=1, message=msg, raw=raw)
+    if raw["rowcount"] > 0:
+        return haxdb.response(success=1, message=msg, raw=raw)
+    else:
+        return haxdb.response(success=0, message=msg, raw=raw)
