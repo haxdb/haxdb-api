@@ -11,7 +11,7 @@ def init(hdb):
 def run():
     @haxdb.route("/PEOPLEPERMS/view", methods=haxdb.METHOD)
     def PEOPLEPERMS_view():
-        return haxdb.api.view_call(mod_def["NODEPERMS"])
+        return haxdb.api.view_call(mod_def["PEOPLEPERMS"])
 
     @haxdb.route("/PEOPLEPERMS/list", methods=haxdb.METHOD)
     def PEOPLEPERMS_list():
