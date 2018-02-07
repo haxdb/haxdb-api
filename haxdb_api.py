@@ -254,6 +254,7 @@ def list_call(mod_def):
 
     headers, cols = get_cols(mod_def, rperm=user_perm)
 
+    flist = haxdb.func("FILE:TABLE:BUILD")(table)
     joins = get_joins(cols)
     sql, params = build_list_query(table, cols, joins)
     cur = haxdb.db.query(sql, params)
@@ -264,15 +265,22 @@ def list_call(mod_def):
     data = []
     for row in cur:
         newdata = {}
+        rid = row["{}_ID".format(table)]
         for col in cols:
-            newdata[col] = row[col]
+            if col in flist:
+                if rid in flist[col]:
+                    newdata[col] = 1
+                else:
+                    newdata[col] = 0
+            else:
+                newdata[col] = row[col]
 
         for jcolname in joins:
             j = joins[jcolname]
             nid = "{}:ROWNAME".format(jcolname)
             newdata[nid] = build_rowname(j["rowname"], row, j["alias"]+"_")
 
-        newdata["ROWID"] = row["{}_ID".format(table)]
+        newdata["ROWID"] = rid
         rdef = haxdb.mod_def[table]["ROWNAME"]
         newdata["ROWNAME"] = build_rowname(rdef, row)
         data.append(newdata)

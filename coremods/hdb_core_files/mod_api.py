@@ -11,7 +11,7 @@ def init(hdb):
 
 def run():
     @haxdb.route("/FILES/clear", methods=haxdb.METHOD)
-    def FILES_upload():
+    def FILES_clear():
         mod = haxdb.get("mod")
         field = haxdb.get("field")
         rowid = haxdb.get("rowid")
