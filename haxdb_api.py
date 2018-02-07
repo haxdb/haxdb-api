@@ -52,7 +52,7 @@ def valid_value(col, val):
         return True
 
     if col_type == "DATE":
-        r = "^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$"
+        r = "^(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$"
         d = re.compile(r)
         return d.match(val)
 
@@ -528,4 +528,7 @@ def delete_call(mod_def, rowid=None):
         "rowcount": haxdb.db.rowcount,
     }
     msg = "DELETED {} ROWS".format(haxdb.db.rowcount)
-    return haxdb.response(success=1, message=msg, raw=raw)
+    if raw["rowcount"] > 0:
+        return haxdb.response(success=1, message=msg, raw=raw)
+    else:
+        return haxdb.response(success=0, message=msg, raw=raw)
