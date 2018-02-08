@@ -316,6 +316,14 @@ def view_call(mod_def, rowid=None):
         msg = "MISSING PARAMETER: rowid"
         return haxdb.response(success=0, message=msg)
 
+    try:
+        rowid = int(rowid)
+    except Exception:
+        msg = "INVALID rowid"
+        return haxdb.response(success=0, message=msg)
+
+    flist = haxdb.func("FILE:TABLE:BUILD")(table, rowid)
+
     sql = "select * "
     for jcolname in joins:
         j = joins[jcolname]
@@ -340,7 +348,13 @@ def view_call(mod_def, rowid=None):
 
     data = {}
     for col in cols:
-        data[col] = row[col]
+        if col in flist:
+            if rowid in flist[col]:
+                data[col] = 1
+            else:
+                data[col] = 0
+        else:
+            data[col] = row[col]
 
     for jcolname in joins:
         j = joins[jcolname]

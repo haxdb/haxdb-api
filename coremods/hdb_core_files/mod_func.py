@@ -50,23 +50,28 @@ def file_csv(filename, headers, rows):
     return file_download(filename, filedata, "text/csv")
 
 
-def build_table_filelist(table):
+def build_table_filelist(table, rowid=None):
     flist = {}
     if table not in haxdb.mod_def:
         return flist
 
-    for col in haxdb.mod_def[table]:
+    for col in haxdb.mod_def[table]["COLS"]:
         if col["TYPE"] == "FILE":
             flist[col["NAME"]] = []
 
-    sql = "SELECT FILES_FIELD, FILES_ROWID FROM FILES WHERE FILES_TABLE=%s"
-    r = haxdb.db.query(sql, (table,))
+    sql = "SELECT FILES_COLUMN, FILES_ROWID FROM FILES WHERE FILES_TABLE=%s"
+    params = (table,)
+
+    if rowid:
+        sql += " AND FILES_ROWID=%s"
+        params += (rowid,)
+
+    r = haxdb.db.query(sql, params)
     for row in r:
-        if row["FILES_FIELD"] in flist:
-            flist[row["FILES_FIELD"]].append(row["FILES_ROWID"])
+        if row["FILES_COLUMN"] in flist:
+            flist[row["FILES_COLUMN"]].append(row["FILES_ROWID"])
 
     return flist
-
 
 
 def init(app_haxdb):
@@ -76,6 +81,7 @@ def init(app_haxdb):
     haxdb.func("FILE:CSV", file_csv)
     haxdb.func("FILE:DATAURL", file_dataurl)
     haxdb.func("FILE:TABLE:BUILD", build_table_filelist)
+
 
 def run():
     pass
