@@ -74,12 +74,12 @@ def has_perm(table, perm_type, perm_val):
 
     nodes_id = haxdb.session("nodes_id")
     sql = """
-    SELECT * FROM NODESPERMS WHERE
-    NODESPERMS_NODES_ID=%s
-    AND NODESPERMS_TABLE=%s
+    SELECT * FROM NODEPERMS WHERE
+    NODEPERMS_NODES_ID=%s
+    AND NODEPERMS_TABLE=%s
     """
     row = haxdb.db.qaf(sql, (nodes_id, table))
-    typecol = "NODESPERMS_{}".format(perm_type)
+    typecol = "NODEPERMS_{}".format(perm_type)
 
     try:
         if int(perm_val) <= int(row[typeocl]):
@@ -95,12 +95,12 @@ def get_perm(table, perm_type):
 
     nodes_id = haxdb.session("nodes_id")
     sql = """
-        SELECT * FROM NODESPERMS WHERE
-        NODESPERMS_NODES_ID=%s
-        AND NODESPERMS_TABLE=%s
+        SELECT * FROM NODEPERMS WHERE
+        NODEPERMS_NODES_ID=%s
+        AND NODEPERMS_TABLE=%s
     """
     row = haxdb.db.qaf(sql, (nodes_id, table))
-    typecol = "NODESPERMS_{}".format(perm_type)
+    typecol = "NODEPERMS_{}".format(perm_type)
     try:
         return int(row[typecol])
     except Exception:
@@ -110,18 +110,18 @@ def get_perm(table, perm_type):
 def get_perm_all():
     nodes_id = haxdb.session("nodes_id")
     sql = """
-        SELECT * FROM NODESPERMS WHERE
-        NODESPERMS_NODES_ID=%s
+        SELECT * FROM NODEPERMS WHERE
+        NODEPERMS_NODES_ID=%s
     """
     r = haxdb.db.query(sql, (nodes_id,))
     perms = {}
     if r:
         for row in r:
-            perms[row["NODESPERMS_TABLE"]] = {
-                "read": row["NODESPERMS_READ"],
-                "write": row["NODESPERMS_WRITE"],
-                "insert": row["NODESPERMS_INSERT"],
-                "delete": row["NODESPERMS_DELETE"],
+            perms[row["NODEPERMS_TABLE"]] = {
+                "read": row["NODEPERMS_READ"],
+                "write": row["NODEPERMS_WRITE"],
+                "insert": row["NODEPERMS_INSERT"],
+                "delete": row["NODEPERMS_DELETE"],
             }
     return perms
 
