@@ -51,7 +51,7 @@ def run():
     @haxdb.route("/NODES/new", methods=haxdb.METHOD)
     def NODES_new():
         vals = {
-            'api_key': haxdb.func("APIKEY:CREATE")(),
+            'NODES_API_KEY': haxdb.func("APIKEY:CREATE")(),
         }
 
         return haxdb.api.new_call(mod_def["NODES"], values=vals)

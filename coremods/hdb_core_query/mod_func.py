@@ -48,6 +48,8 @@ def QUERY_getall(people_id=None):
     r = haxdb.db.query(sql, params)
 
     queries = {}
+    if not r:
+        return queries
     for row in r:
         if row["QUERY_TABLE"] not in queries:
             queries[row["QUERY_TABLE"]] = []

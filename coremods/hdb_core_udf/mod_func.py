@@ -30,6 +30,8 @@ def extend_mod_def():
         ORDER BY UDF_TABLE, UDF_NUM
         """
     r = haxdb.db.query(sql)
+    if not r:
+        return False
     for row in r:
         col = {
             "UDF": 1,
@@ -48,7 +50,7 @@ def extend_mod_def():
             "AUTH": {
                 "READ": row["UDF_AUTH_READ"],
                 "WRITE": row["UDF_AUTH_WRITE"],
-                }
+            }
         }
         haxdb.mod_def[row["UDF_TABLE"]]["COLS"].append(col)
 

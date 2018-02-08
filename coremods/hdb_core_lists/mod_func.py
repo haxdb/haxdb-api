@@ -28,6 +28,8 @@ def lists_get():
     lists = {}
     sql = "SELECT * FROM LISTS"
     r = haxdb.db.query(sql)
+    if not r:
+        return lists
     for row in r:
         lists[row["LISTS_NAME"]] = []
 

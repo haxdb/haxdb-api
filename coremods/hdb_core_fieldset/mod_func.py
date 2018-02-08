@@ -33,7 +33,7 @@ def FIELDSET_get(table, people_id=None):
     if people_id:
         sql += " AND FIELDSET_PEOPLE_ID=%s"
         params += (people_id, )
-    sql += "ORDER BY FIELDSET_TABLE, FIELDSET_ORDER, FIELDSETFIELDS_ORDER"
+    sql += " ORDER BY FIELDSET_TABLE, FIELDSET_ORDER, FIELDSETFIELDS_ORDER"
     r = haxdb.db.query(sql, params)
 
     fieldsets = {}
@@ -70,10 +70,12 @@ def FIELDSET_getall(people_id=None):
     if people_id:
         sql += " AND FIELDSET_PEOPLE_ID=%s"
         params += (people_id, )
-    sql += "ORDER BY FIELDSET_TABLE, FIELDSET_ORDER, FIELDSETFIELDS_ORDER"
+    sql += " ORDER BY FIELDSET_TABLE, FIELDSET_ORDER, FIELDSETFIELDS_ORDER"
     r = haxdb.db.query(sql, params)
 
     fieldsets = {}
+    if not r:
+        return fieldsets
     fields = []
     lastfid = None
     for row in r:

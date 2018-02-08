@@ -21,21 +21,32 @@ def node_create(name, ip=None, expire=None, dba=0, enabled=1,
     cols = ["NODES_API_KEY", "NODES_NAME", "NODES_DBA", "NODES_ENABLED"]
     params = (api_key, name, dba, enabled)
 
+    data = {
+        "NODES_API_KEY": api_key,
+        "NODES_NAME": name,
+        "NODES_DBA": dba,
+        "NODES_ENABLED": enabled
+    }
+
     if ip:
         cols.append("NODES_IP")
         params += (ip,)
+        data["NODES_IP"] = ip
 
     if expire:
         cols.append("NODES_EXPIRE")
         params += (expire, )
+        data["NODES_EXPIRE"] = expire
 
     if  people_id:
         cols.append("NODES_PEOPLE_ID")
         params += (people_id, )
+        data["NODES_PEOPLE_ID"] = people_id
 
     if assets_id:
-        cols.append("ASSETS_ID")
+        cols.append("NODES_ASSETS_ID")
         params += (assets_id)
+        data["NODES_ASSETS_ID"] = assets_id
 
     sql = """
         INSERT INTO NODES ({})
@@ -46,6 +57,14 @@ def node_create(name, ip=None, expire=None, dba=0, enabled=1,
     if haxdb.db.error:
         return haxdb.error(haxdb.db.error)
     haxdb.db.commit()
+
+    event_data = {
+        "mod": "NODES",
+        "call": "new",
+        "data": data,
+        "rowid": haxdb.db.lastrowid,
+    }
+    haxdb.trigger("NEW.NODES", event_data)
     return api_key
 
 

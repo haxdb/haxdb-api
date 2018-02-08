@@ -67,6 +67,8 @@ def build_table_filelist(table, rowid=None):
         params += (rowid,)
 
     r = haxdb.db.query(sql, params)
+    if not r:
+        return flist
     for row in r:
         if row["FILES_COLUMN"] in flist:
             flist[row["FILES_COLUMN"]].append(row["FILES_ROWID"])

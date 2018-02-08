@@ -7,6 +7,8 @@ def build_people_perms():
     ids = []
     sql = "SELECT * FROM PEOPLE"
     r = haxdb.db.query(sql)
+    if not r:
+        return False
     for row in r:
         ids.append(row["PEOPLE_ID"])
 
@@ -36,6 +38,8 @@ def build_node_perms():
     nids = []
     sql = "SELECT * FROM NODES"
     r = haxdb.db.query(sql)
+    if not r:
+        return False
     for row in r:
         nids.append(row["NODES_ID"])
 

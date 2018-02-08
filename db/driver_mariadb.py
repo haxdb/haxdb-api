@@ -12,7 +12,7 @@ class db:
                                     user=config["USER"],
                                     password=config["PASS"],
                                     database=config["DB"])
-        self.cur = self.conn.cursor(dictionary=True)
+        self.cur = self.conn.cursor(dictionary=True, buffered=True)
 
     def _TOBLOB(self, filedata):
         return filedata
@@ -28,6 +28,9 @@ class db:
             if datasize:
                 return "INT({})".format(datasize)
             return "INT"
+
+        if datatype == "ID":
+            return "INT UNSIGNED"
 
         if datatype == "CHAR":
             if datasize:
@@ -45,11 +48,17 @@ class db:
         if datatype == "TEXT":
             return "TEXT"
 
-        if datatype == "BLOB":
+        if datatype == "BLOB" or datatype == "FILE":
             return "MEDIUMBLOB"
 
-        if datatype == "DATETIME":
-            return "INTEGER"
+        if datatype == "TIMESTAMP":
+            return "INT"
+
+        if datatype == "LIST":
+            return "INT"
+
+        if datatype == "SELECT":
+            return "VARCHAR(25)"
 
     def create(self, tables=None, indexes=None):
         self.create_tables(tables)
@@ -123,7 +132,7 @@ class db:
                 result = self.cur.execute(sql)
             self.rowcount = self.cur.rowcount
             self.lastrowid = self.cur.lastrowid
-            return result
+            return self.cur
         except mariadb.Error as error:
             self.error = str(error)
             if not squelch:
