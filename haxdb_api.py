@@ -117,6 +117,12 @@ def parse_query(query, cols):
                             params += (val,)
                     sql += ")"
                     use_connector = True
+                else:
+                    if use_connector:
+                        sql += "{} ".format(connector)
+                        connector = "AND"
+                    sql += "1=2"
+                    use_connector = True
             else:
                 if use_connector:
                     sql += "{} ".format(connector)
@@ -410,7 +416,8 @@ def new_call(mod_def, defaults=None, values=None):
     for col in mod_def["COLS"]:
         if col["NAME"] in data:
             if not valid_value(col, val):
-                msg = "INVALID VALUE FOR {}".format(col["NAME"])
+                msg = "INVALID VALUE FOR {} ({})"
+                msg = msg.format(col["NAME"], col["TYPE"])
                 return haxdb.response(success=0, message=msg)
 
     for key in data:
@@ -480,7 +487,8 @@ def save_call(mod_def, rowid=None, values=None):
     for colname in data:
         col = get_col(mod_def, colname)
         if not valid_value(col, data[colname]):
-            msg = "INVALID VALUE FOR: {}".format(colname)
+            msg = "INVALID VALUE FOR {} ({})"
+            msg = msg.format(col["NAME"], col["TYPE"])
             return haxdb.response(success=0, message=msg)
         if not data[colname]:
             sql += " {}=NULL".format(colname)
