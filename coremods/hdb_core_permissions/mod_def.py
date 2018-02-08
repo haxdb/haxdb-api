@@ -136,7 +136,7 @@ mod_def["NODEPERMS"] = {
     "UDF": 0,
     "ORDER": ["NODEPERMS_TABLE"],
     "INDEX": [],
-    "UNIQUE": [["NODEPERMS_PEOPLE_ID", "NODEPERMS_TABLE"]],
+    "UNIQUE": [["NODEPERMS_NODES_ID", "NODEPERMS_TABLE"]],
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
