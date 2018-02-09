@@ -3,7 +3,7 @@ mod_def = {}
 mod_def["PEOPLERFID"] = {
     "HEADER": "RFIDS",
     "NAME": "PEOPLERFID",
-    "ROWNAME": "PEOPLERFID_NAME",
+    "ROWNAME": ["PEOPLERFID_NAME"],
     "NEW": 1,
     "UDF": 0,
     "ORDER": ["PEOPLERFID_PEOPLE_ID", "PEOPLERFID_NAME"],

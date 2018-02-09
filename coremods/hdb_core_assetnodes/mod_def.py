@@ -3,7 +3,7 @@ mod_def = {}
 mod_def["ASSETNODES"] = {
     "HEADER": "ASSET NODES",
     "NAME": "ASSETNODES",
-    "ROWNAME": "ASSETNODES_NAME",
+    "ROWNAME": ["ASSETNODES_NAME"],
     "NEW": 1,
     "UDF": 0,
     "ORDER": ["ASSETNODES_NAME"],
@@ -67,6 +67,38 @@ mod_def["ASSETNODES"] = {
             "SEARCH": 0,
             "REQUIRED": 0,
             "DEFAULT": None,
+            "NEW": 0,
+            "AUTH": {
+                "READ": 100,
+                "WRITE": 100,
+            }
+        },
+        {
+            "CATEGORY": "ASSETNODE",
+            "NAME": "ASSETNODES_REQUIRERFID",
+            "HEADER": "RFID REQUIRED",
+            "TYPE": "BOOL",
+            "EDIT": 1,
+            "QUERY": 1,
+            "SEARCH": 0,
+            "REQUIRED": 1,
+            "DEFAULT": 0,
+            "NEW": 0,
+            "AUTH": {
+                "READ": 100,
+                "WRITE": 100,
+            }
+        },
+        {
+            "CATEGORY": "ASSETNODE",
+            "NAME": "ASSETNODES_APPROVEREQUIRED",
+            "HEADER": "APPROVAL REQUIRED",
+            "TYPE": "BOOL",
+            "EDIT": 1,
+            "QUERY": 1,
+            "SEARCH": 0,
+            "REQUIRED": 1,
+            "DEFAULT": 0,
             "NEW": 0,
             "AUTH": {
                 "READ": 100,

@@ -3,7 +3,7 @@ mod_def = {}
 mod_def["FIELDSET"] = {
     "HEADER": "FIELDSET",
     "NAME": "FIELDSET",
-    "ROWNAME": "FIELDSET_NAME",
+    "ROWNAME": ["FIELDSET_NAME"],
     "NEW": 1,
     "UDF": 0,
     "ORDER": ["FIELDSET_ORDER", "FIELDSET_NAME"],
@@ -96,7 +96,7 @@ mod_def["FIELDSET"] = {
 mod_def["FIELDSETFIELDS"] = {
     "HEADER": "FIELDS",
     "NAME": "FIELDSETFIELDS",
-    "ROWNAME": "FIELDSETFIELDS_FIELD",
+    "ROWNAME": ["FIELDSETFIELDS_FIELD"],
     "NEW": 1,
     "UDF": 0,
     "ORDER": ["FIELDSETFIELD_ORDER"],

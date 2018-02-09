@@ -4,7 +4,7 @@ mod_def["UDF"] = {
     "HEADER": "UDF",
     "NAME": "UDF",
     "NAME": "UDF",
-    "ROWNAME": "UDF_NAME",
+    "ROWNAME": ["UDF_NAME"],
     "UDF": 0,
     "NEW": 0,
     "ORDER": ["UDF_TABLE", "UDF_NUM"],

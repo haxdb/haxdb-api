@@ -3,7 +3,7 @@ mod_def = {}
 mod_def["ASSETSENSORS"] = {
     "HEADER": "SENSORS",
     "NAME": "ASSETSENSORS",
-    "ROWNAME": "ASSETSENSORS_NAME",
+    "ROWNAME": ["ASSETSENSORS_NAME"],
     "NEW": 1,
     "UDF": 0,
     "ORDER": ["ASSETSENSORS_NAME"],

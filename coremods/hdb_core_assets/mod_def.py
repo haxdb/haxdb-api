@@ -3,7 +3,7 @@ mod_def = {}
 mod_def["ASSETS"] = {
     "HEADER": "ASSET",
     "NAME": "ASSETS",
-    "ROWNAME": "ASSETS_NAME",
+    "ROWNAME": ["ASSETS_NAME"],
     "NEW": 1,
     "UDF": 20,
     "ORDER": ["ASSETS_LOCATION, ASSETS_NAME"],
@@ -181,7 +181,7 @@ mod_def["ASSETS"] = {
 mod_def["ASSETURLS"] = {
     "HEADER": "URLS",
     "NAME": "ASSETURLS",
-    "ROWNAME": "ASSETURLS_NAME",
+    "ROWNAME": ["ASSETURLS_NAME"],
     "NEW": 1,
     "UDF": 0,
     "ORDER": ["ASSETURLS_ORDER", "ASSETURLS_NAME"],
@@ -276,9 +276,9 @@ mod_def["ASSETURLS"] = {
 }
 
 mod_def["ASSETAUTHS"] = {
-    "HEADER": "AUTHS",
+    "HEADER": "APPROVALS",
     "NAME": "ASSETAUTHS",
-    "ROWNAME": "",
+    "ROWNAME": [],
     "NEW": 0,
     "UDF": 0,
     "ORDER": ["ASSETAUTHS_PEOPLE_ID"],

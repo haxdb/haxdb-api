@@ -52,6 +52,7 @@ def file_csv(filename, headers, rows):
 
 def build_table_filelist(table, rowid=None):
     flist = {}
+    print table
     if table not in haxdb.mod_def:
         return flist
 

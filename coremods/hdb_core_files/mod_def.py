@@ -3,7 +3,7 @@ mod_def = {}
 mod_def["FILES"] = {
     "HEADER": "FILE",
     "NAME": "FILES",
-    "ROWNAME": "FILES_ID",
+    "ROWNAME": ["FILES_ID"],
     "NEW": 0,
     "UDF": 0,
     "ORDER": ["FILES_TABLE", "FILES_ROW_ID", "FILES_COLUMN"],

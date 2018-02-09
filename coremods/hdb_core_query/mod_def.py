@@ -3,7 +3,7 @@ mod_def = {}
 mod_def["QUERY"] = {
     "HEADER": "QUERY",
     "NAME": "QUERY",
-    "ROWNAME": "QUERY_NAME",
+    "ROWNAME": ["QUERY_NAME"],
     "NEW": 1,
     "UDF": 0,
     "ORDER": ["QUERY_ORDER", "QUERY_NAME"],

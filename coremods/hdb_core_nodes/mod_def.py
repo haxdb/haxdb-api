@@ -3,7 +3,7 @@ mod_def = {}
 mod_def["NODES"] = {
     "HEADER": "NODE",
     "NAME": "NODES",
-    "ROWNAME": "NODES_NAME",
+    "ROWNAME": ["NODES_NAME"],
     "NEW": 1,
     "UDF": 0,
     "ORDER": ["NODES_NAME"],
