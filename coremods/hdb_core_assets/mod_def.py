@@ -278,10 +278,10 @@ mod_def["ASSETURLS"] = {
 mod_def["ASSETAUTHS"] = {
     "HEADER": "AUTHS",
     "NAME": "ASSETAUTHS",
-    "ROWNAME": "CALC_ASSETAUTHS_PEOPLE_ID",
+    "ROWNAME": "",
     "NEW": 0,
     "UDF": 0,
-    "ORDER": ["CALC_ASSETAUTHS_PEOPLE_ID"],
+    "ORDER": ["ASSETAUTHS_PEOPLE_ID"],
     "INDEX": [],
     "UNIQUE": [["ASSETAUTHS_ASSETS_ID", "ASSETAUTHS_PEOPLE_ID"]],
     "CLIENT": {
