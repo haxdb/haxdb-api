@@ -198,8 +198,10 @@ def build_rowname(rdef, data, prefix=""):
             r = data["{}{}".format(prefix, col)] or ""
             rowname += " {}".format(r)
     else:
-        r = data["{}{}".format(prefix, rdef)] or ""
-        rowname += r
+        rkey = "{}{}".format(prefix, rdef)
+        if rkey in data:
+            r = data[rkey] or ""
+            rowname += r
     rowname = rowname.strip()
     return rowname
 
