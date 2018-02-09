@@ -12,7 +12,7 @@ mod_def["FIELDSET"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": None,
+        "PARENT": [],
         "ICON": "columns"
     },
     "AUTH": {
@@ -105,7 +105,7 @@ mod_def["FIELDSETFIELDS"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": "FIELDSET",
+        "PARENT": ["FIELDSET"],
         "ICON": "columns"
     },
     "AUTH": {

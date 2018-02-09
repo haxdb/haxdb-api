@@ -14,7 +14,7 @@ mod_def["PEOPLERFID"] = {
         "NAME": "RFID",
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": "PEOPLE",
+        "PARENT": ["PEOPLE"],
         "ICON": "id-card-o"
     },
     "AUTH": {

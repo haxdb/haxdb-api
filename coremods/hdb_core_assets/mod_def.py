@@ -12,7 +12,7 @@ mod_def["ASSETS"] = {
     "CLIENT": {
         "MAJOR": 1,
         "MINOR": 0,
-        "PARENT": None,
+        "PARENT": [],
         "ICON": "wrench"
     },
     "AUTH": {
@@ -35,8 +35,8 @@ mod_def["ASSETS"] = {
             "NEW": 1,
             "DEFAULT": "NEW ASSET",
             "AUTH": {
-                "READ": 100,
-                "WRITE": 100,
+                "READ": 1,
+                "WRITE": 1,
             }
         },
         {
@@ -52,8 +52,8 @@ mod_def["ASSETS"] = {
             "NEW": 1,
             "DEFAULT": "WIDGET",
             "AUTH": {
-                "READ": 100,
-                "WRITE": 100,
+                "READ": 1,
+                "WRITE": 1,
             }
         },
         {
@@ -69,8 +69,8 @@ mod_def["ASSETS"] = {
             "NEW": 0,
             "DEFAULT": None,
             "AUTH": {
-                "READ": 100,
-                "WRITE": 100,
+                "READ": 50,
+                "WRITE": 50,
             }
         },
         {
@@ -86,8 +86,8 @@ mod_def["ASSETS"] = {
             "NEW": 0,
             "DEFAULT": None,
             "AUTH": {
-                "READ": 100,
-                "WRITE": 100,
+                "READ": 50,
+                "WRITE": 50,
             }
         },
         {
@@ -137,8 +137,8 @@ mod_def["ASSETS"] = {
             "NEW": 1,
             "DEFAULT": 1,
             "AUTH": {
-                "READ": 100,
-                "WRITE": 100,
+                "READ": 1,
+                "WRITE": 1,
             }
         },
         {
@@ -170,8 +170,8 @@ mod_def["ASSETS"] = {
             "NEW": 0,
             "DEFAULT": None,
             "AUTH": {
-                "READ": 100,
-                "WRITE": 100,
+                "READ": 50,
+                "WRITE": 50,
             }
         },
     ],
@@ -193,7 +193,7 @@ mod_def["ASSETURLS"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": "ASSETS",
+        "PARENT": ["ASSETS"],
         "ICON": "link",
     },
     "AUTH": {
@@ -233,8 +233,8 @@ mod_def["ASSETURLS"] = {
             "NEW": 1,
             "DEFAULT": "",
             "AUTH": {
-                "READ": 100,
-                "WRITE": 100,
+                "READ": 1,
+                "WRITE": 1,
             }
         },
         {
@@ -250,8 +250,8 @@ mod_def["ASSETURLS"] = {
             "NEW": 1,
             "DEFAULT": "",
             "AUTH": {
-                "READ": 100,
-                "WRITE": 100,
+                "READ": 1,
+                "WRITE": 1,
             }
         },
         {
@@ -267,8 +267,8 @@ mod_def["ASSETURLS"] = {
             "NEW": 0,
             "DEFAULT": 999.0,
             "AUTH": {
-                "READ": 100,
-                "WRITE": 100,
+                "READ": 1,
+                "WRITE": 1,
             }
         },
     ],
@@ -287,7 +287,7 @@ mod_def["ASSETAUTHS"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": "ASSETS",
+        "PARENT": ["ASSETS"],
         "ICON": "lock",
     },
     "AUTH": {

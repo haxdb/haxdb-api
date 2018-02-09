@@ -11,7 +11,7 @@ mod_def["THUMBNAILS"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": None,
+        "PARENT": [],
         "ICON": "picture-o"
     },
     "AUTH": {

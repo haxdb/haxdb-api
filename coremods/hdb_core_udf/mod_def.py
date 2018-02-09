@@ -14,7 +14,7 @@ mod_def["UDF"] = {
         "NAME": "UDF",
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": None,
+        "PARENT": [],
         "ICON": "database",
     },
     "AUTH": {

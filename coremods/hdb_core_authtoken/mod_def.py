@@ -11,7 +11,7 @@ mod_def["AUTHTOKEN"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 1,
-        "PARENT": None,
+        "PARENT": [],
         "ICON": "key"
     },
     "COLS": [

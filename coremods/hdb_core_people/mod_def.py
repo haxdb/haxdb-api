@@ -12,7 +12,7 @@ mod_def["PEOPLE"] = {
     "CLIENT": {
         "MAJOR": 1,
         "MINOR": 0,
-        "PARENT": None,
+        "PARENT": [],
         "ICON": "user"
     },
     "AUTH": {

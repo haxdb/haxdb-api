@@ -12,11 +12,11 @@ mod_def["LISTS"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 1,
-        "PARENT": None,
+        "PARENT": [],
         "ICON": "list"
     },
     "AUTH": {
-        "READ": 0,
+        "READ": 1,
         "WRITE": 100,
         "INSERT": 100,
         "DELETE": 100,
@@ -35,7 +35,7 @@ mod_def["LISTS"] = {
             "NEW": 1,
             "DEFAULT": None,
             "AUTH": {
-                "READ": 100,
+                "READ": 1,
                 "WRITE": 100,
             }
         },
@@ -55,11 +55,11 @@ mod_def["LIST_ITEMS"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": "LISTS",
+        "PARENT": ["LISTS"],
         "ICON": "key"
     },
     "AUTH": {
-        "READ": 0,
+        "READ": 1,
         "WRITE": 100,
         "INSERT": 100,
         "DELETE": 100,
@@ -78,7 +78,7 @@ mod_def["LIST_ITEMS"] = {
             "NEW": 0,
             "DEFAULT": None,
             "AUTH": {
-                "READ": 100,
+                "READ": 1,
                 "WRITE": 100,
             }
         },
@@ -95,7 +95,7 @@ mod_def["LIST_ITEMS"] = {
             "NEW": 1,
             "DEFAULT": None,
             "AUTH": {
-                "READ": 100,
+                "READ": 1,
                 "WRITE": 100,
             }
         },
@@ -112,7 +112,7 @@ mod_def["LIST_ITEMS"] = {
             "NEW": 1,
             "DEFAULT": None,
             "AUTH": {
-                "READ": 100,
+                "READ": 1,
                 "WRITE": 100,
             }
         },
@@ -128,7 +128,7 @@ mod_def["LIST_ITEMS"] = {
             "NEW": 1,
             "DEFAULT": 0,
             "AUTH": {
-                "READ": 100,
+                "READ": 1,
                 "WRITE": 100,
             }
         },
@@ -144,7 +144,7 @@ mod_def["LIST_ITEMS"] = {
             "NEW": 0,
             "DEFAULT": 999.9,
             "AUTH": {
-                "READ": 100,
+                "READ": 1,
                 "WRITE": 100,
             }
         },

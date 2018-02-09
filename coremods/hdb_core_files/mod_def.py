@@ -12,7 +12,7 @@ mod_def["FILES"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": None,
+        "PARENT": [],
         "ICON": "file"
     },
     "AUTH": {

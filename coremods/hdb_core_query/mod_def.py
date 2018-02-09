@@ -12,7 +12,7 @@ mod_def["QUERY"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": None,
+        "PARENT": [],
         "ICON": "search"
     },
     "AUTH": {

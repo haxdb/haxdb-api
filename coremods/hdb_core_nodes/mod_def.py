@@ -12,7 +12,7 @@ mod_def["NODES"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 1,
-        "PARENT": None,
+        "PARENT": [],
         "ICON": "cube"
     },
     "AUTH": {

@@ -12,7 +12,7 @@ mod_def["PEOPLEPERMS"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": "PEOPLE",
+        "PARENT": ["PEOPLE"],
         "ICON": "key"
     },
     "AUTH": {
@@ -140,7 +140,7 @@ mod_def["NODEPERMS"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": "NODES",
+        "PARENT": ["NODES"],
         "ICON": "key"
     },
     "AUTH": {
