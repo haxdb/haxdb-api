@@ -38,7 +38,7 @@ def node_create(name, ip=None, expire=None, dba=0, enabled=1,
         params += (expire, )
         data["NODES_EXPIRE"] = expire
 
-    if  people_id:
+    if people_id:
         cols.append("NODES_PEOPLE_ID")
         params += (people_id, )
         data["NODES_PEOPLE_ID"] = people_id
@@ -57,14 +57,19 @@ def node_create(name, ip=None, expire=None, dba=0, enabled=1,
     if haxdb.db.error:
         return haxdb.error(haxdb.db.error)
     haxdb.db.commit()
+    nodes_id = haxdb.db.lastrowid
 
     event_data = {
         "mod": "NODES",
         "call": "new",
         "data": data,
-        "rowid": haxdb.db.lastrowid,
+        "rowid": nodes_id,
     }
     haxdb.trigger("NEW.NODES", event_data)
+
+    if people_id:
+        haxdb.func("PERM:PERSON2NODE")(people_id, nodes_id)
+
     return api_key
 
 

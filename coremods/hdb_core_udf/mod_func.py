@@ -9,7 +9,7 @@ def build_UDF():
             for i in range(0, mod["UDF"]):
                 sql = """
                     INSERT INTO UDF (UDF_TABLE, UDF_NUM, UDF_NAME, UDF_ENABLED)
-                    VALUES (%s, %s, %s, 0)
+                    VALUES (%s, %s, %s, 99999999)
                     """
                 udfname = "UDF{}".format(i)
                 haxdb.db.query(sql, (table, i, udfname))

@@ -30,7 +30,8 @@ def build_people_perm(data):
         PEOPLEPERMS_DELETE) VALUES (%s, %s, 0, 0, 0, 0)
     """
     for md in haxdb.mod_def:
-        haxdb.db.query(sql, (data["rowid"], haxdb.mod_def[md]["NAME"]))
+        mdname = haxdb.mod_def[md]["NAME"]
+        haxdb.db.query(sql, (data["rowid"], mdname), squelch=True)
     haxdb.db.commit()
 
 
@@ -55,15 +56,45 @@ def build_node_perms():
 
 
 def build_node_perm(data):
+    nodes_id = data["rowid"]
     sql = """
         INSERT INTO NODEPERMS (NODEPERMS_NODES_ID, NODEPERMS_TABLE,
         NODEPERMS_READ, NODEPERMS_WRITE, NODEPERMS_INSERT,
         NODEPERMS_DELETE) VALUES (%s, %s, 0, 0, 0, 0)
     """
     for md in haxdb.mod_def:
-        haxdb.db.query(sql, (data["rowid"], haxdb.mod_def[md]["NAME"]))
+        mdname = haxdb.mod_def[md]["NAME"]
+        haxdb.db.query(sql, (nodes_id, mdname), squelch=True)
     haxdb.db.commit()
 
+
+def person2node_perm(people_id, nodes_id):
+    print "PERSON2NODE {} {}".format(people_id, nodes_id)
+    perms = []
+    sql = """
+        SELECT * FROM PEOPLEPERMS
+        WHERE PEOPLEPERMS_PEOPLE_ID=%s
+    """
+    r = haxdb.db.query(sql, (people_id,))
+    for row in r:
+        perms.append(row)
+
+    sql = """
+        UPDATE NODEPERMS SET
+        NODEPERMS_READ=%s, NODEPERMS_WRITE=%s,
+        NODEPERMS_INSERT=%s, NODEPERMS_DELETE=%s
+        WHERE
+        NODEPERMS_NODES_ID=%s AND NODEPERMS_TABLE=%s
+    """
+    for p in perms:
+        params = (p["PEOPLEPERMS_READ"],)
+        params += (p["PEOPLEPERMS_WRITE"],)
+        params += (p["PEOPLEPERMS_INSERT"],)
+        params += (p["PEOPLEPERMS_DELETE"],)
+        params += (nodes_id,)
+        params += (p["PEOPLEPERMS_TABLE"],)
+        haxdb.db.query(sql, params)
+    haxdb.db.commit()
 
 def has_perm(table, perm_type, perm_val):
     if haxdb.session("dba") == 1:
@@ -135,6 +166,7 @@ def run():
     haxdb.func("PERM:HAS", has_perm)
     haxdb.func("PERM:GET", get_perm)
     haxdb.func("PERM:GET:ALL", get_perm_all)
+    haxdb.func("PERM:PERSON2NODE", person2node_perm)
 
     build_people_perms()
     haxdb.on("NEW.PEOPLE", build_people_perm)
