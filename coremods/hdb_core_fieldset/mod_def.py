@@ -119,7 +119,7 @@ mod_def["FIELDSETFIELDS"] = {
             "CATEGORY": "FIELDSETFIELDS",
             "NAME": "FIELDSETFIELDS_FIELDSET_ID",
             "HEADER": "FIELDSET",
-            "TYPE": "API",
+            "TYPE": "ID",
             "ID_API": "FIELDSET",
             "NEW": 0,
             "EDIT": 0,
