@@ -41,13 +41,13 @@ def run():
 
     haxdb.logger.info(" Initializing MODS:")
     for mod in mod_names:
-        haxdb.logger.info("{}.init()".format(mod))
+        haxdb.logger.info("\t{}".format(mod))
         mod_def = mods[mod].init(haxdb)
         haxdb.mod_def.update(mod_def)
 
     haxdb.logger.info(" Running MODS:")
     for mod in mod_names:
-        haxdb.logger.info("{}.run()".format(mod))
+        haxdb.logger.info("\t{}".format(mod))
         mods[mod].run()
 
     haxdb.db.close()

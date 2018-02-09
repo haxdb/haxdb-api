@@ -12,7 +12,7 @@ def build_UDF():
                     VALUES (%s, %s, %s, 99999999)
                     """
                 udfname = "UDF{}".format(i)
-                haxdb.db.query(sql, (table, i, udfname))
+                haxdb.db.query(sql, (table, i, udfname), squelch=True)
     haxdb.db.commit()
 
 
@@ -29,7 +29,7 @@ def extend_mod_def():
         WHERE UDF_ENABLED=1
         ORDER BY UDF_TABLE, UDF_NUM
         """
-    r = haxdb.db.query(sql)
+    r = haxdb.db.query(sql, squelch=True)
     if not r:
         return False
     for row in r:

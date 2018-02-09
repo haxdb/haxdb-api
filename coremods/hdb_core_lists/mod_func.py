@@ -3,7 +3,7 @@ haxdb = None
 
 def lists_create(name, internal=1):
     sql = "INSERT INTO LISTS (LISTS_NAME, LISTS_INTERNAL) VALUES (%s, %s)"
-    r = haxdb.db.query(sql, (name, internal))
+    r = haxdb.db.query(sql, (name, internal), squelch=True)
     haxdb.db.commit()
     return r
 

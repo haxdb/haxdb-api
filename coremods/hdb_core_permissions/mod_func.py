@@ -6,7 +6,7 @@ haxdb = None
 def build_people_perms():
     ids = []
     sql = "SELECT * FROM PEOPLE"
-    r = haxdb.db.query(sql)
+    r = haxdb.db.query(sql, squelch=True)
     if not r:
         return False
     for row in r:
@@ -19,7 +19,7 @@ def build_people_perms():
     """
     for md in haxdb.mod_def:
         for rid in ids:
-            haxdb.db.query(sql, (rid, haxdb.mod_def[md]["NAME"]))
+            haxdb.db.query(sql, (rid, haxdb.mod_def[md]["NAME"]), squelch=True)
     haxdb.db.commit()
 
 
@@ -38,7 +38,7 @@ def build_people_perm(data):
 def build_node_perms():
     nids = []
     sql = "SELECT * FROM NODES"
-    r = haxdb.db.query(sql)
+    r = haxdb.db.query(sql, squelch=True)
     if not r:
         return False
     for row in r:
@@ -51,7 +51,7 @@ def build_node_perms():
     """
     for md in haxdb.mod_def:
         for nid in nids:
-            haxdb.db.query(sql, (nid, haxdb.mod_def[md]["NAME"]))
+            haxdb.db.query(sql, (nid, haxdb.mod_def[md]["NAME"]), squelch=True)
     haxdb.db.commit()
 
 
@@ -75,7 +75,7 @@ def person2node_perm(people_id, nodes_id):
         SELECT * FROM PEOPLEPERMS
         WHERE PEOPLEPERMS_PEOPLE_ID=%s
     """
-    r = haxdb.db.query(sql, (people_id,))
+    r = haxdb.db.query(sql, (people_id,), squelch=True)
     for row in r:
         perms.append(row)
 
@@ -93,7 +93,7 @@ def person2node_perm(people_id, nodes_id):
         params += (p["PEOPLEPERMS_DELETE"],)
         params += (nodes_id,)
         params += (p["PEOPLEPERMS_TABLE"],)
-        haxdb.db.query(sql, params)
+        haxdb.db.query(sql, params, squelch=True)
     haxdb.db.commit()
 
 def has_perm(table, perm_type, perm_val):
@@ -131,7 +131,7 @@ def get_perm(table, perm_type):
         AND NODEPERMS_TABLE=%s
     """
     row = haxdb.db.qaf(sql, (nodes_id, table))
-    typecol = "NODEPERMS_{}".format(perm_type)
+    typecol = "NODEPERMS_{}".format(perm_type, squelch=True)
     try:
         return int(row[typecol])
     except Exception:
