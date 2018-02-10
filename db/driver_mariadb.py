@@ -76,7 +76,7 @@ class db:
                                               ON UPDATE CURRENT_TIMESTAMP
                 )""".format(table.name, table.name, table.name,
                             table.name, table.name)
-                self.query(t_sql, squelch=True)
+                self.query(t_sql, squelch=False)
                 self.commit()
 
                 trigger_sql = """

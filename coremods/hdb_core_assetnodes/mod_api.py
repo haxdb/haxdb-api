@@ -59,7 +59,7 @@ def init(hdb):
         raw = {
             "registered": 1,
             "name": node.get("ASSETNODES_NAME"),
-            "restricted": node.get("ASSETNODES_RESTRICTED"),
+            "restricted": node.get("ASSETNODES_RESTRICTED", 0),
             "asset": node.get("ASSETS_NAME")
         }
         return haxdb.response(success=1, raw=raw)

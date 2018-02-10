@@ -82,7 +82,7 @@ mod_def["ASSETNODES"] = {
             "EDIT": 1,
             "QUERY": 1,
             "SEARCH": 0,
-            "REQUIRED": 1,
+            "REQUIRED": 0,
             "DEFAULT": None,
             "NEW": 0,
             "AUTH": {

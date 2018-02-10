@@ -138,5 +138,5 @@ if __name__ == "__main__":
         which = None
         while which not in menuoptions:
             which = getVal("[1,2,3,4,5]: ")
-            hdb = menuoptions[which](hdb)
+        hdb = menuoptions[which](hdb)
         raw_input("[pause]")

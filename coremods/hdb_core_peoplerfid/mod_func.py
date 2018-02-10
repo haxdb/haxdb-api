@@ -30,7 +30,10 @@ def rfid_dba(rfid):
         AND PEOPLERFID_ENABLED=1
         """
     r = haxdb.db.qaf(sql, (rfid,))
-    if r and "PEOPLE_DBA" in r and r["PEOPLE_DBA"] == 1:
+    if r:
+        r = dict(r)
+    isdba = (r and (int(r.get("PEOPLE_DBA",0)) == 1))
+    if isdba:
         return True
     return False
 

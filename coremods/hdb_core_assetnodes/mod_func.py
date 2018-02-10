@@ -94,23 +94,37 @@ def assetnode_sense(node, sensors):
 
 
 def assetnode_auth(node, rfid):
+    print "1"
 
     # If any valid rfid will work
     if node["ASSETNODES_APPROVAL"] != 1:
         return haxdb.func("RFID:GET")(rfid)
 
+    print "2"
+
     sql = """
         SELECT * FROM PEOPLE
         JOIN PEOPLERFID ON PEOPLERFID_PEOPLE_ID=PEOPLE_ID
         JOIN MEMBERSHIPS ON PEOPLE_MEMBERSHIPS_ID=MEMBERSHIPS_ID
+        LEFT OUTER JOIN ASSETAUTHS ON ASSETAUTHS_PEOPLE_ID=PEOPLE_ID
         WHERE
         PEOPLERFID_RFID = %s
         AND
         PEOPLERFID_ENABLED=1
         AND
-        ( MEMBERSHIPS_RFID=1 OR PEOPLE_DBA=1 )
+        (
+         PEOPLE_DBA = 1
+         OR
+         ( MEMBERSHIPS_RFID=1 AND ASSETAUTHS_ENABLED=1 )
+        )
         """
-    return haxdb.db.qaf(sql)
+
+    r = haxdb.db.qaf(sql, (rfid,))
+
+    print "3"
+    print r
+
+    return r
 
 
 def init(app_haxdb):

@@ -59,7 +59,10 @@ class db:
         self.query(sql, data, squelch=squelch)
         if self.error:
             return False
-        return self.next()
+        r = self.next()
+        if r:
+            return dict(r)
+        return r
 
     def next(self):
         return self.db.next()
