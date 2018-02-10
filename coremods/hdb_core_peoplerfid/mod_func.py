@@ -26,7 +26,8 @@ def rfid_dba(rfid):
     sql = """
         SELECT PEOPLE_DBA FROM PEOPLE
         JOIN PEOPLERFID ON PEOPLERFID_PEOPLE_ID=PEOPLE_ID
-        WHERE PEOPLERFID_RFID = %s
+        WHERE PEOPLERFID_RFID=%s
+        AND PEOPLERFID_ENABLED=1
         """
     r = haxdb.db.qaf(sql, (rfid,))
     if r and "PEOPLE_DBA" in r and r["PEOPLE_DBA"] == 1:
