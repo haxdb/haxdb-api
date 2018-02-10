@@ -94,7 +94,7 @@ if __name__ == "__main__":
         rfid = getVal("RFID: ")
         sensors = getSensors()
         r = hdb.register(rfid, sensors)
-        print r["message"]
+        print r
         return hdb
 
     def hpulse(hdb):
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     def hauth(hdb):
         rfid = getVal("RFID: ")
         r = hdb.auth(rfid)
-        print r["message"]
+        print r
         return hdb
 
     menuoptions = {
@@ -137,6 +137,6 @@ if __name__ == "__main__":
         print "............................."
         which = None
         while which not in menuoptions:
-            which = getVal("["+",".join(menuoptions.keys())+"]: ")
+            which = getVal("[1,2,3,4,5]: ")
             hdb = menuoptions[which](hdb)
         raw_input("[pause]")
