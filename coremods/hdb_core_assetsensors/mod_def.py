@@ -12,7 +12,7 @@ mod_def["ASSETSENSORS"] = {
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
-        "PARENT": ["ASSETS", "ASSETNODES"],
+        "PARENT": ["ASSETNODES"],
         "ICON": "dot-circle"
     },
     "AUTH": {
@@ -22,23 +22,6 @@ mod_def["ASSETSENSORS"] = {
         "DELETE": 100,
     },
     "COLS": [
-        {
-            "CATEGORY": "NODE",
-            "NAME": "ASSETSENSORS_ASSETS_ID",
-            "HEADER": "ASSET",
-            "TYPE": "ID",
-            "ID_API": "ASSETS",
-            "EDIT": 0,
-            "QUERY": 1,
-            "SEARCH": 0,
-            "REQUIRED": 0,
-            "DEFAULT": None,
-            "NEW": 0,
-            "AUTH": {
-                "READ": 100,
-                "WRITE": 100,
-            }
-        },
         {
             "CATEGORY": "NODE",
             "NAME": "ASSETSENSORS_NAME",

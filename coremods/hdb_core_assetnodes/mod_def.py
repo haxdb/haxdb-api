@@ -8,11 +8,11 @@ mod_def["ASSETNODES"] = {
     "UDF": 0,
     "ORDER": ["ASSETNODES_NAME"],
     "INDEX": [["ASSETNODES_ASSETS_ID"]],
-    "UNIQUE": [["ASSETNODES_NODES_ID"]],
+    "UNIQUE": [["ASSETNODES_API_KEY"]],
     "CLIENT": {
         "MAJOR": 0,
-        "MINOR": 0,
-        "PARENT": ["NODES", "ASSETS"],
+        "MINOR": 1,
+        "PARENT": ["ASSETS"],
         "ICON": "cube"
     },
     "AUTH": {
@@ -41,11 +41,45 @@ mod_def["ASSETNODES"] = {
         },
         {
             "CATEGORY": "ASSETNODE",
+            "NAME": "ASSETNODES_API_KEY",
+            "HEADER": "API KEY",
+            "TYPE": "CHAR",
+            "SIZE": 50,
+            "EDIT": 0,
+            "QUERY": 1,
+            "SEARCH": 1,
+            "REQUIRED": 1,
+            "DEFAULT": None,
+            "NEW": 0,
+            "AUTH": {
+                "READ": 100,
+                "WRITE": 100,
+            }
+        },
+        {
+            "CATEGORY": "ASSETNODE",
+            "NAME": "ASSETNODES_IP",
+            "HEADER": "IP",
+            "TYPE": "CHAR",
+            "SIZE": 20,
+            "EDIT": 1,
+            "QUERY": 1,
+            "SEARCH": 1,
+            "REQUIRED": 0,
+            "DEFAULT": None,
+            "NEW": 0,
+            "AUTH": {
+                "READ": 100,
+                "WRITE": 100,
+            }
+        },
+        {
+            "CATEGORY": "ASSETNODE",
             "NAME": "ASSETNODES_ASSETS_ID",
             "HEADER": "ASSET",
             "TYPE": "ID",
             "ID_API": "ASSETS",
-            "EDIT": 0,
+            "EDIT": 1,
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 1,
@@ -58,16 +92,15 @@ mod_def["ASSETNODES"] = {
         },
         {
             "CATEGORY": "ASSETNODE",
-            "NAME": "ASSETNODES_NODES_ID",
-            "HEADER": "NODE",
-            "TYPE": "ID",
-            "ID_API": "NODES",
-            "EDIT": 0,
+            "NAME": "ASSETNODES_ENABLED",
+            "HEADER": "ENABLED",
+            "TYPE": "BOOL",
+            "EDIT": 1,
             "QUERY": 1,
             "SEARCH": 0,
-            "REQUIRED": 0,
-            "DEFAULT": None,
-            "NEW": 0,
+            "REQUIRED": 1,
+            "DEFAULT": 0,
+            "NEW": 1,
             "AUTH": {
                 "READ": 100,
                 "WRITE": 100,
@@ -75,7 +108,7 @@ mod_def["ASSETNODES"] = {
         },
         {
             "CATEGORY": "ASSETNODE",
-            "NAME": "ASSETNODES_REQUIRERFID",
+            "NAME": "ASSETNODES_RESTRICTED",
             "HEADER": "RFID REQUIRED",
             "TYPE": "BOOL",
             "EDIT": 1,
@@ -91,7 +124,7 @@ mod_def["ASSETNODES"] = {
         },
         {
             "CATEGORY": "ASSETNODE",
-            "NAME": "ASSETNODES_APPROVEREQUIRED",
+            "NAME": "ASSETNODES_APPROVAL",
             "HEADER": "APPROVAL REQUIRED",
             "TYPE": "BOOL",
             "EDIT": 1,
@@ -105,6 +138,24 @@ mod_def["ASSETNODES"] = {
                 "WRITE": 100,
             }
         },
+        {
+            "CATEGORY": "ASSETNODE",
+            "NAME": "ASSETNODES_PEOPLE_ID",
+            "HEADER": "OPERATOR",
+            "TYPE": "ID",
+            "ID_API": "PEOPLE",
+            "EDIT": 0,
+            "QUERY": 1,
+            "SEARCH": 0,
+            "REQUIRED": 0,
+            "DEFAULT": 0,
+            "NEW": 0,
+            "AUTH": {
+                "READ": 100,
+                "WRITE": 100,
+            }
+        },
     ],
-    "CALLS": ["list", "view", "save", "delete"]
+    "CALLS": ["list", "view", "save", "delete", "register",
+              "pulse", "sense", "auth"]
 }

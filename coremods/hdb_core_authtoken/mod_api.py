@@ -31,8 +31,8 @@ def run():
         if person["PEOPLE_EMAIL"].upper() in config_dbas:
             dba = 1
 
-        api_key = haxdb.func("NODES:CREATE")(nname, ip, expire, dba,
-                                             people_id=person["PEOPLE_ID"])
+        api_key, nodes_id = haxdb.func("NODES:CREATE")(nname, ip, expire, dba,
+                                                 people_id=person["PEOPLE_ID"])
 
         raw = {
             "api_key": api_key,
