@@ -138,23 +138,6 @@ mod_def["NODES"] = {
                 "WRITE": 100,
             }
         },
-        {
-            "CATEGORY": "RELATIONSHIP",
-            "NAME": "NODES_ASSETS_ID",
-            "HEADER": "ASSET",
-            "TYPE": "ID",
-            "ID_API": "ASSETS",
-            "EDIT": 1,
-            "QUERY": 1,
-            "SEARCH": 1,
-            "REQUIRED": 0,
-            "DEFAULT": None,
-            "NEW": 0,
-            "AUTH": {
-                "READ": 100,
-                "WRITE": 100,
-            }
-        },
     ],
     "CALLS": ["list", "view", "save", "new", "delete"]
 }
