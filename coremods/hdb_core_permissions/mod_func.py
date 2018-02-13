@@ -97,13 +97,13 @@ def person2node_perm(people_id, nodes_id):
     haxdb.db.commit()
 
 def has_perm(table, perm_type, perm_val):
-    if haxdb.session("dba") == 1:
+    if haxdb.session.get("dba") == 1:
         return True
 
     if perm_val <= 0:
         return True
 
-    nodes_id = haxdb.session("nodes_id")
+    nodes_id = haxdb.session.get("nodes_id")
     sql = """
     SELECT * FROM NODEPERMS WHERE
     NODEPERMS_NODES_ID=%s
@@ -121,10 +121,10 @@ def has_perm(table, perm_type, perm_val):
 
 
 def get_perm(table, perm_type):
-    if haxdb.session("dba") == 1:
+    if haxdb.session.get("dba") == 1:
         return 99999999
 
-    nodes_id = haxdb.session("nodes_id")
+    nodes_id = haxdb.session.get("nodes_id")
     sql = """
         SELECT * FROM NODEPERMS WHERE
         NODEPERMS_NODES_ID=%s
@@ -139,7 +139,7 @@ def get_perm(table, perm_type):
 
 
 def get_perm_all():
-    nodes_id = haxdb.session("nodes_id")
+    nodes_id = haxdb.session.get("nodes_id")
     sql = """
         SELECT * FROM NODEPERMS WHERE
         NODEPERMS_NODES_ID=%s

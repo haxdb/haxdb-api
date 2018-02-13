@@ -36,7 +36,6 @@ def init(hdb):
         msg = "WELCOME TO THE HIVE!"
         return haxdb.response(success=1, message=msg, raw=raw)
 
-
     @haxdb.route("/ASSETNODES/pulse")
     def ASSETNODES_pulse():
         # PULSE from ASSETNODE
@@ -64,7 +63,6 @@ def init(hdb):
         }
         return haxdb.response(success=1, raw=raw)
 
-
     @haxdb.route("/ASSETNODES/sense")
     def ASSETNODES_sense():
         # SENSE call from ASSETNODE
@@ -81,7 +79,6 @@ def init(hdb):
 
         haxdb.func("ASSETNODE:SENSE")(node, data.get("sensors"))
         return haxdb.response(success=1)
-
 
     @haxdb.route("/ASSETNODES/auth")
     def ASSETNODES_auth():
@@ -113,7 +110,6 @@ def init(hdb):
         }
         msg = "PERMISSION GRANTED"
         return haxdb.response(success=1, message=msg, raw=raw)
-
 
     @haxdb.route("/ASSETNODES/list", methods=haxdb.METHOD)
     def ASSETNODES_list():

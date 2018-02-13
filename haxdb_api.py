@@ -42,6 +42,7 @@ def valid_value(col, val):
         return True
 
     if col_type == "FLOAT":
+        print "Checking {} for {}".format(col["TYPE"], val)
         try:
             float(val)
         except (ValueError, TypeError) as e:
@@ -214,7 +215,7 @@ def get_col(mod_def, colname):
 
 
 def get_cols(mod_def, rperm=None, wperm=None):
-    dba = haxdb.session("dba")
+    dba = haxdb.session.get("dba")
     table = mod_def["NAME"]
     cols = {
         "{}_ID".format(table): {
@@ -402,8 +403,9 @@ def new_call(mod_def, defaults=None, values=None):
             data[key] = defaults[key]
 
     # set user passed data
+    newvals = haxdb.get("new") or {}
     for col in mod_def["COLS"]:
-        val = haxdb.get("new[{}]".format(col["NAME"]))
+        val = newvals.get(col["NAME"])
         if val:
             data[col["NAME"]] = val
 
@@ -463,8 +465,9 @@ def save_call(mod_def, rowid=None, values=None):
         return haxdb.response(success=0, message=msg)
 
     # set value from user
+    savevals = haxdb.get("save") or {}
     for col in mod_def["COLS"]:
-        val = haxdb.get("save[{}]".format(col["NAME"]))
+        val = savevals.get(col["NAME"])
         if val is not None:
             if col["EDIT"] != 1:
                 msg = "{} IS NOT EDITABLE".format(col["NAME"])
@@ -483,6 +486,13 @@ def save_call(mod_def, rowid=None, values=None):
     if len(data) <= 0:
         msg = "NOTHING TO SAVE"
         return haxdb.response(success=0, message=msg)
+
+    for col in mod_def["COLS"]:
+        if col["NAME"] in data:
+            if not valid_value(col, val):
+                msg = "INVALID VALUE FOR {} ({})"
+                msg = msg.format(col["NAME"], col["TYPE"])
+                return haxdb.response(success=0, message=msg)
 
     params = ()
     sql = "UPDATE {} SET".format(table)

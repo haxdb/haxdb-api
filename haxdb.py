@@ -1,12 +1,12 @@
 from functools import wraps
-from flask import Flask, session as sess, jsonify, json, request, Blueprint
+from flask import Flask, session, jsonify, json, request, Blueprint
 from flask_cors import CORS
 import msgpack
 import os
 import time
 from datetime import timedelta
-import haxdb_data
 import re
+# import haxdb_data
 
 VERSION = "v1"
 METHOD = ["POST", "GET"]
@@ -23,6 +23,7 @@ logger = None
 saved_functions = {}
 saved_triggers = []
 mod_def = {}
+user_data = None
 
 
 class error(str):
@@ -44,23 +45,27 @@ def mod2db(mod_def):
     return db.mod2db(mod_def)
 
 
-def get(key, use_session=False, force_list=False):
-    r = haxdb_data.var.getlist(key)
-    if force_list or (isinstance(r, list) and len(r) > 1):
-        return r
-    return haxdb_data.var.get(key, use_session)
+def get(key, use_session=False):
+    global user_data
+    if use_session:
+        r = session.get(key, None)
+        if r:
+            return r
 
+    if user_data is None:
+        try:
+            user_data = request.get_json() or {}
+        except Exception:
+            print "wat"
+            user_data = {}
+            return None
 
-def session(key, val=None):
-    if val is not None:
-        haxdb_data.session.set(key, val)
-    else:
-        return haxdb_data.session.get(key)
+    return user_data.get(key, None)
 
 
 def response(success=0, message=None, raw=None):
     output_format = get("format")
-    authenticated = session("authenticated")
+    authenticated = session.get("authenticated", 0)
 
     out = raw or {}
     out["success"] = success
@@ -90,8 +95,8 @@ def on(event_regex, func):
 
 def trigger(event, data):
     data["EVENT"] = event
-    data["NODES_ID"] = session("nodes_id") or 0
-    data["NODES_NAME"] = session("nodes_name") or ''
+    data["NODES_ID"] = session.get("nodes_id", 0)
+    data["NODES_NAME"] = session.get("nodes_name", '')
     logger.debug("TRIGGER: {}: {}".format(event, data))
     for trigger in saved_triggers:
         e = trigger[0]
@@ -130,7 +135,9 @@ def run():
 
 @flask_app.before_request
 def open_db():
+    global user_data
     db.open()
+    user_data = None
 
 
 @flask_app.teardown_appcontext

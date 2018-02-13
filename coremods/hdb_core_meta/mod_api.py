@@ -9,8 +9,8 @@ def init(hdb):
 def run():
     @haxdb.route("/META", methods=haxdb.METHOD)
     def META_list():
-        dba = haxdb.session("dba")
-        pid = haxdb.session("people_id")
+        dba = haxdb.session.get("dba")
+        pid = haxdb.session.get("people_id")
         perms = haxdb.func("PERM:GET:ALL")()
 
         mod_def = {}
