@@ -26,13 +26,14 @@ def run():
         nname = "{} TOKEN AUTH".format(pname)
 
         ip = str(request.access_route[-1])
-        expire = int(haxdb.config["AUTHTOKEN"]["TOKEN_EXPIRE"])+now
+        expire = int(haxdb.config["AUTHTOKEN"]["TOKEN_EXPIRE"]) + now
         dba = person["PEOPLE_DBA"]
         if person["PEOPLE_EMAIL"].upper() in config_dbas:
             dba = 1
 
-        api_key, nodes_id = haxdb.func("NODES:CREATE")(nname, ip, expire, dba,
-                                                 people_id=person["PEOPLE_ID"])
+        nc = haxdb.func("NODES:CREATE")
+        api_key, nodes_id = nc(nname, ip, expire, dba,
+                               people_id=person["PEOPLE_ID"])
 
         raw = {
             "api_key": api_key,

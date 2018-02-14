@@ -187,9 +187,9 @@ mod_def["ASSETURLS"] = {
     "ORDER": ["ASSETURLS_ORDER", "ASSETURLS_NAME"],
     "INDEX": [],
     "UNIQUE": [
-                ["ASSETURLS_ASSETS_ID", "ASSETURLS_URL"],
-                ["ASSETURLS_ASSETS_ID", "ASSETURLS_NAME"],
-              ],
+        ["ASSETURLS_ASSETS_ID", "ASSETURLS_URL"],
+        ["ASSETURLS_ASSETS_ID", "ASSETURLS_NAME"],
+    ],
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,

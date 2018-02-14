@@ -1,6 +1,3 @@
-import base64
-import os
-
 haxdb = None
 
 
@@ -20,7 +17,7 @@ def assetnode_create(name, ip=None, enabled=1, assets_id=None):
         data["ASSETNODES_IP"] = ip
 
     if assets_id:
-        data["ASSETNODES_ASSETS_ID"] = people_id
+        data["ASSETNODES_ASSETS_ID"] = assets_id
 
     cols = []
     params = ()
@@ -31,7 +28,7 @@ def assetnode_create(name, ip=None, enabled=1, assets_id=None):
     sql = """
         INSERT INTO ASSETNODES ({})
         VALUES ({})
-    """.format(",".join(cols), ",".join(["%s"]*len(params)))
+    """.format(",".join(cols), ",".join(["%s"] * len(params)))
 
     haxdb.db.query(sql, params)
     if haxdb.db.error:
@@ -48,6 +45,7 @@ def assetnode_create(name, ip=None, enabled=1, assets_id=None):
     haxdb.trigger("NEW.ASSETNODES", event_data)
 
     return api_key, rowid
+
 
 def assetnode_get(api_key):
     sql = """
@@ -79,6 +77,7 @@ def assetnode_rfid(node, rfid):
         params = (node["ASSETNODES_ID"],)
     haxdb.db.query(sql, params)
     haxdb.db.commit()
+
 
 def assetnode_sense(node, sensors):
     sql = """

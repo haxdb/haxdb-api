@@ -3,6 +3,7 @@ from mod_def import mod_def
 
 haxdb = None
 
+
 def init(hdb):
     global haxdb
     haxdb = hdb
