@@ -8,10 +8,10 @@ def init(hdb):
 
 def run():
 
-    @haxdb.route("/THUMBNAIL/upload/<table>/<rowid>", methods=haxdb.METHOD)
-    def THUMBNAIL_upload(table, rowid):
+    @haxdb.route("/THUMBNAIL/<table>", methods=haxdb.METHOD)
+    def THUMBNAIL_download_all(table):
         pass
 
-    @haxdb.route("/THUMBNAIL/download/<table>/<rowid>", methods=haxdb.METHOD)
+    @haxdb.route("/THUMBNAIL/<table>/<rowid>", methods=haxdb.METHOD)
     def THUMBNAIL_download(table, rowid):
         pass
