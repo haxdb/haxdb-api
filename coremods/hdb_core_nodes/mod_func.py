@@ -7,7 +7,7 @@ haxdb = None
 
 def apikey_create():
     size = int(haxdb.config["NODES"]["APIKEY_SIZE"])
-    return base64.urlsafe_b64encode(os.urandom(500))[5:5+size]
+    return base64.urlsafe_b64encode(os.urandom(500))[5:5 + size]
 
 
 def node_create(name, ip=None, expire=None, dba=0, enabled=1, people_id=None):
@@ -47,7 +47,7 @@ def node_create(name, ip=None, expire=None, dba=0, enabled=1, people_id=None):
     sql = """
         INSERT INTO NODES ({})
         VALUES ({})
-    """.format(",".join(cols), ",".join(["%s"]*len(params)))
+    """.format(",".join(cols), ",".join(["%s"] * len(params)))
 
     haxdb.db.query(sql, params)
     if haxdb.db.error:

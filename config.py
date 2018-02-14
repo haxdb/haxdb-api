@@ -1,4 +1,3 @@
-import optparse
 import os
 from ConfigParser import ConfigParser
 from os.path import join, isfile

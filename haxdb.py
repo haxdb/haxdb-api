@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import Flask, session, jsonify, json, request, Blueprint
+from flask import Flask, session, json, request, Blueprint
 from flask_cors import CORS
 import msgpack
 import os
@@ -126,7 +126,6 @@ def run():
     flask_app.permanent_session_lifetime = timedelta(seconds=int(timeout))
     flask_app.register_blueprint(api_app, url_prefix="/{}".format(VERSION))
 
-    from flask import url_for
     for rule in flask_app.url_map.iter_rules():
         print rule
 
@@ -149,7 +148,7 @@ def require_dba(view_function):
     @wraps(view_function)
     def decorated_function(*args, **kwargs):
         session.permanent = True
-        dba = haxdb_data.session.get("dba")
+        dba = session.get("dba")
         if (not dba or (dba and int(dba) != 1)):
             return response(success=0, message="INVALID PERMISSION")
         return view_function(*args, **kwargs)

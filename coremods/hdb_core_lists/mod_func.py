@@ -16,13 +16,14 @@ def lists_add(listname, itemname, itemvalue, internal=1):
     sql = """
     INSERT INTO LIST_ITEMS (LIST_ITEMS_NAME, LIST_ITEMS_VALUE,
                             LIST_ITEMS_ENABLED, LIST_ITEMS_ORDER,
-                            LIST_ITEMS_INTERNAL)
-                VALUES (%s, %s, 1, 9999, %s)
+                            LIST_ITEMS_INTERNAL, LIST_ITEMS_LISTS_ID)
+                VALUES (%s, %s, 1, 9999, %s, %s)
     """
 
-    r = haxdb.db.query(itemname, itemvalue, internal)
+    r = haxdb.db.query(sql, (itemname, itemvalue, internal, lid))
     haxdb.db.commit()
     return r
+
 
 def lists_get():
     lists = {}

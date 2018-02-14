@@ -1,7 +1,5 @@
-from flask import make_response, request
 import shlex
 import re
-import os.path
 
 haxdb = None
 
@@ -31,13 +29,13 @@ def valid_value(col, val):
                 return True
             else:
                 return False
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError):
             return False
 
     if col_type == "INT" or col_type == "ID" or col_type == "TIMESTAMP":
         try:
             int(val)
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError):
             return False
         return True
 
@@ -45,7 +43,7 @@ def valid_value(col, val):
         print "Checking {} for {}".format(col["TYPE"], val)
         try:
             float(val)
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError):
             return False
         return True
 
@@ -215,7 +213,6 @@ def get_col(mod_def, colname):
 
 
 def get_cols(mod_def, rperm=None, wperm=None):
-    dba = haxdb.session.get("dba")
     table = mod_def["NAME"]
     cols = {
         "{}_ID".format(table): {
@@ -287,7 +284,7 @@ def list_call(mod_def):
         for jcolname in joins:
             j = joins[jcolname]
             nid = "{}:ROWNAME".format(jcolname)
-            newdata[nid] = build_rowname(j["rowname"], row, j["alias"]+"_")
+            newdata[nid] = build_rowname(j["rowname"], row, j["alias"] + "_")
 
         newdata["ROWID"] = rid
         rdef = haxdb.mod_def[table]["ROWNAME"]
@@ -302,9 +299,6 @@ def list_call(mod_def):
         "data": data,
     }
     haxdb.trigger("LIST.{}".format(mod_def["NAME"]), event_data)
-
-    if haxdb.get("csv") == 1:
-        return haxdb.func("FILE_CSV")(filename, headers, data)
 
     raw = {"api": table, "data": data}
     return haxdb.response(success=1, raw=raw)
@@ -368,7 +362,7 @@ def view_call(mod_def, rowid=None):
     for jcolname in joins:
         j = joins[jcolname]
         nid = "{}:ROWNAME".format(jcolname)
-        data[nid] = build_rowname(j["rowname"], row, j["alias"]+"_")
+        data[nid] = build_rowname(j["rowname"], row, j["alias"] + "_")
 
     event_data = {
         "api": mod_def["NAME"],
@@ -544,7 +538,7 @@ def delete_call(mod_def, rowid=None):
     if isinstance(rowid, list):
         sql = """
             DELETE FROM {} WHERE {}_ID IN ({})
-        """.format(table, table, ",".join(["%s"]*len(rowid)))
+        """.format(table, table, ",".join(["%s"] * len(rowid)))
         params = tuple(rowid)
     else:
         sql = "DELETE FROM {} WHERE {}_ID=%s".format(table, table)

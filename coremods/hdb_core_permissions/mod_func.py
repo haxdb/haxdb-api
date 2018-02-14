@@ -1,5 +1,3 @@
-import base64
-
 haxdb = None
 
 
@@ -96,6 +94,7 @@ def person2node_perm(people_id, nodes_id):
         haxdb.db.query(sql, params, squelch=True)
     haxdb.db.commit()
 
+
 def has_perm(table, perm_type, perm_val):
     if haxdb.session.get("dba") == 1:
         return True
@@ -113,7 +112,7 @@ def has_perm(table, perm_type, perm_val):
     typecol = "NODEPERMS_{}".format(perm_type)
 
     try:
-        if int(perm_val) <= int(row[typeocl]):
+        if int(perm_val) <= int(row[typecol]):
             return True
     except Exception:
         return False

@@ -88,7 +88,6 @@ class db:
 
                 self.query("SET FOREIGN_KEY_CHECKS=0")
                 for col in table:
-                    params = ()
                     sql = """
                     ALTER TABLE {} ADD COLUMN {} {}
                     """.format(table.name, col.name,
@@ -127,9 +126,9 @@ class db:
 
         try:
             if data:
-                result = self.cur.execute(sql, data)
+                self.cur.execute(sql, data)
             else:
-                result = self.cur.execute(sql)
+                self.cur.execute(sql)
             self.rowcount = self.cur.rowcount
             self.lastrowid = self.cur.lastrowid
             return self.cur

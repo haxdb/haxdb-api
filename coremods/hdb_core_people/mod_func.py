@@ -1,6 +1,3 @@
-import time
-import base64
-
 haxdb = None
 
 

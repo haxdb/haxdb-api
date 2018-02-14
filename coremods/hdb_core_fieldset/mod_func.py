@@ -1,7 +1,8 @@
 haxdb = None
 
 
-def FIELDSET_create(table, name, fields, people_id=None, order=9999, internal=1):
+def FIELDSET_create(table, name, fields, people_id=None,
+                    order=9999, internal=1):
     cols = [
         "FIELDSET_TABLE",
         "FIELDSET_NAME",
@@ -16,7 +17,7 @@ def FIELDSET_create(table, name, fields, people_id=None, order=9999, internal=1)
         INSERT INTO FIELDSET
         ({})
         VALUES ({})
-    """.format(",".join(cols), ",".join(["%s"]*len(cols)))
+    """.format(",".join(cols), ",".join(["%s"] * len(cols)))
 
     r = haxdb.db.query(sql, params)
     haxdb.db.commit()

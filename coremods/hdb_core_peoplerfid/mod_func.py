@@ -1,11 +1,12 @@
 import base64
+import os
 
 haxdb = None
 
 
 def rfid_create():
     size = haxdb.config["RFID"]["SIZE"]
-    return base64.urlsafe_b64encode(os.urandom(500))[5:5+size]
+    return base64.urlsafe_b64encode(os.urandom(500))[5:5 + size]
 
 
 def rfid_get(rfid):
@@ -32,10 +33,11 @@ def rfid_dba(rfid):
     r = haxdb.db.qaf(sql, (rfid,))
     if r:
         r = dict(r)
-    isdba = (r and (int(r.get("PEOPLE_DBA",0)) == 1))
+    isdba = (r and (int(r.get("PEOPLE_DBA", 0)) == 1))
     if isdba:
         return True
     return False
+
 
 def init(app_haxdb):
     global haxdb

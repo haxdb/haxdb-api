@@ -1,5 +1,4 @@
 import os
-import sys
 import glob
 import re
 import imp
@@ -18,7 +17,6 @@ def import_mods(path):
             mod_names.append(name)
 
     for mod_name in mod_names:
-        mod_path = "{}/{}".format(path, mod_name)
         fp, path_name, description = imp.find_module(mod_name, [path, ])
         mods[mod_name] = imp.load_module(mod_name, fp, path_name, description)
 

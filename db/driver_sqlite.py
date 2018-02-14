@@ -69,7 +69,6 @@ class db:
 
                 self.query("PRAGMA foreign_keys = 0")
                 for col in table:
-                    params = ()
                     sql = """
                         ALTER TABLE {}
                         ADD COLUMN {} {}

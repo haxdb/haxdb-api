@@ -25,7 +25,7 @@ def file_download(filename, filedata, mimetype=None):
 
 def file_csv(filename, headers, rows):
     import csv
-    from datetime import datetime
+    # from datetime import datetime
     from StringIO import StringIO
 
     csvfile = StringIO()
@@ -39,7 +39,7 @@ def file_csv(filename, headers, rows):
         writer.writerow(row)
 
     filedata = csvfile.getvalue()
-    now = datetime.now().strftime("%Y%m%d%H%M")
+    # now = datetime.now().strftime("%Y%m%d%H%M")
 
     event_data = {}
     event_data["headers"] = headers

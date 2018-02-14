@@ -1,4 +1,5 @@
 from PIL import Image
+import StringIO
 
 haxdb = None
 
@@ -20,14 +21,14 @@ def thumbnail_create(img=None, file=None):
 
     if w > h:
         bigw = haxdb.config["THUMBNAILS"]["BIG_MAX"]
-        bigh = int(h * (float(bigw)/w))
+        bigh = int(h * (float(bigw) / w))
         smallw = haxdb.config["THUMBNAILS"]["SMALL_MAX"]
-        smallh = int(h * (float(smallw)/w))
+        smallh = int(h * (float(smallw) / w))
     else:
         bigh = haxdb.config["THUMBNAILS"]["BIG_MAX"]
-        bigw = int(w * (float(bigh)/h))
+        bigw = int(w * (float(bigh) / h))
         smallh = haxdb.config["THUMBNAILS"]["SMALL_MAX"]
-        smallw = int(w * (float(smallh)/h))
+        smallw = int(w * (float(smallh) / h))
 
     thumb_big = thumb_big.resize((bigw, bigh), Image.ANTIALIAS)
     thumb_small = thumb_small.resize((smallw, smallh), Image.ANTIALIAS)

@@ -17,7 +17,7 @@ def QUERY_create(table, name, query, people_id=None, order=9999, internal=1):
         INSERT INTO QUERY
         ({})
         VALUES ({})
-    """.format(",".join(cols), ",".join(["%s"]*len(cols)))
+    """.format(",".join(cols), ",".join(["%s"] * len(cols)))
 
     r = haxdb.db.query(sql, params)
     haxdb.db.commit()

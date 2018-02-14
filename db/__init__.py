@@ -47,7 +47,6 @@ class db:
             self.logger.debug(sep)
             self.logger.debug("      sql: {}".format(sql))
             self.logger.debug("     data: {}".format(data))
-            #self.logger.debug("   result: {}".format(result))
             self.logger.debug(" rowcount: {}".format(self.rowcount))
             self.logger.debug("lastrowid: {}".format(self.lastrowid))
             self.logger.debug("    error: {}".format(self.error))

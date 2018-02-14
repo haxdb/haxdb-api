@@ -1,6 +1,5 @@
-from PIL import Image
-
 haxdb = None
+
 
 def build_UDF():
     for table in haxdb.mod_def:
@@ -53,6 +52,7 @@ def extend_mod_def():
             }
         }
         haxdb.mod_def[row["UDF_TABLE"]]["COLS"].append(col)
+
 
 def init(app_haxdb):
     global haxdb
