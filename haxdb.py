@@ -60,7 +60,13 @@ def get(key, use_session=False):
             user_data = {}
             return None
 
-    return user_data.get(key, None)
+    val = user_data.get(key, None)
+    if not val:
+        val = request.form.get(key, None)
+    if not val:
+        val = request.args.get(key, None)
+
+    return val
 
 
 def response(success=0, message=None, raw=None):
