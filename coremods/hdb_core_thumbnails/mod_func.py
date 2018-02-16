@@ -19,24 +19,35 @@ def thumbnail_create(img=None, file=None):
     else:
         return False, False
 
-    if w > h:
-        bigw = haxdb.config["THUMBNAILS"]["BIG_MAX"]
-        bigh = int(h * (float(bigw) / w))
-        smallw = haxdb.config["THUMBNAILS"]["SMALL_MAX"]
-        smallh = int(h * (float(smallw) / w))
-    else:
-        bigh = haxdb.config["THUMBNAILS"]["BIG_MAX"]
-        bigw = int(w * (float(bigh) / h))
-        smallh = haxdb.config["THUMBNAILS"]["SMALL_MAX"]
-        smallw = int(w * (float(smallh) / h))
+    ratio = w / h
+    smallw = int(w)
+    smallh = int(h)
+    bigw = int(w)
+    bigh = int(h)
+
+    if bigh > haxdb.config["THUMBNAILS"]["BIG_H"]:
+        bigh = haxdb.config["THUMBNAILS"]["BIG_H"]
+        bigw = bigh * ratio
+
+    if bigw > haxdb.config["THUMBNAILS"]["BIG_W"]:
+        bigw = haxdb.config["THUMBNAILS"]["BIG_W"]
+        bigh = bigh / ratio
+
+    if smallh > haxdb.config["THUMBNAILS"]["SMALL_H"]:
+        smallh = haxdb.config["THUMBNAILS"]["SMALL_H"]
+        smallw = smallh * ratio
+
+    if smallw > haxdb.config["THUMBNAILS"]["SMALL_W"]:
+        smallw = haxdb.config["THUMBNAILS"]["SMALL_W"]
+        smallh = smallh / ratio
 
     thumb_big = thumb_big.resize((bigw, bigh), Image.ANTIALIAS)
     thumb_small = thumb_small.resize((smallw, smallh), Image.ANTIALIAS)
 
     big = StringIO.StringIO()
     small = StringIO.StringIO()
-    thumb_big.save(big, "JPG")
-    thumb_small.save(small, "JPG")
+    thumb_big.save(big, format="JPEG")
+    thumb_small.save(small, format="JPEG")
     return big.getvalue(), small.getvalue()
 
 
