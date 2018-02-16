@@ -3,11 +3,11 @@ mod_def = {}
 mod_def["THUMBNAILS"] = {
     "HEADER": "THUMBNAIL",
     "NAME": "THUMBNAILS",
-    "ROWNAME": ["THUMBNAILS_TABLE", "THUMBNAILS_ROWID"],
+    "ROWNAME": ["THUMBNAILS_CONTEXT", "THUMBNAILS_CONTEXTID"],
     "UDF": 0,
-    "ORDER": ["THUMBNAILS_TABLE", "THUMBNAILS_ROWID"],
+    "ORDER": ["THUMBNAILS_CONTEXT", "THUMBNAILS_CONTEXTID"],
     "INDEX": [],
-    "UNIQUE": [["THUMBNAILS_TABLE", "THUMBNAILS_ROWID"]],
+    "UNIQUE": [["THUMBNAILS_CONTEXT", "THUMBNAILS_CONTEXTID"]],
     "CLIENT": {
         "MAJOR": 0,
         "MINOR": 0,
@@ -23,8 +23,8 @@ mod_def["THUMBNAILS"] = {
     "COLS": [
         {
             "CATEGORY": "THUMBNAIL",
-            "NAME": "THUMBNAIL_TABLE",
-            "HEADER": "TABLE",
+            "NAME": "THUMBNAILS_CONTEXT",
+            "HEADER": "CONTEXT",
             "TYPE": "CHAR",
             "SIZE": 25,
             "NEW": 1,
@@ -40,8 +40,8 @@ mod_def["THUMBNAILS"] = {
         },
         {
             "CATEGORY": "THUMBNAIL",
-            "NAME": "THUMBNAIL_ROWID",
-            "HEADER": "ROWID",
+            "NAME": "THUMBNAILS_CONTEXTID",
+            "HEADER": "CONTEXTID",
             "TYPE": "INT",
             "NEW": 1,
             "EDIT": 1,
@@ -56,7 +56,7 @@ mod_def["THUMBNAILS"] = {
         },
         {
             "CATEGORY": "THUMBNAIL",
-            "NAME": "THUMBNAIL_SMALL",
+            "NAME": "THUMBNAILS_SMALL",
             "HEADER": "SMALL",
             "TYPE": "BLOB",
             "NEW": 0,
@@ -72,7 +72,7 @@ mod_def["THUMBNAILS"] = {
         },
         {
             "CATEGORY": "THUMBNAIL",
-            "NAME": "THUMBNAIL_BIG",
+            "NAME": "THUMBNAILS_BIG",
             "HEADER": "BIG",
             "TYPE": "BLOB",
             "NEW": 0,
