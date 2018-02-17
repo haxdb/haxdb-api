@@ -10,9 +10,13 @@ def init(hdb):
 
 def run():
 
-    @haxdb.route("/THUMBNAILS/get", methods=haxdb.METHOD)
+    @haxdb.route("/THUMBNAILS/getall", methods=haxdb.METHOD)
     def THUMBNAILS_get_all():
         context = haxdb.get("context")
+        if not context:
+            msg = "MISSING INPUT: context"
+            return haxdb.response(success=0, message=msg)
+
         tfield = "THUMBNAILS_SMALL"
         if haxdb.get("big") == 1:
             tfield = "THUMBNAILS_BIG"
