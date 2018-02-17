@@ -60,19 +60,19 @@ def build_table_filelist(table, rowid=None):
         if col["TYPE"] == "FILE":
             flist[col["NAME"]] = []
 
-    sql = "SELECT FILES_COLUMN, FILES_ROWID FROM FILES WHERE FILES_TABLE=%s"
+    sql = "SELECT FILES_SUBCONTEXT, FILES_CONTEXTID FROM FILES WHERE FILES_CONTEXT=%s"
     params = (table,)
 
     if rowid:
-        sql += " AND FILES_ROWID=%s"
+        sql += " AND FILES_CONTEXTID=%s"
         params += (rowid,)
 
     r = haxdb.db.query(sql, params)
     if not r:
         return flist
     for row in r:
-        if row["FILES_COLUMN"] in flist:
-            flist[row["FILES_COLUMN"]].append(row["FILES_ROWID"])
+        if row["FILES_SUBCONTEXT"] in flist:
+            flist[row["FILES_SUBCONTEXT"]].append(row["FILES_CONTEXTID"])
 
     return flist
 

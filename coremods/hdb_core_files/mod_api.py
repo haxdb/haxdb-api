@@ -13,47 +13,49 @@ def init(hdb):
 def run():
     @haxdb.route("/FILES/clear", methods=haxdb.METHOD)
     def FILES_clear():
-        mod = haxdb.get("mod")
-        field = haxdb.get("field")
-        rowid = haxdb.get("rowid")
+        context = haxdb.get("context")
+        subcontext = haxdb.get("subcontext")
+        contextid = haxdb.get("contextid")
 
-        col = haxdb.func("META:COL:GET")(mod, field)
+        col = haxdb.func("META:COL:GET")(context, subcontext)
         if not col or col["TYPE"] != "FILE":
-            msg = "INVALID FIELD: {}".format(field)
+            msg = "INVALID FIELD: {}".format(subcontext)
             return haxdb.response(success=0, message=msg)
 
-        if not haxdb.func("PERM:HAS")(mod, "WRITE", col["AUTH"]["WRITE"]):
+        if not haxdb.func("PERM:HAS")(context, "WRITE", col["AUTH"]["WRITE"]):
             msg = "INVALID PERMISSIONS"
             return haxdb.response(success=0, message=msg)
 
         sql = """
             DELETE FROM FILES
-            WHERE FILES_TABLE=%s AND FILES_COLUMN=%s and FILES_ROWID=%s
+            WHERE FILES_CONTEXT=%s
+            AND FILES_SUBCONTEXT=%s
+            AND FILES_CONTEXTID=%s
             """
-        haxdb.db.query(sql, (mod, field, rowid))
+        haxdb.db.query(sql, (context, subcontext, contextid))
         haxdb.db.commit()
 
         raw = {
-            "mod": mod,
-            "field": field,
-            "rowid": rowid,
+            "context": context,
+            "subcontext": subcontext,
+            "contextid": contextid,
         }
         return haxdb.response(success=1, message="FILE CLEARED", raw=raw)
 
     @haxdb.route("/FILES/upload", methods=haxdb.METHOD)
     def FILES_upload():
-        mod = haxdb.get("mod")
-        rowid = haxdb.get("rowid")
-        field = haxdb.get("field")
+        context = haxdb.get("context")
+        contextid = haxdb.get("contextid")
+        subcontext = haxdb.get("subcontext")
 
-        print mod, rowid, field
-        col = haxdb.func("META:COL:GET")(mod, field)
+        print context, contextid, subcontext
+        col = haxdb.func("META:COL:GET")(context, subcontext)
 
         if not col or col["TYPE"] != "FILE":
             msg = "INVALID FIELD"
             return haxdb.response(success=0, message=msg)
 
-        if not haxdb.func("PERM:HAS")(mod, "WRITE", col["AUTH"]["WRITE"]):
+        if not haxdb.func("PERM:HAS")(context, "WRITE", col["AUTH"]["WRITE"]):
             msg = "INVALID PERMISSIONS"
             return haxdb.response(success=0, message=msg)
 
@@ -66,58 +68,61 @@ def run():
             msg = "NO FILE UPLOADED"
             return haxdb.response(success=0, message=msg)
 
-        fext = os.path.splitext(f.filename)[1]
+        fext = os.path.splitext(f.filename)[1][1:]
         fmime = f.mimetype
         fdata = haxdb.db._TOBLOB(f.read())
         f.close()
 
         sql = """
             DELETE FROM FILES
-            WHERE FILES_TABLE=%s AND FILES_COLUMN=%s and FILES_ROWID=%s
+            WHERE FILES_CONTEXT=%s
+            AND FILES_SUBCONTEXT=%s
+            AND FILES_CONTEXTID=%s
             """
-        haxdb.db.query(sql, (mod, field, rowid))
+        haxdb.db.query(sql, (context, subcontext, contextid))
 
         sql = """
             INSERT INTO FILES
-            (FILES_TABLE, FILES_COLUMN, FILES_ROWID,
+            (FILES_CONTEXT, FILES_SUBCONTEXT, FILES_CONTEXTID,
             FILES_EXT, FILES_MIMETYPE, FILES_DATA)
             VALUES (%s, %s, %s, %s, %s, %s)
             """
-        haxdb.db.query(sql, (mod, field, rowid, fext, fmime, fdata))
+        params = (context, subcontext, contextid, fext, fmime, fdata)
+        haxdb.db.query(sql, params)
         if haxdb.db.error:
             haxdb.db.rollback()
             return haxdb.response(success=0, message=haxdb.db.error)
         haxdb.db.commit()
 
         raw = {
-            "api": mod,
-            "field": field,
-            "rowid": rowid,
+            "api": context,
+            "subcontext": subcontext,
+            "contextid": contextid,
         }
         return haxdb.response(success=1, message="FILE SAVED", raw=raw)
 
-    @haxdb.route("/FILES/download/<mod>/<field>/<rowid>", methods=haxdb.METHOD)
     @haxdb.route("/FILES/download", methods=haxdb.METHOD)
-    def FILES_download(mod=None, field=None, rowid=None):
-        mod = mod or haxdb.get("mod")
-        field = field or haxdb.get("field")
-        rowid = rowid or haxdb.get("rowid")
+    def FILES_download():
+        context = haxdb.get("context")
+        subcontext = haxdb.get("subcontext")
+        contextid = haxdb.get("contextid")
 
-        col = haxdb.func("META:COL:GET")(mod, field)
+        col = haxdb.func("META:COL:GET")(context, subcontext)
         if not col or col["TYPE"] != "FILE":
-            msg = "INVALID FIELD: {}".format(field)
+            msg = "INVALID FIELD: {}".format(subcontext)
             return haxdb.response(success=0, message=msg)
 
-        if not haxdb.func("PERM:HAS")(mod, "READ", col["AUTH"]["READ"]):
+        if not haxdb.func("PERM:HAS")(context, "READ", col["AUTH"]["READ"]):
             msg = "INVALID PERMISSIONS"
             return haxdb.response(success=0, message=msg)
 
         sql = """
             SELECT * FROM FILES
-            WHERE
-            FILES_TABLE=%s AND FILES_COLUMN=%s AND FILES_ROWID=%s
+            WHERE FILES_CONTEXT=%s
+            AND FILES_SUBCONTEXT=%s
+            AND FILES_CONTEXTID=%s
         """
-        row = haxdb.db.qaf(sql, (mod, field, rowid))
+        row = haxdb.db.qaf(sql, (context, subcontext, contextid))
         if not row:
             msg = "NO FILE"
             return haxdb.response(success=0, message=msg)
@@ -125,32 +130,31 @@ def run():
         ext = row["FILES_EXT"]
         mimetype = row["FILES_MIMETYPE"]
         filedata = haxdb.db._FROMBLOB(row["FILES_DATA"])
-        filename = "{}.{}.{}{}".format(mod, field, rowid, ext)
+        filename = "{}.{}.{}{}".format(context, subcontext, contextid, ext)
 
         return haxdb.func("FILE:DOWNLOAD")(filename, filedata, mimetype)
 
-    @haxdb.route("/FILES/get/<mod>/<field>/<rowid>", methods=haxdb.METHOD)
     @haxdb.route("/FILES/get", methods=haxdb.METHOD)
-    def FILES_get(mod=None, field=None, rowid=None):
-        mod = mod or haxdb.get("mod")
-        field = field or haxdb.get("field")
-        rowid = rowid or haxdb.get("rowid")
+    def FILES_get():
+        context = haxdb.get("context")
+        subcontext = haxdb.get("subcontext")
+        contextid = haxdb.get("contextid")
 
-        col = haxdb.func("META:COL:GET")(mod, field)
+        col = haxdb.func("META:COL:GET")(context, subcontext)
         if not col or col["TYPE"] != "FILE":
-            msg = "INVALID FIELD: {}".format(field)
+            msg = "INVALID FIELD: {}".format(subcontext)
             return haxdb.response(success=0, message=msg)
 
-        if not haxdb.func("PERM:HAS")(mod, "READ", col["AUTH"]["READ"]):
+        if not haxdb.func("PERM:HAS")(context, "READ", col["AUTH"]["READ"]):
             msg = "INVALID PERMISSIONS"
             return haxdb.response(success=0, message=msg)
 
         sql = """
             SELECT * FROM FILES
             WHERE
-            FILES_TABLE=%s AND FILES_COLUMN=%s AND FILES_ROWID=%s
+            FILES_CONTEXT=%s AND FILES_SUBCONTEXT=%s AND FILES_CONTEXTID=%s
         """
-        row = haxdb.db.qaf(sql, mod, field, rowid)
+        row = haxdb.db.qaf(sql, (context, subcontext, contextid))
         if not row:
             msg = "NO FILE"
             return haxdb.response(success=0, message=msg)
@@ -158,11 +162,12 @@ def run():
         ext = row["FILES_EXT"]
         mimetype = row["FILES_MIMETYPE"]
         filedata = haxdb.func("FILE:DATAURL")(row["FILES_DATA"], mimetype)
+        filename = "{}.{}.{}.{}".format(context, subcontext, contextid, ext)
         raw = {
-            "api": mod,
-            "field": field,
-            "rowid": rowid,
-            "filename": "{}.{}.{}.{}".format(mod, field, rowid, ext),
+            "api": context,
+            "subcontext": subcontext,
+            "contextid": contextid,
+            "filename": filename,
             "mimetype": mimetype,
             "data": filedata,
         }
