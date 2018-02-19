@@ -432,19 +432,20 @@ def new_call(mod_def, defaults=None, values=None):
         msg = haxdb.db.error
         return haxdb.response(success=0, message=msg)
 
+    rowid = haxdb.db.lastrowid
     haxdb.db.commit()
 
     event_data = {
         "api": mod_def["NAME"],
         "call": "new",
         "data": data,
-        "rowid": haxdb.db.lastrowid,
+        "rowid": rowid,
     }
     haxdb.trigger("NEW.{}".format(mod_def["NAME"]), event_data)
 
     raw = {
         "api": table,
-        "rowid": haxdb.db.lastrowid,
+        "rowid": rowid,
     }
     return haxdb.response(success=1, message="CREATED", raw=raw)
 
