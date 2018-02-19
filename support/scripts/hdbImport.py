@@ -187,7 +187,7 @@ class hdbImport:
         #         Write invalid data to excFile:
         #         [oldid, newid, field, value, reason]
 
-        fieldnames = ["oldid", "rowid", "field", "value", "reason"]
+        fieldnames = ["rowid", "field", "value", "reason"]
         e = csv.DictWriter(open(excFile, "a"), fieldnames)
         cols = self.metaData["mods"][apiName]["COLS"]
         reader = csv.DictReader(open(csvFile))
@@ -220,5 +220,5 @@ if __name__ == "__main__":
     if h.oldIdMap:
         f = open(newidFile, "w")
         for newid in h.oldIdMap:
-            f.write("{}\t{}\n".format(newid, h.oldIdMap[newid]))
+            f.write("{}\t{}\t{}\n".format(apiName, newid, h.oldIdMap[newid]))
         f.close()
