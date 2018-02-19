@@ -80,6 +80,16 @@ def build_table_filelist(table, rowid=None):
 
     return flist
 
+def cascade_delete_files(data):
+    table = data["api"]
+    rowid = data["rowid"]
+
+    sql = """
+        DELETE FROM FILES WHERE FILES_CONTEXT=%s
+        AND FILES_CONTEXTID=%s
+        """
+    haxdb.db.query(sql, (table, rowid))
+    haxdb.db.commit()
 
 def init(app_haxdb):
     global haxdb
@@ -91,4 +101,5 @@ def init(app_haxdb):
 
 
 def run():
+    haxdb.on("DELETE.*", cascade_delete_files)
     pass
