@@ -60,7 +60,11 @@ def build_table_filelist(table, rowid=None):
         if col["TYPE"] == "FILE":
             flist[col["NAME"]] = []
 
-    sql = "SELECT FILES_SUBCONTEXT, FILES_CONTEXTID FROM FILES WHERE FILES_CONTEXT=%s"
+    sql = """
+        SELECT FILES_SUBCONTEXT, FILES_CONTEXTID
+        FROM FILES
+        WHERE FILES_CONTEXT=%s
+        """
     params = (table,)
 
     if rowid:
