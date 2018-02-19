@@ -95,7 +95,7 @@ class db:
 
             for i in range(0, int(md["UDF"])):
                 cname = "{}_UDF{}".format(md["NAME"], i)
-                t.add(cname, "CHAR", col_size="50")
+                t.add(cname, "CHAR", col_size="1000")
 
             for i in md["INDEX"]:
                 idx.append(tables.index(md["NAME"], i, unique=False))
