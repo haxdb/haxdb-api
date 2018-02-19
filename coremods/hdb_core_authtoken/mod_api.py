@@ -23,7 +23,7 @@ def run():
 
         pname = "{} {}".format(person["PEOPLE_NAME_FIRST"],
                                person["PEOPLE_NAME_LAST"])
-        nname = "{} TOKEN AUTH".format(pname)
+        nname = "{} TOKEN AUTH".format(pname)[:25]
 
         ip = str(request.access_route[-1])
         expire = int(haxdb.config["AUTHTOKEN"]["TOKEN_EXPIRE"]) + now
