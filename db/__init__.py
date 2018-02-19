@@ -89,6 +89,7 @@ class db:
                       col["TYPE"],
                       col_size=col.get("SIZE", None),
                       col_required=col.get("REQUIRED", False),
+                      col_default=col.get("DEFAULT", False),
                       fk_table=ftab,
                       fk_col=fcol,
                       )

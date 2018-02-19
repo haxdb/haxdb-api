@@ -88,13 +88,17 @@ class db:
                 self.commit()
 
                 for col in table:
+                    params = ()
                     sql = """
                     ALTER TABLE {} ADD COLUMN {} {}
                     """.format(table.name, col.name,
                                self.get_datatype(col.datatype, col.size))
+                    if col.default:
+                        sql += " DEFAULT %s"
+                        params += (col.default,)
                     if col.required:
                         sql += " NOT NULL"
-                    self.query(sql, squelch=True)
+                    self.query(sql, params, squelch=True)
 
                     if col.fk_table and col.fk_col:
                         sql = """

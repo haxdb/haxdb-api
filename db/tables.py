@@ -4,15 +4,17 @@ class col:
     datatype = None
     size = None
     required = None
+    default = None
     fk_table = None
     fk_col = None
 
-    def __init__(self, name, datatype, size=None, required=False,
+    def __init__(self, name, datatype, size=None, required=False, default=None,
                  fk_table=None, fk_col=None):
         self.name = name
         self.datatype = datatype
         self.size = size
         self.required = required
+        self.default = default
         self.fk_table = fk_table
         self.fk_col = fk_col
 
@@ -45,9 +47,9 @@ class table:
         return iter(self.cols)
 
     def add(self, col_name, col_type, col_size=None,
-            col_required=False, fk_table=None, fk_col=None):
+            col_required=False, col_default=None, fk_table=None, fk_col=None):
         self.add_col(col(col_name, col_type, col_size,
-                         col_required, fk_table, fk_col))
+                         col_required, col_default, fk_table, fk_col))
 
     def add_col(self, col):
         self.cols.append(col)
