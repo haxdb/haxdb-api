@@ -1,6 +1,7 @@
 import os
 from mod_def import mod_def
 from flask import request
+import mimetypes
 
 haxdb = None
 
@@ -70,6 +71,8 @@ def run():
 
         fext = os.path.splitext(f.filename)[1][1:]
         fmime = f.mimetype
+        if not fmime:
+            fmime = mimetypes.MimeTypes().guess_type(f.filename)[0]
         fdata = haxdb.db._TOBLOB(f.read())
         f.close()
 
