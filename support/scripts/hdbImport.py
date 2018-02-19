@@ -218,7 +218,7 @@ if __name__ == "__main__":
             h.importStep3(apiName, csvFile, excFile)
 
     if h.oldIdMap:
-        f = open(newidFile, "w")
+        f = open(newidFile, "a")
         for newid in h.oldIdMap:
             f.write("{}\t{}\t{}\n".format(apiName, newid, h.oldIdMap[newid]))
         f.close()
