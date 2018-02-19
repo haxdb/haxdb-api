@@ -71,7 +71,7 @@ mod_def["UDF"] = {
             "SEARCH": 1,
             "REQUIRED": 1,
             "INTERNAL": 0,
-            "DEFAULT": None,
+            "DEFAULT": "UDF",
             "NEW": 0,
             "AUTH": {
                 "READ": 1,
