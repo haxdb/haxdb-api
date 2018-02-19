@@ -57,11 +57,10 @@ class hdbapi:
             return True
         return False
 
+
 if __name__ == "__main__":
-    from tabulate import tabulate
     from pprint import pprint
     hdb = hdbapi()
-    #logging.basicConfig(level=logging.DEBUG)
     print "..........................."
     print ""
     print "    1) Email"

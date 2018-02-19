@@ -1,7 +1,5 @@
 import requests
 import json
-import logging
-import sys
 
 
 class hdbAsset:
@@ -55,7 +53,6 @@ class hdbAsset:
         return r
 
 
-
 if __name__ == "__main__":
     def getVal(s):
         val = None
@@ -73,7 +70,6 @@ if __name__ == "__main__":
             val = raw_input("sensor{}: ".format(i))
         return sensors
 
-
     def getSensorVals():
         i = 0
         sensors = {}
@@ -84,7 +80,6 @@ if __name__ == "__main__":
             sensors[s] = v
             s = raw_input("sensor{}: ".format(i))
         return sensors
-
 
     def getKey(hdb):
         hdb.api_key = getVal("API KEY: ")
