@@ -413,9 +413,9 @@ def new_call(mod_def, defaults=None, values=None):
     vals = []
     for col in mod_def["COLS"]:
         if col["NAME"] in data:
-            if not valid_value(col, val):
-                msg = "INVALID VALUE FOR {} ({})"
-                msg = msg.format(col["NAME"], col["TYPE"])
+            if not valid_value(col, data[col["NAME"]]):
+                msg = "INVALID VALUE FOR {} ({}): {}"
+                msg = msg.format(col["NAME"], col["TYPE"], val)
                 return haxdb.response(success=0, message=msg)
 
     for key in data:
@@ -491,7 +491,11 @@ def save_call(mod_def, rowid=None, values=None):
 
     params = ()
     sql = "UPDATE {} SET".format(table)
+    i = 0
     for colname in data:
+        if i > 0:
+            sql += ","
+        i += 1
         col = get_col(mod_def, colname)
         if not valid_value(col, data[colname]):
             msg = "INVALID VALUE FOR {} ({})"
@@ -536,35 +540,36 @@ def delete_call(mod_def, rowid=None):
         msg = "INVALID PERMISSIONS"
         return haxdb.response(success=0, message=msg)
 
-    if isinstance(rowid, list):
-        sql = """
-            DELETE FROM {} WHERE {}_ID IN ({})
-        """.format(table, table, ",".join(["%s"] * len(rowid)))
-        params = tuple(rowid)
+    if not isinstance(rowid, list):
+        rowids = [rowid]
     else:
+        rowids = rowid
+
+    total = 0
+    for rowid in rowids:
         sql = "DELETE FROM {} WHERE {}_ID=%s".format(table, table)
         params = (rowid,)
-    r = haxdb.db.query(sql, params)
-    if not r:
-        msg = haxdb.db.error
-        return haxdb.response(success=0, message=msg)
+        r = haxdb.db.query(sql, params)
+        if not r:
+            msg = haxdb.db.error
+            return haxdb.response(success=0, message=msg)
+        total += haxdb.db.rowcount
+        event_data = {
+            "api": mod_def["NAME"],
+            "call": "delete",
+            "rowid": rowid,
+            "rowcount": haxdb.db.rowcount,
+        }
+        haxdb.trigger("DELETE.{}.{}".format(mod_def["NAME"], rowid), event_data)
 
     haxdb.db.commit()
 
-    event_data = {
-        "api": mod_def["NAME"],
-        "call": "delete",
-        "rowid": rowid,
-        "rowcount": haxdb.db.rowcount,
-    }
-    haxdb.trigger("DELETE.{}.{}".format(mod_def["NAME"], rowid), event_data)
-
     raw = {
         "api": table,
-        "rowid": rowid,
-        "rowcount": haxdb.db.rowcount,
+        "rowid": rowids,
+        "rowcount": total,
     }
-    msg = "DELETED {} ROWS".format(haxdb.db.rowcount)
+    msg = "DELETED {} ROWS".format(total)
     if raw["rowcount"] > 0:
         return haxdb.response(success=1, message=msg, raw=raw)
     else:
