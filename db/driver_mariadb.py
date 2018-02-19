@@ -65,17 +65,18 @@ class db:
         self.create_indexes(indexes)
 
     def create_tables(self, tables):
+        self.query("SET FOREIGN_KEY_CHECKS=0")
         if tables:
             for table in tables:
                 t_sql = """
                 CREATE TABLE IF NOT EXISTS {} (
-                {}_ID INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                {}_ID INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 {}_INTERNAL INT(1) NOT NULL DEFAULT 0,
                 {}_INSERTED TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
                 {}_UPDATED TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
                                               ON UPDATE CURRENT_TIMESTAMP
-                )""".format(table.name, table.name, table.name,
-                            table.name, table.name)
+                ) ENGINE=INNODB""".format(table.name, table.name, table.name,
+                                          table.name, table.name)
                 self.query(t_sql, squelch=False)
                 self.commit()
 
@@ -86,7 +87,6 @@ class db:
                 self.query(trigger_sql, squelch=True)
                 self.commit()
 
-                self.query("SET FOREIGN_KEY_CHECKS=0")
                 for col in table:
                     sql = """
                     ALTER TABLE {} ADD COLUMN {} {}
@@ -105,7 +105,7 @@ class db:
                         self.query(sql, squelch=True)
 
                     self.commit()
-                self.query("SET FOREIGN_KEY_CHECKS=1")
+        self.query("SET FOREIGN_KEY_CHECKS=1")
 
     def create_indexes(self, indexes):
         if indexes:
