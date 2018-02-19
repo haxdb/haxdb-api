@@ -51,8 +51,7 @@ def assetnode_get(api_key):
     sql = """
         SELECT * FROM ASSETNODES
         JOIN ASSETS ON ASSETNODES_ASSETS_ID=assets_id
-        WHERE ASSETNODES_ENABLED=1
-        AND ASSETNODES_API_KEY=%s
+        WHERE ASSETNODES_API_KEY=%s
         """
     r = haxdb.db.qaf(sql, (api_key,))
     return r
@@ -91,39 +90,55 @@ def assetnode_sense(node, sensors):
         haxdb.db.query(sql, (val, sname, node["ASSETNODES_ID"]))
     haxdb.db.commit()
 
-
 def assetnode_auth(node, rfid):
-    print "1"
+    raw = {
+        "registered": 1,
+    }
 
     # If any valid rfid will work
     if node["ASSETNODES_APPROVAL"] != 1:
-        return haxdb.func("RFID:GET")(rfid)
-
-    print "2"
+        r = haxdb.func("RFID:GET")(rfid)
+        if not r:
+            raw["code"] = -3
+            raw["message"] = "ASSETNODE RESTRICTED"
+            return haxdb.response(success=0, raw=raw)
+        else:
+            identity = "{} {}".format(r["PEOPLE_NAME_FIRST"],
+                                      r["PEOPLE_NAME_LAST"])
+            raw["identity"] = identity
+            raw["code"] = 2
+            raw["message"] = "ACCESS GRANTED"
+            return haxdb.response(success=1, raw=raw)
 
     sql = """
         SELECT * FROM PEOPLE
         JOIN PEOPLERFID ON PEOPLERFID_PEOPLE_ID=PEOPLE_ID
         JOIN MEMBERSHIPS ON PEOPLE_MEMBERSHIPS_ID=MEMBERSHIPS_ID
-        LEFT OUTER JOIN ASSETAUTHS ON ASSETAUTHS_PEOPLE_ID=PEOPLE_ID
+        JOIN ASSETAUTHS ON ASSETAUTHS_PEOPLE_ID=PEOPLE_ID
+        JOIN ASSET ON ASSETS_ID=ASSETAUTHS_ASSETS_ID
+        JOIN ASSETNODES ON ASSETNODES_ASSETS_ID=ASSETS_ID
         WHERE
-        PEOPLERFID_RFID = %s
-        AND
-        PEOPLERFID_ENABLED=1
-        AND
-        (
+        ASSETNODES_ID=%S
+        AND PEOPLERFID_RFID = %s
+        AND PEOPLERFID_ENABLED=1
+        AND (
          PEOPLE_DBA = 1
          OR
          ( MEMBERSHIPS_RFID=1 AND ASSETAUTHS_ENABLED=1 )
         )
         """
-
-    r = haxdb.db.qaf(sql, (rfid,))
-
-    print "3"
-    print r
-
-    return r
+    r = haxdb.db.qaf(sql, (node["ASSETSNODE_ID"], rfid,))
+    if not r:
+        raw["code"] = -4
+        raw["message"] = "ASSET REQUIRES APPROVAL"
+        return haxdb.response(success=0, raw=raw)
+    else:
+        identity = "{} {}".format(r["PEOPLE_NAME_FIRST"],
+                                  r["PEOPLE_NAME_LAST"])
+        raw["identity"] = identity
+        raw["code"] = 3
+        raw["message"] = "ACCESS GRANTED"
+        return haxdb.response(success=1, raw=raw)
 
 
 def init(app_haxdb):
