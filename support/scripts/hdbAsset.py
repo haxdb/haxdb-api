@@ -26,7 +26,7 @@ class hdbAsset:
             "sensors": sensors,
         }
         r = self.api("ASSETNODES/register", data)
-        if r["success"] == 1 and r["api_key"]:
+        if r and r["success"] == 1 and r["api_key"]:
             self.api_key = r["api_key"]
         return r
 
