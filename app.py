@@ -15,6 +15,8 @@ haxdb_api.init(haxdb)
 haxdb_mods.init(haxdb)
 haxdb_mods.run()
 
-app = haxdb.api_app
+app = haxdb.flask_app
 if __name__ == "__main__":
     haxdb.run()
+else:
+    haxdb.service()

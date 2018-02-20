@@ -122,7 +122,16 @@ def init(app_config, app_db, app_api, app_logger):
     db = app_db
     api = app_api
     logger = app_logger
+    
+    origins = config["API"]["ORIGINS"]
+    logger.warning(origins)
 
+
+def service():
+    timeout = config["API"]["SESSION_TIMEOUT"]
+    flask_app.permanent_session_lifetime = timedelta(seconds=int(timeout))
+    flask_app.register_blueprint(api_app, url_prefix="/{}".format(VERSION))
+    
 
 def run():
     debug = (int(config["API"]["DEBUG"]) == 1)
