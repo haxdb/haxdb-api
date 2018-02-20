@@ -143,7 +143,7 @@ def assetnode_auth(node, rfid):
         """
     r = haxdb.db.qaf(sql, (node["ASSETNODES_ID"], rfid,))
     if not r:
-        raw["code"] = -4
+        raw["code"] = -5
         raw["message"] = "ASSET REQUIRES APPROVAL"
         return haxdb.response(success=0, raw=raw)
     else:
