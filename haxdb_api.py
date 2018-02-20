@@ -262,7 +262,12 @@ def list_call(mod_def):
 
     flist = haxdb.func("FILE:TABLE:BUILD")(table)
     joins = get_joins(cols)
-    sql, params = build_list_query(table, cols, joins)
+    try:
+        sql, params = build_list_query(table, cols, joins)
+    except Exception:
+        msg = "MALFORMED QUERY"
+        return haxdb.response(success=0, message=msg)
+
     cur = haxdb.db.query(sql, params)
     if not cur:
         msg = "QUERY MALFORMED"
