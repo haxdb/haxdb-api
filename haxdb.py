@@ -129,7 +129,7 @@ def run():
     CORS(flask_app, origins=config["API"]["ORIGINS"])
     timeout = config["API"]["SESSION_TIMEOUT"]
     host = config["API"]["HOST"]
-    port = config["API"]["PORT"]
+    port = int(config["API"]["PORT"])
     flask_app.permanent_session_lifetime = timedelta(seconds=int(timeout))
     flask_app.register_blueprint(api_app, url_prefix="/{}".format(VERSION))
 
