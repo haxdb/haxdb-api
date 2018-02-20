@@ -1,4 +1,4 @@
-mods/user_*/
+usermods/*
 *.tsv
 *.csv
 *.swp

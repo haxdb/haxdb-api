@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-HOST=http://localhost:8012
-KEY=[API KEY]
-

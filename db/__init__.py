@@ -6,6 +6,9 @@ class db:
     tables = tables
     config = None
     logger = None
+    rowcount = None
+    lastrowid = None
+    error = None
 
     def __init__(self, config, logger):
         self.config = config
@@ -40,15 +43,13 @@ class db:
         self.lastrowid = self.db.lastrowid
         self.error = self.db.error
         if int(self.config["DEBUG"]) == 1 and not squelch:
-            sep = "##########################################################"
-            sep += "#####################"
+            sep = "###########################################################"
             self.logger.debug(sep)
-            self.logger.debug("sql: {}".format(sql))
-            self.logger.debug("data: {}".format(data))
-            self.logger.debug("result: {}".format(result))
-            self.logger.debug("rowcount: {}".format(self.rowcount))
+            self.logger.debug("      sql: {}".format(sql))
+            self.logger.debug("     data: {}".format(data))
+            self.logger.debug(" rowcount: {}".format(self.rowcount))
             self.logger.debug("lastrowid: {}".format(self.lastrowid))
-            self.logger.debug("error: {}".format(self.error))
+            self.logger.debug("    error: {}".format(self.error))
             self.logger.debug(sep)
 
         return result
@@ -57,7 +58,10 @@ class db:
         self.query(sql, data, squelch=squelch)
         if self.error:
             return False
-        return self.next()
+        r = self.next()
+        if r:
+            return dict(r)
+        return r
 
     def next(self):
         return self.db.next()
@@ -67,3 +71,38 @@ class db:
 
     def rollback(self):
         return self.db.rollback()
+
+    def mod2db(self, mod_def):
+        tbl = []
+        idx = []
+
+        for md in mod_def:
+            md = mod_def[md]
+            t = tables.table(md["NAME"])
+            for col in md["COLS"]:
+                ftab = None
+                fcol = None
+                if col["TYPE"] == "ID":
+                    ftab = col["ID_API"]
+                    fcol = "{}_ID".format(ftab)
+                t.add(col["NAME"],
+                      col["TYPE"],
+                      col_size=col.get("SIZE", None),
+                      col_required=col.get("REQUIRED", False),
+                      col_default=col.get("DEFAULT", False),
+                      fk_table=ftab,
+                      fk_col=fcol,
+                      )
+
+            for i in range(0, int(md["UDF"])):
+                cname = "{}_UDF{}".format(md["NAME"], i)
+                t.add(cname, "CHAR", col_size="1000")
+
+            for i in md["INDEX"]:
+                idx.append(tables.index(md["NAME"], i, unique=False))
+            for i in md["UNIQUE"]:
+                idx.append(tables.index(md["NAME"], i, unique=True))
+
+            tbl.append(t)
+
+        self.create(tables=tbl, indexes=idx)

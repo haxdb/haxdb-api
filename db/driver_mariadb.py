@@ -12,7 +12,7 @@ class db:
                                     user=config["USER"],
                                     password=config["PASS"],
                                     database=config["DB"])
-        self.cur = self.conn.cursor(dictionary=True)
+        self.cur = self.conn.cursor(dictionary=True, buffered=True)
 
     def _TOBLOB(self, filedata):
         return filedata
@@ -21,54 +21,63 @@ class db:
         return filedata
 
     def get_datatype(self, datatype, datasize):
+        if datasize:
+            datasize = int(datasize)
+
         if datatype == "INT":
-            return "INT" if not datasize else "INT(%s)" % str(datasize)
+            if datasize:
+                return "INT({})".format(datasize)
+            return "INT"
 
-        if datatype == "VARCHAR" or datatype == "CHAR":
-            if not datasize:
-                return "VARCHAR(50)"
-            else:
+        if datatype == "ID":
+            return "INT UNSIGNED"
+
+        if datatype == "CHAR":
+            if datasize:
                 return "VARCHAR({})".format(datasize)
-
-        if datatype == "ASCII":
-            if not datasize:
-                return "VARCHAR(50) CHARSET ASCII"
-            else:
-                return "VARCHAR({}) CHARSET ASCII".format(datasize)
+            return "VARCHAR(50)"
 
         if datatype == "BOOL":
             return "INT(1)"
 
         if datatype == "FLOAT":
-            if not datasize:
-                return "FLOAT(10,4)"
-            else:
+            if datasize:
                 return "FLOAT({},4)".format(datasize)
+            return "FLOAT(10,4)"
 
         if datatype == "TEXT":
             return "TEXT"
 
-        if datatype == "BLOB":
+        if datatype == "BLOB" or datatype == "FILE":
             return "MEDIUMBLOB"
 
-        if datatype == "DATETIME":
-            return "INTEGER"
+        if datatype == "TIMESTAMP":
+            return "INT"
+
+        if datatype == "LIST":
+            return "INT"
+
+        if datatype == "SELECT":
+            return "VARCHAR(25)"
 
     def create(self, tables=None, indexes=None):
         self.create_tables(tables)
         self.create_indexes(indexes)
 
     def create_tables(self, tables):
+        self.query("SET FOREIGN_KEY_CHECKS=0")
         if tables:
             for table in tables:
                 t_sql = """
                 CREATE TABLE IF NOT EXISTS {} (
-                {}_ID INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                {}_ID INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                {}_INTERNAL INT(1) NOT NULL DEFAULT 0,
                 {}_INSERTED TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
                 {}_UPDATED TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
                                               ON UPDATE CURRENT_TIMESTAMP
-                )""".format(table.name, table.name, table.name, table.name)
-                self.query(t_sql, squelch=True)
+                ) ENGINE=INNODB""".format(table.name, table.name, table.name,
+                                          table.name, table.name)
+                self.query(t_sql, squelch=False)
                 self.commit()
 
                 trigger_sql = """
@@ -78,16 +87,18 @@ class db:
                 self.query(trigger_sql, squelch=True)
                 self.commit()
 
-                self.query("SET FOREIGN_KEY_CHECKS=0")
                 for col in table:
                     params = ()
                     sql = """
                     ALTER TABLE {} ADD COLUMN {} {}
                     """.format(table.name, col.name,
                                self.get_datatype(col.datatype, col.size))
+                    if col.default:
+                        sql += " DEFAULT %s"
+                        params += (col.default,)
                     if col.required:
                         sql += " NOT NULL"
-                    self.query(sql, squelch=True)
+                    self.query(sql, params, squelch=True)
 
                     if col.fk_table and col.fk_col:
                         sql = """
@@ -98,7 +109,7 @@ class db:
                         self.query(sql, squelch=True)
 
                     self.commit()
-                self.query("SET FOREIGN_KEY_CHECKS=1")
+        self.query("SET FOREIGN_KEY_CHECKS=1")
 
     def create_indexes(self, indexes):
         if indexes:
@@ -119,12 +130,12 @@ class db:
 
         try:
             if data:
-                result = self.cur.execute(sql, data)
+                self.cur.execute(sql, data)
             else:
-                result = self.cur.execute(sql)
+                self.cur.execute(sql)
             self.rowcount = self.cur.rowcount
             self.lastrowid = self.cur.lastrowid
-            return result
+            return self.cur
         except mariadb.Error as error:
             self.error = str(error)
             if not squelch:
