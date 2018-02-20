@@ -45,34 +45,40 @@ def init(hdb):
         rfid = haxdb.get("rfid")
         sensors = haxdb.get("sensors")
 
+        raw = {
+            "code": 0,
+        }
+
         node = haxdb.func("ASSETNODE:GET")(api_key)
         if not node:
-            raw = {
-                "registered": 0,
-                "code": -1,
-                "message": "UNREGISTERED NODE",
-            }
+            raw["code"] = -1
+            raw["message"] = "REGISTER ASSETNODE"
             return haxdb.response(success=0, raw=raw)
 
         if node["ASSETNODES_ENABLED"] != 1:
-            raw = {
-                "registered": 1,
-                "code": -2,
-                "message": "ASSETNODE NOT ENABLED",
-            }
+            raw["code"] = -2
+            raw["message"] = "ASSETNODE DISABLED"
             return haxdb.response(success=0, raw=raw)
 
-        if node["ASSETNODES_RESTRICTED"] != 1:
-            raw = {
-                "registered": 1,
-                "code": 1,
-                "message": "ASSETNODE NOT RESTRICTED",
-                }
-            return haxdb.response(success=1, raw=raw)
+        if not node["ASSETS_ID"]:
+            raw["code"] = -3
+            raw["message"] = "ASSETNODE UNASSIGNED"
+            return haxdb.response(success=0, raw=raw)
+
+        raw["assetName"] = node["ASSETS_NAME"]
+        raw["assetId"] = node["ASSETS_ID"]
 
         if sensors:
             haxdb.func("ASSETNODE:SENSE")(node, sensors)
-        return haxdb.func("ASSETNODE:AUTH")(node, rfid)
+
+        if node["ASSETNODES_RESTRICTED"] != 1:
+            raw["code"] = 1
+            return haxdb.response(success=1, raw=raw)
+
+        if rfid:
+            return haxdb.func("ASSETNODE:AUTH")(node, rfid)
+
+        return haxdb.response(success=1, raw=raw)
 
     @haxdb.route("/ASSETNODES/sense")
     def ASSETNODES_sense():

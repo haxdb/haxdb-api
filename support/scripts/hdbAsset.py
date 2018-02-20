@@ -54,6 +54,9 @@ class hdbAsset:
 
 
 if __name__ == "__main__":
+    import pprint
+    pp = pprint.PrettyPrinter(indent=4)
+
     def getVal(s):
         val = None
         while not val:
@@ -89,26 +92,26 @@ if __name__ == "__main__":
         rfid = getVal("RFID: ")
         sensors = getSensors()
         r = hdb.register(rfid, sensors)
-        print r
+        pp.pprint(r)
         return hdb
 
     def hpulse(hdb):
         rfid = raw_input("RFID: ")
         sensors = getSensorVals()
         r = hdb.pulse(rfid, sensors)
-        print r
+        pp.pprint(r)
         return hdb
 
     def hsense(hdb):
         sensors = getSensorVals()
         r = hdb.sense(sensors)
-        print r
+        pp.pprint(r)
         return hdb
 
     def hauth(hdb):
         rfid = getVal("RFID: ")
         r = hdb.auth(rfid)
-        print r
+        pp.pprint(r)
         return hdb
 
     menuoptions = {
@@ -116,7 +119,6 @@ if __name__ == "__main__":
         "2": hregister,
         "3": hpulse,
         "4": hsense,
-        "5": hauth,
     }
 
     hdb = hdbAsset()
@@ -127,11 +129,10 @@ if __name__ == "__main__":
         print "    2) /ASSETNODES/register  "
         print "    3) /ASSETNODES/pulse     "
         print "    4) /ASSETNODES/sense     "
-        print "    5) /ASSETNODES/auth      "
         print "                             "
         print "............................."
         which = None
         while which not in menuoptions:
-            which = getVal("[1,2,3,4,5]: ")
+            which = getVal("[1,2,3,4]: ")
         hdb = menuoptions[which](hdb)
         raw_input("[pause]")

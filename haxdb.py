@@ -75,7 +75,8 @@ def response(success=0, message=None, raw=None):
 
     out = raw or {}
     out["success"] = success
-    out["message"] = message
+    if "message" not in out:
+        out["message"] = message
     out["timestamp"] = time.time()
     out["authenticated"] = authenticated
 
