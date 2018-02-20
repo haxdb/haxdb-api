@@ -2,6 +2,9 @@ haxdb = None
 
 
 def assetsensors_create(assetnode_id, sensors):
+    if not sensors:
+        return False
+
     sql = """
         INSERT INTO ASSETSENSORS
         (ASSETSENSORS_NAME, ASSETSENSORS_REFERENCE, ASSETSENSORS_ASSETNODES_ID)
