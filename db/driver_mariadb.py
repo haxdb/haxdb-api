@@ -93,7 +93,9 @@ class db:
                     ALTER TABLE {} ADD COLUMN {} {}
                     """.format(table.name, col.name,
                                self.get_datatype(col.datatype, col.size))
-                    if col.default:
+                    if col.default is None and not col.required:
+                        sql += " DEFAULT NULL"
+                    elif col.default is not None:
                         sql += " DEFAULT %s"
                         params += (col.default,)
                     if col.required:
