@@ -9,7 +9,7 @@ def rfid_create():
     return base64.urlsafe_b64encode(os.urandom(500))[5:5 + size]
 
 
-def rfid_get(rfid):
+def rfid_get(rfid, rfidmember=True):
     sql = """
         SELECT * FROM PEOPLE
         JOIN PEOPLERFID ON PEOPLERFID_PEOPLE_ID=PEOPLE_ID
@@ -17,8 +17,9 @@ def rfid_get(rfid):
         WHERE
         PEOPLERFID_RFID = %s
         AND PEOPLERFID_ENABLED=1
-        AND MEMBERSHIPS_RFID=1
         """
+    if rfidmember:
+        sql += "AND (MEMBERSHIPS_RFID=1 OR PEOPLE_DBA=1)"
     r = haxdb.db.qaf(sql, (rfid,))
     return r
 

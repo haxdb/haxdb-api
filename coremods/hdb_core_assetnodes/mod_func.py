@@ -101,36 +101,33 @@ def assetnode_operator(node_id, people_id):
     haxdb.db.commit()
 
 
-def assetnode_auth(node, rfid):
-    raw = {
-        "assetName": node["ASSETS_NAME"],
-        "assetId": node["ASSETS_ID"],
-    }
-
+def assetnode_auth(raw, rfid):
     # If any valid rfid will work
-    if node["ASSETNODES_APPROVAL"] != 1:
+    if raw["node"]["approval"] != 1:
         r = haxdb.func("RFID:GET")(rfid)
         if not r:
-            raw["code"] = -4
-            raw["message"] = "ASSETNODE RESTRICTED"
-            return haxdb.response(success=0, raw=raw)
+            raw["engage"] = 0
+            raw["message"] = "RESTRICTED"
+            return haxdb.response(raw=raw)
         else:
-            assetnode_operator(node["ASSETNODES_ID"], r["PEOPLE_ID"])
+            assetnode_operator(raw["node"]["id"], r["PEOPLE_ID"])
             identity = "{} {}".format(r["PEOPLE_NAME_FIRST"],
                                       r["PEOPLE_NAME_LAST"])
-            raw["personName"] = identity
-            raw["personId"] = r["PEOPLE_ID"]
-            raw["code"] = 2
+            raw["rfid"]["person"]["id"] = r["PEOPLE_ID"]
+            raw["rfid"]["person"]["name"] = identity
+            raw["rfid"]["valid"] = 1
+            raw["engage"] = 1
             raw["message"] = "ACCESS GRANTED"
-            return haxdb.response(success=1, raw=raw)
+            return haxdb.response(raw=raw)
 
     sql = """
         SELECT * FROM PEOPLE
+        JOIN ASSETS
         JOIN PEOPLERFID ON PEOPLERFID_PEOPLE_ID=PEOPLE_ID
-        JOIN MEMBERSHIPS ON PEOPLE_MEMBERSHIPS_ID=MEMBERSHIPS_ID
-        JOIN ASSETAUTHS ON ASSETAUTHS_PEOPLE_ID=PEOPLE_ID
-        JOIN ASSETS ON ASSETS_ID=ASSETAUTHS_ASSETS_ID
         JOIN ASSETNODES ON ASSETNODES_ASSETS_ID=ASSETS_ID
+        LEFT OUTER JOIN MEMBERSHIPS ON PEOPLE_MEMBERSHIPS_ID=MEMBERSHIPS_ID
+        LEFT OUTER JOIN ASSETAUTHS ON ASSETAUTHS_PEOPLE_ID=PEOPLE_ID
+                        AND ASSETAUTHS_ASSETS_ID=ASSETS_ID
         WHERE
         ASSETNODES_ID=%s
         AND PEOPLERFID_RFID = %s
@@ -141,20 +138,29 @@ def assetnode_auth(node, rfid):
          ( MEMBERSHIPS_RFID=1 AND ASSETAUTHS_ENABLED=1 )
         )
         """
-    r = haxdb.db.qaf(sql, (node["ASSETNODES_ID"], rfid,))
+    r = haxdb.db.qaf(sql, (raw["node"]["id"], rfid,))
     if not r:
-        raw["code"] = -5
-        raw["message"] = "ASSET REQUIRES APPROVAL"
-        return haxdb.response(success=0, raw=raw)
+        r = haxdb.func("RFID:GET")(rfid)
+        if r:
+            identity = "{} {}".format(r["PEOPLE_NAME_FIRST"],
+                                      r["PEOPLE_NAME_LAST"])
+            raw["rfid"]["person"]["id"] = r["PEOPLE_ID"]
+            raw["rfid"]["person"]["name"] = identity
+            raw["rfid"]["valid"] = 1
+        raw["engage"] = 0
+        raw["message"] = "APPROVAL REQUIRED"
+        return haxdb.response(raw=raw)
     else:
-        assetnode_operator(node["ASSETNODES_ID"], r["PEOPLE_ID"])
+        assetnode_operator(raw["node"]["id"], r["PEOPLE_ID"])
         identity = "{} {}".format(r["PEOPLE_NAME_FIRST"],
                                   r["PEOPLE_NAME_LAST"])
-        raw["personName"] = identity
-        raw["personId"] = r["PEOPLE_ID"]
-        raw["code"] = 3
+        raw["rfid"]["person"]["id"] = r["PEOPLE_ID"]
+        raw["rfid"]["person"]["name"] = identity
+        raw["rfid"]["valid"] = 1
+        raw["rfid"]["approved"] = 1
+        raw["engage"] = 1
         raw["message"] = "ACCESS GRANTED"
-        return haxdb.response(success=1, raw=raw)
+        return haxdb.response(raw=raw)
 
 
 def init(app_haxdb):

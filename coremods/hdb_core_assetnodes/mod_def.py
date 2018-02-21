@@ -115,7 +115,7 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 1,
-            "DEFAULT": 0,
+            "DEFAULT": 1,
             "NEW": 0,
             "AUTH": {
                 "READ": 100,
@@ -131,7 +131,7 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 1,
-            "DEFAULT": 0,
+            "DEFAULT": 1,
             "NEW": 0,
             "AUTH": {
                 "READ": 100,
@@ -148,7 +148,7 @@ mod_def["ASSETNODES"] = {
             "QUERY": 1,
             "SEARCH": 0,
             "REQUIRED": 0,
-            "DEFAULT": 0,
+            "DEFAULT": None,
             "NEW": 0,
             "AUTH": {
                 "READ": 100,
