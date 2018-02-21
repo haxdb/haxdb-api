@@ -69,16 +69,17 @@ def get(key, use_session=False):
     return val
 
 
-def response(success=0, message=None, raw=None):
+def response(success=None, message=None, raw=None):
     output_format = get("format")
     authenticated = session.get("authenticated", 0)
 
     out = raw or {}
-    out["success"] = success
+    if success is not None:
+        out["success"] = success
+        out["authenticated"] = authenticated
     if "message" not in out:
         out["message"] = message
     out["timestamp"] = time.time()
-    out["authenticated"] = authenticated
 
     if output_format and output_format == "msgpack":
         return msgpack.packb(out)
