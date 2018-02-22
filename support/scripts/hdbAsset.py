@@ -1,11 +1,16 @@
 import requests
 import json
+import sys
 
 
 class hdbAsset:
     host = "http://localhost:8081/v1"
     api_key = None
     meta = {}
+
+    def __init__(self, host=None):
+        if host:
+            self.host = host
 
     def api(self, call, data=None):
         url = self.host.rstrip("/") + "/" + call.lstrip("/")
@@ -121,7 +126,10 @@ if __name__ == "__main__":
         "4": hsense,
     }
 
-    hdb = hdbAsset()
+    if len(sys.argv) > 1:
+        hdb = hdbAsset(sys.argv[1])
+    else:
+        hdb = hdbAsset()
     while True:
         print "............................."
         print "                             "
