@@ -110,6 +110,7 @@ def init(hdb):
         if rfid:
             return haxdb.func("ASSETNODE:AUTH")(raw, rfid)
 
+        haxdb.func("ASSETNODE:OPERATOR")(raw["node"]["id"], None)
         return haxdb.response(raw=raw)
 
     @haxdb.route("/ASSETNODES/sense")

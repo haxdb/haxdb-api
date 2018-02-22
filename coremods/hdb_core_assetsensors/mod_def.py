@@ -50,7 +50,7 @@ mod_def["ASSETSENSORS"] = {
             "SEARCH": 1,
             "REQUIRED": 1,
             "DEFAULT": None,
-            "NEW": 0,
+            "NEW": 1,
             "AUTH": {
                 "READ": 100,
                 "WRITE": 100,
