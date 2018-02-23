@@ -30,11 +30,6 @@ cp haxdb.cfg-example haxdb.cfg
 
 ```
 
-Copy mod.cfg for the email auth mod and then edit it with your email settings.
-```
-cd mods/mod_auth_email/mod.cfg-example mod.cfg
-```
-
 At this point you should be able to type ./app.py and have it start on whatever port you chose in the config.
 
 ---
@@ -78,16 +73,46 @@ sudo apt install nginx git
 ```
 
 
-Create **/etc/nginx/sites-available/haxdb-api**
+Create **/etc/nginx/sites-available/haxdb-api** and edit your domain values into it.
 ```
 server {
     listen 80;
-    server_name haxdb-api.mydomain.tld;
+    server_name [MYDOMAIN.TLD];
 
     location / {
         include proxy_params;
+
+        if ($http_origin ~* (https?://.*\.[MYDOMAIN]\.[TLD](:[0-9]+)?$)) {
+           set $cors "1";
+        }
+  
+        # OPTIONS indicates a CORS pre-flight request
+        if ($request_method = 'OPTIONS') {
+           set $cors "${cors}o";
+        }
+  
+        # Append CORS headers to any request from 
+        # allowed CORS domain, except OPTIONS
+        if ($cors = "1") {
+           more_set_headers 'Access-Control-Allow-Origin: $http_origin';
+           more_set_headers 'Access-Control-Allow-Credentials: true';
+           proxy_pass http://unix:/home/haxdb/www/haxdb-api/haxdb.sock; 
+        }
+  
+        # OPTIONS (pre-flight) request from allowed 
+        # CORS domain. return response directly
+        if ($cors = "1o") {
+           more_set_headers 'Access-Control-Allow-Origin: $http_origin';
+           more_set_headers 'Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE';
+           more_set_headers 'Access-Control-Allow-Credentials: true';
+           more_set_headers 'Access-Control-Allow-Headers: Origin,Content-Type,Accept';
+           add_header Content-Length 0;
+           add_header Content-Type text/plain;
+           return 204;
+        }
+
         proxy_pass http://unix:/home/haxdb/www/haxdb-api/haxdb.sock;
-        add_header Access-Control-Allow-Origin *;
+        client_max_body_size 10M;
     }
 }
 ```
@@ -99,12 +124,7 @@ ln -s /etc/nginx/sites-available/haxdb-api /etc/nginx/sites-enabled/haxdb-api
 service nginx restart
 ```
 
-Use letsencrypt to add ssl.
-```
-git clone https://github.com/certbot/certbot.git
-cd certbot
-./certbot-auto --nginx
-```
+You can now add SSL(HTTPS) with certbot at https://certbot.eff.org/
 
 ---
 
