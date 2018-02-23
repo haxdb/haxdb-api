@@ -1,4 +1,4 @@
-# Quick and Dirty Install
+# Production Install
 This is an example of installing the haxdb api on an ubuntu 16.04 system but other distro's can be deduced from this info.
 ---
 
@@ -129,7 +129,7 @@ You can now add SSL(HTTPS) with certbot at https://certbot.eff.org/
 ---
 
 # Set up MariaDB
-By default haxdb uses sqlite but maybe you have thousands of users or just prefer something a bit more.  Future plans also include support for postgresql.
+By default haxdb uses sqlite.  Here is how you would install MariaDB.  Future plans also include support for postgresql.
 
 Install MariaDB
 ```
