@@ -103,8 +103,12 @@ def on(event_regex, func):
 
 def trigger(event, data):
     data["EVENT"] = event
-    data["NODES_ID"] = session.get("nodes_id", 0)
-    data["NODES_NAME"] = session.get("nodes_name", '')
+    if "node" not in data:
+        data["node"] = {
+            "id": session.get("nodes_id", 0),
+            "name": session.get("nodes_name", ''),
+            "peopleid": session.get("people_id", 0),
+        }
     logger.debug("TRIGGER: {}: {}".format(event, data))
     for trigger in saved_triggers:
         e = trigger[0]

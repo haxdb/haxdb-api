@@ -36,6 +36,13 @@ def init(hdb):
         sensors = haxdb.get("sensors")
         haxdb.func("ASSETSENSORS:CREATE")(rowid, sensors)
 
+        event_data = {
+            "api": "ASSETNODES",
+            "call": "register",
+            "sensors": sensors,
+        }
+        haxdb.trigger("ASSETNODES.REGISTER", event_data)
+
         raw = {
             "api_key": api_key,
         }

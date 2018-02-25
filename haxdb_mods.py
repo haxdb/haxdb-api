@@ -41,7 +41,8 @@ def run():
     for mod in mod_names:
         haxdb.logger.info("\t{}".format(mod))
         mod_def = mods[mod].init(haxdb)
-        haxdb.mod_def.update(mod_def)
+        if mod_def:
+            haxdb.mod_def.update(mod_def)
 
     haxdb.logger.info(" Running MODS:")
     for mod in mod_names:

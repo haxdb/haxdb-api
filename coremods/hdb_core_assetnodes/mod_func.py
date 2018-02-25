@@ -88,8 +88,37 @@ def assetnode_operator(node_id, people_id):
     haxdb.db.commit()
 
 
+def assetnode_auth_trigger(node, r, msg, granted=0, reason=None):
+    pid = None
+    pname = None
+    if r:
+        pid = r.get("PEOPLE_ID")
+        pfname = r.get("PEOPLE_NAME_FIRST")
+        plname = r.get("PEOPLE_NAME_LAST")
+        pname = "{} {}".format(pfname, plname)
+    event_data = {
+        "node": node,
+        "api": "ASSETNODES",
+        "call": "pulse",
+        "auth": 1,
+        "granted": granted,
+        "reason": reason,
+        "message": msg,
+        "person": {
+            "id": pid,
+            "name": pname,
+        }
+    }
+    if granted == 1:
+        tname = "ASSETNODES.PULSE.AUTH.GRANTED".format(reason.upper())
+    elif reason:
+        tname = "ASSETNODES.PULSE.AUTH.{}".format(reason.upper())
+    haxdb.trigger(tname, event_data)
+
+
 def assetnode_auth(raw, rfid):
     # get rfid data
+    node = raw["node"]
     r = haxdb.func("RFID:GET")(rfid, False)
     if r:
         identity = "{} {}".format(r["PEOPLE_NAME_FIRST"],
@@ -97,20 +126,26 @@ def assetnode_auth(raw, rfid):
         raw["rfid"]["person"]["id"] = r["PEOPLE_ID"]
         raw["rfid"]["person"]["name"] = identity
     else:
-        raw["message"] = "INVALID RFID"
+        msg = "INVALID RFID"
+        assetnode_auth_trigger(node, r, msg, granted=0, reason="invalid")
+        raw["message"] = msg
         return haxdb.response(raw=raw)
 
     if r["PEOPLE_DBA"] == 1 or r["MEMBERSHIPS_RFID"] == 1:
             raw["rfid"]["valid"] = 1
     else:
-        raw["message"] = "INACTIVE RFID"
+        msg = "INACTIVE RFID"
+        assetnode_auth_trigger(node, r, msg, granted=0, reason="inactive")
+        raw["message"] = msg
         return haxdb.response(raw=raw)
 
     # any valid rfid will work
     if raw["node"]["approval"] != 1:
+        msg = "ACCESS GRANTED"
+        assetnode_auth_trigger(node, r, msg, granted=1, reason="granted")
         assetnode_operator(raw["node"]["id"], r["PEOPLE_ID"])
         raw["engage"] = 1
-        raw["message"] = "ACCESS GRANTED"
+        raw["message"] = msg
         return haxdb.response(raw=raw)
 
     # only valid rfid on approval list
@@ -132,15 +167,19 @@ def assetnode_auth(raw, rfid):
          ( MEMBERSHIPS_RFID=1 AND ASSETAUTHS_ENABLED=1 )
         )
         """
-    r = haxdb.db.qaf(sql, (raw["node"]["id"], rfid,))
-    if not r:
+    r2 = haxdb.db.qaf(sql, (raw["node"]["id"], rfid,))
+    if not r2:
+        msg = "APPROVAL REQUIRED"
+        assetnode_auth_trigger(node, r, msg, granted=0, reason="approval")
         raw["engage"] = 0
-        raw["message"] = "APPROVAL REQUIRED"
+        raw["message"] = msg
         return haxdb.response(raw=raw)
     else:
+        msg = "ACCESS GRANTED"
+        assetnode_auth_trigger(node, r, msg, granted=1, reason="granted")
         assetnode_operator(raw["node"]["id"], r["PEOPLE_ID"])
         raw["engage"] = 1
-        raw["message"] = "ACCESS GRANTED"
+        raw["message"] = msg
         return haxdb.response(raw=raw)
 
 

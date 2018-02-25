@@ -36,6 +36,16 @@ def run():
         haxdb.db.query(sql, (context, subcontext, contextid))
         haxdb.db.commit()
 
+        event_data = {
+            "api": "FILES",
+            "call": "clear",
+            "context": context,
+            "subcontext": subcontext,
+            "contextid": contextid,
+        }
+        tname = "FILES.CLEAR.{}.{}.{}".format(context, subcontext, contextid)
+        haxdb.trigger(tname, event_data)
+
         raw = {
             "context": context,
             "subcontext": subcontext,
@@ -97,6 +107,16 @@ def run():
             return haxdb.response(success=0, message=haxdb.db.error)
         haxdb.db.commit()
 
+        event_data = {
+            "api": "FILES",
+            "call": "upload",
+            "context": context,
+            "subcontext": subcontext,
+            "contextid": contextid,
+        }
+        tname = "FILES.UPLOAD.{}.{}.{}".format(context, subcontext, contextid)
+        haxdb.trigger(tname, event_data)
+
         raw = {
             "api": context,
             "subcontext": subcontext,
@@ -135,6 +155,19 @@ def run():
         filedata = haxdb.db._FROMBLOB(row["FILES_DATA"])
         filename = "{}.{}.{}{}".format(context, subcontext, contextid, ext)
 
+        event_data = {
+            "api": "FILES",
+            "call": "download",
+            "context": context,
+            "subcontext": subcontext,
+            "contextid": contextid,
+            "filename": filename,
+            "mimetype": mimetype,
+            "ext": ext,
+        }
+        tname = "FILES.DOWNLOAD.{}.{}.{}".format(context, subcontext, contextid)
+        haxdb.trigger(tname, event_data)
+
         return haxdb.func("FILE:DOWNLOAD")(filename, filedata, mimetype)
 
     @haxdb.route("/FILES/get", methods=haxdb.METHOD)
@@ -166,6 +199,20 @@ def run():
         mimetype = row["FILES_MIMETYPE"]
         filedata = haxdb.func("FILE:DATAURL")(row["FILES_DATA"], mimetype)
         filename = "{}.{}.{}.{}".format(context, subcontext, contextid, ext)
+
+        event_data = {
+            "api": "FILES",
+            "call": "get",
+            "context": context,
+            "subcontext": subcontext,
+            "contextid": contextid,
+            "filename": filename,
+            "mimetype": mimetype,
+            "ext": ext,
+        }
+        tname = "FILES.GET.{}.{}.{}".format(context, subcontext, contextid)
+        haxdb.trigger(tname, event_data)
+
         raw = {
             "api": context,
             "subcontext": subcontext,
