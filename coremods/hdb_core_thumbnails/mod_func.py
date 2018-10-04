@@ -45,9 +45,13 @@ def thumbnail_create(img=None, file=None):
     thumb_small = thumb_small.resize((smallw, smallh), Image.ANTIALIAS)
 
     big = StringIO.StringIO()
-    small = StringIO.StringIO()
+    thumb_big = thumb_big.convert("RGB")
     thumb_big.save(big, format="JPEG")
+
+    small = StringIO.StringIO()
+    thumb_small = thumb_small.convert("RGB")
     thumb_small.save(small, format="JPEG")
+
     return big.getvalue(), small.getvalue()
 
 
