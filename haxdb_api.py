@@ -67,6 +67,13 @@ def parse_query(query, cols):
     connector = "AND"
     use_connector = True
     open_par = 0
+
+    headers = {}
+    for col in cols:
+        h = cols[col].get("HEADER")
+        if h and h not in cols and h not in headers:
+            headers[h] = cols[col].get("NAME")
+
     for q in query:
         if q == "(":
             open_par += 1
@@ -89,6 +96,8 @@ def parse_query(query, cols):
             r = re.split("([=<>~]|!=)", q, 1)
             if len(r) > 2:
                 field = r[0]
+                if field not in cols and field in headers:
+                    field = headers[field]
                 op = r[1]
                 vals = r[2].split("|")
                 if op == "~":
@@ -113,6 +122,14 @@ def parse_query(query, cols):
                             sql += " {} IS NOT NULL".format(field)
                         else:
                             sql += " {}{}%s".format(field, op)
+                            params += (val,)
+                        if cols[field].get("TYPE") == "ID":
+                            idapi = cols[field].get("ID_API")
+                            idapiid = "{}_ID".format(idapi)
+                            idfields = haxdb.mod_def[idapi]["ROWNAME"]
+                            sql += """
+                            OR %s IN (SELECT {} FROM {} WHERE {}=T0.{})
+                            """.format(haxdb.db._CONCAT(idfields), idapi, idapiid, field)
                             params += (val,)
                     sql += ")"
                     use_connector = True
@@ -262,6 +279,8 @@ def list_call(mod_def):
 
     flist = haxdb.func("FILE:TABLE:BUILD")(table)
     joins = get_joins(cols)
+    sql, params = build_list_query(table, cols, joins)
+
     try:
         sql, params = build_list_query(table, cols, joins)
     except Exception:
