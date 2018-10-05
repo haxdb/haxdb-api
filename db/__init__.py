@@ -20,6 +20,9 @@ class db:
     def _FROMBLOB(self, blobdata):
         return self.db._FROMBLOB(blobdata)
 
+    def _CONCAT(self, strings):
+        return self.db._CONCAT(strings)
+
     def open(self):
         if self.config["TYPE"] == "SQLITE":
             import driver_sqlite

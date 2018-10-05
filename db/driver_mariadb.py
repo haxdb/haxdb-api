@@ -20,6 +20,9 @@ class db:
     def _FROMBLOB(self, filedata):
         return filedata
 
+    def _CONCAT(self, strings):
+        return "CONCAT({})".format(",".join(strings))
+
     def get_datatype(self, datatype, datasize):
         if datasize:
             datasize = int(datasize)

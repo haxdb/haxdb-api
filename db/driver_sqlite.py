@@ -21,6 +21,9 @@ class db:
     def _FROMBLOB(self, data):
         return str(data)
 
+    def _CONCAT(self, strings):
+        return " || ".join(strings)
+
     def get_datatype(self, datatype):
         if datatype == "INT":
             return "INTEGER"
