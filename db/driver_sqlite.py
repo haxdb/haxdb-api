@@ -27,7 +27,7 @@ class db:
     def get_datatype(self, datatype):
         if datatype == "INT":
             return "INTEGER"
-        if datatype in ("VARCHAR", "CHAR", "ASCII"):
+        if datatype in ("VARCHAR", "CHAR", "ASCII", "LIST"):
             return "VARCHAR"
         if datatype == "BOOL":
             return "INTEGER(1)"

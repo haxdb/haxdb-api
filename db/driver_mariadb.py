@@ -58,7 +58,7 @@ class db:
             return "INT"
 
         if datatype == "LIST":
-            return "INT"
+            return "VARCHAR(25)"
 
         if datatype == "SELECT":
             return "VARCHAR(25)"
