@@ -35,7 +35,7 @@ mod_def["PEOPLE"] = {
             "DEFAULT": None,
             "NEW": 1,
             "AUTH": {
-                "READ": 100,
+                "READ": 10,
                 "WRITE": 100,
             }
         },
@@ -52,7 +52,7 @@ mod_def["PEOPLE"] = {
             "DEFAULT": None,
             "NEW": 1,
             "AUTH": {
-                "READ": 100,
+                "READ": 10,
                 "WRITE": 100,
             }
         },
