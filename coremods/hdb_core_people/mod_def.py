@@ -16,7 +16,7 @@ mod_def["PEOPLE"] = {
         "ICON": "user"
     },
     "AUTH": {
-        "READ": 100,
+        "READ": 10,
         "WRITE": 100,
         "INSERT": 100,
         "DELETE": 100,
